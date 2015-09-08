@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="mongoui.ui.settings.ConnectionSettingsController">
+	<top>
+		<ButtonBar>
+			<buttons>
+				<Hyperlink text="Back" focusTraversable="false" onAction="#back" />
+				<Hyperlink text="Save" focusTraversable="false" onAction="#save" />
+			</buttons>
+		</ButtonBar>
+	</top>
+	<center>
+		<GridPane vgap="5" hgap="5">
+			<children>
+				<Label text="Connection host" GridPane.columnIndex="0"
+					GridPane.rowIndex="0" />
+				<Label text="Username:" GridPane.columnIndex="0"
+					GridPane.rowIndex="1" />
+				<Label text="Password:" GridPane.columnIndex="0"
+					GridPane.rowIndex="2" />
+				<TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+				<TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
+				<TextField GridPane.columnIndex="1" GridPane.rowIndex="2" />
+			</children>
+		</GridPane>
+	</center>
+</BorderPane>
+

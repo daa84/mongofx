@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.TreeView?>
+	
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="mongoui.ui.main.MainFrameController">
+	<left>
+	<TreeView fx:id="treeView"></TreeView>
+	</left>
+	<center>
+	<Text text="MongoDB"></Text>
+	</center>
+</BorderPane>

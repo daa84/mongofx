@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="mongoui.ui.settings.SettingsListController" prefHeight="200"
+	prefWidth="320">
+	<top>
+		<ButtonBar>
+			<buttons>
+				<Hyperlink text="Create" focusTraversable="false" onAction="#createConnection"/>
+				<Hyperlink text="Edit" focusTraversable="false" />
+				<Hyperlink text="Delete" focusTraversable="false" />
+			</buttons>
+		</ButtonBar>
+	</top>
+	<center>
+		<TableView fx:id="settingsListTable" items="${controller.settingsList}" onMouseClicked="#tableClicked">
+			<columns>
+				<TableColumn text="Url">
+					<cellValueFactory>
+						<PropertyValueFactory property="host" />
+					</cellValueFactory>
+				</TableColumn>
+				<TableColumn text="Login">
+					<cellValueFactory>
+						<PropertyValueFactory property="user" />
+					</cellValueFactory>
+				</TableColumn>
+			</columns>
+			<items></items>
+		</TableView>
+	</center>
+</BorderPane>
+
