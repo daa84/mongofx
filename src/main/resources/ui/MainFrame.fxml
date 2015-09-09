@@ -3,12 +3,14 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.TreeView?>
+<?import org.fxmisc.richtext.CodeArea?>
+<?import javafx.scene.control.TabPane?>
 	
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="mongoui.ui.main.MainFrameController">
 	<left>
-	<TreeView fx:id="treeView"></TreeView>
+	<TreeView fx:id="treeView" showRoot="false" onMouseClicked="#treeViewClicked"></TreeView>
 	</left>
 	<center>
-	<Text text="MongoDB"></Text>
+	<TabPane fx:id="queryTabs"></TabPane>
 	</center>
 </BorderPane>

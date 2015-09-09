@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import org.fxmisc.richtext.CodeArea?>
+<?import javafx.scene.control.Label?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="mongoui.ui.main.QueryTabController">
+	<top><CodeArea fx:id="codeArea"></CodeArea></top>
+	<center><Label text="Query result"></Label> </center>
+</BorderPane>
+
