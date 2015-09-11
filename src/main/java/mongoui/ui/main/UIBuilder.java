@@ -21,6 +21,7 @@ public class UIBuilder {
 
   private Injector injector;
   private Stage primaryStage;
+  private Scene previousScene;
 
   public void setInjector(Injector injector) {
     this.injector = injector;
@@ -44,6 +45,19 @@ public class UIBuilder {
     Scene scene = loadScene("/ui/SettingsList.fxml", 400, 400);
     primaryStage.setScene(scene);
     primaryStage.show();
+  }
+
+  public void loadNewDb() throws IOException {
+    Scene scene = loadScene("/ui/NewDb.fxml", 400, 150);
+    previousScene = primaryStage.getScene();
+    primaryStage.setScene(scene);
+  }
+
+  public void back() {
+    if (previousScene != null) {
+      primaryStage.setScene(previousScene);
+      previousScene = null;
+    }
   }
 
   public void loadMainWindow(ConnectionSettings selectedItem) throws IOException {
@@ -85,12 +99,12 @@ public class UIBuilder {
     return loader;
   }
 
-  public Node buildQueryNode(MongoConnection dbConnect, String dbName) throws IOException {
+  public Node buildQueryNode(MongoConnection dbConnect, DbTreeValue dbTreeValue) throws IOException {
     URL url = getClass().getResource("/ui/QueryTab.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
     QueryTabController controller = (QueryTabController)loader.getController();
-    controller.setDbName(dbName);
+    controller.setDb(dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
     controller.setConnection(dbConnect);
     return root;
   }

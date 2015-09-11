@@ -1,19 +1,18 @@
 package mongoui.service.js.api;
 
-import com.mongodb.client.MongoDatabase;
-
 import mongoui.service.MongoConnection;
+import mongoui.service.MongoDatabase;
 
 public class DB {
 
-  private MongoDatabase database;
+  private final MongoDatabase mongoDatabase;
 
-  public DB(MongoConnection connection, String dbName) {
+  public DB(MongoConnection connection, mongoui.service.MongoDatabase mongoDatabase) {
     super();
-    database = connection.getClient().getDatabase(dbName);
+    this.mongoDatabase = mongoDatabase;
   }
 
   public Collection getCollection(String name) {
-    return new Collection(database, name);
+    return new Collection(mongoDatabase, name);
   }
 }

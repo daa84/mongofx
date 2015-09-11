@@ -10,8 +10,8 @@ import org.bson.types.ObjectId;
  *
  */
 public class DocumentTreeValue {
-  private Object value;
-  private String key;
+  private final Object value;
+  private final String key;
 
   public DocumentTreeValue(String key, Object value) {
     this.key = key;
@@ -39,13 +39,14 @@ public class DocumentTreeValue {
 
   public String getKey() {
     if (key == null && value instanceof Document) {
-      ObjectId id = ((Document)value).getObjectId("_id");
+      Object id = ((Document)value).get("_id");
       if (id != null) {
-        return "ObjectId(" + id.toHexString() + ")";
+        if (id instanceof ObjectId) {
+          return "ObjectId(" + ((ObjectId)id).toHexString() + ")";
+        }
+        return id.toString();
       }
-      else {
-        return "id not found";
-      }
+      return "id not found";
     }
     return key;
   }

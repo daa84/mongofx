@@ -20,6 +20,7 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import mongoui.service.MongoConnection;
+import mongoui.service.MongoDatabase;
 import mongoui.service.js.api.ObjectListPresentationIterables;
 
 public class QueryTabController {
@@ -31,10 +32,10 @@ public class QueryTabController {
 
   private MongoConnection connection;
 
-  private String dbName;
-
   @FXML
   private TreeTableView<DocumentTreeValue> queryResultTree;
+
+  private MongoDatabase mongoDatabase;
 
   @FXML
   protected void initialize() {
@@ -45,16 +46,17 @@ public class QueryTabController {
     this.connection = connection;
   }
 
-  public void setDbName(String dbName) {
-    this.dbName = dbName;
-    codeArea.replaceText("db.getCollection('zalando_category').find({})");
+  public void setDb(MongoDatabase mongoDatabase, String collectionName) {
+    this.mongoDatabase = mongoDatabase;
+    codeArea.replaceText("db.getCollection('" + collectionName + "').find({})");
   }
+
 
   @FXML
   public void codeAreaOnKeyReleased(KeyEvent ev) {
     if (ev.getCode() == KeyCode.F5) {
       try {
-        Optional<ObjectListPresentationIterables> documents = connection.eval(dbName, codeArea.getText());
+        Optional<ObjectListPresentationIterables> documents = connection.eval(mongoDatabase, codeArea.getText());
         buildResultTree(documents);
       }
       catch (ScriptException e) {
@@ -80,7 +82,7 @@ public class QueryTabController {
     Object value = i.getValue().getValue();
     if (value instanceof Document) {
       i.getChildren()
-          .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
+      .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
     }
   }
 
@@ -99,5 +101,4 @@ public class QueryTabController {
     }
     return new TreeItem<>(new DocumentTreeValue(f.getKey(), f.getValue()));
   }
-
 }

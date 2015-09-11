@@ -3,22 +3,23 @@ package mongoui.service.js.api;
 import javax.script.Bindings;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.client.MongoDatabase;
+
+import mongoui.service.MongoDatabase;
 
 public class Collection {
-  private String name;
-  private MongoDatabase database;
+  private final String name;
+  private final mongoui.service.MongoDatabase mongoDatabase;
 
-  public Collection(MongoDatabase database, String name) {
-    this.database = database;
+  public Collection(MongoDatabase mongoDatabase, String name) {
+    this.mongoDatabase = mongoDatabase;
     this.name = name;
   }
 
   public FindResultIterable find(Bindings query) {
-    return new FindResultIterable(database.getCollection(name).find(new BasicDBObject(query)));
+    return new FindResultIterable(mongoDatabase.getMongoDb().getCollection(name).find(new BasicDBObject(query)));
   }
 
   public FindResultIterable find() {
-    return new FindResultIterable(database.getCollection(name).find());
+    return new FindResultIterable(mongoDatabase.getMongoDb().getCollection(name).find());
   }
 }

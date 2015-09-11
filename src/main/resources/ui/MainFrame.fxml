@@ -5,10 +5,16 @@
 <?import javafx.scene.control.TreeView?>
 <?import org.fxmisc.richtext.CodeArea?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
 	
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="mongoui.ui.main.MainFrameController">
 	<left>
-	<TreeView fx:id="treeView" showRoot="false" onMouseClicked="#treeViewClicked"></TreeView>
+	<TreeView fx:id="treeView" showRoot="false" onMouseClicked="#treeViewClicked">
+	<contextMenu>
+	<ContextMenu><items><MenuItem text="Create db" onAction="#createNewDb"></MenuItem></items></ContextMenu>
+	</contextMenu>
+	</TreeView>
 	</left>
 	<center>
 	<TabPane fx:id="queryTabs"></TabPane>
