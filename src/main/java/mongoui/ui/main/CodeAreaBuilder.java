@@ -20,7 +20,8 @@ public class CodeAreaBuilder {
   private static final String BRACE_PATTERN = "\\{|\\}";
   private static final String BRACKET_PATTERN = "\\[|\\]";
   private static final String SEMICOLON_PATTERN = "\\;";
-  private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
+  private static final String STRING_PATTERN_DOUBLE = "\"([^\"\\\\]|\\\\.)*\"";
+  private static final String STRING_PATTERN_SINGLE = "'([^\"\\\\]|\\\\.)*'";
   private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
 
   private static final Pattern PATTERN = Pattern.compile("(?<KEYWORD>" + KEYWORD_PATTERN + ")" //
@@ -28,7 +29,8 @@ public class CodeAreaBuilder {
       + "|(?<BRACE>" + BRACE_PATTERN + ")" //
       + "|(?<BRACKET>" + BRACKET_PATTERN + ")" //
       + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")" //
-      + "|(?<STRING>" + STRING_PATTERN + ")" //
+      + "|(?<STRINGDOUBLE>" + STRING_PATTERN_DOUBLE + ")" //
+      + "|(?<STRINGSINGLE>" + STRING_PATTERN_SINGLE + ")" //
       + "|(?<COMMENT>" + COMMENT_PATTERN + ")" //
   );
 
@@ -51,9 +53,10 @@ public class CodeAreaBuilder {
                   matcher.group("BRACE") != null ? "brace" : //
                       matcher.group("BRACKET") != null ? "bracket" : //
                           matcher.group("SEMICOLON") != null ? "semicolon" : //
-                              matcher.group("STRING") != null ? "string" : //
-                                  matcher.group("COMMENT") != null ? "comment" : //
-                                      null;
+                              matcher.group("STRINGSINGLE") != null ? "string" : //
+                                  matcher.group("STRINGDOUBLE") != null ? "string" : //
+                                      matcher.group("COMMENT") != null ? "comment" : //
+                                          null;
       /* never happens */ assert styleClass != null;
       spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
       spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());

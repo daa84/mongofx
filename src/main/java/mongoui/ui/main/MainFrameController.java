@@ -45,7 +45,8 @@ public class MainFrameController {
     if (ev.getClickCount() == 2) {
       TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
       if (selectedItem != null) {
-        queryTabs.getTabs().add(new Tab(selectedItem.getValue(), uiBuilder.buildQueryNode(selectedItem.getValue())));
+        queryTabs.getTabs()
+            .add(new Tab(selectedItem.getValue(), uiBuilder.buildQueryNode(dbConnect, selectedItem.getValue())));
         queryTabs.getSelectionModel().selectLast();
       }
     }

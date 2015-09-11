@@ -12,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import mongoui.service.MongoConnection;
 import mongoui.settings.ConnectionSettings;
 import mongoui.ui.settings.ConnectionSettingsController;
 
@@ -84,11 +85,13 @@ public class UIBuilder {
     return loader;
   }
 
-  public Node buildQueryNode(String dbName) throws IOException {
+  public Node buildQueryNode(MongoConnection dbConnect, String dbName) throws IOException {
     URL url = getClass().getResource("/ui/QueryTab.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
-    ((QueryTabController)loader.getController()).setDbName(dbName);
+    QueryTabController controller = (QueryTabController)loader.getController();
+    controller.setDbName(dbName);
+    controller.setConnection(dbConnect);
     return root;
   }
 }
