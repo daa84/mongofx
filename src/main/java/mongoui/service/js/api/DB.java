@@ -1,18 +1,15 @@
 package mongoui.service.js.api;
 
-import mongoui.service.MongoConnection;
-import mongoui.service.MongoDatabase;
+import java.util.HashMap;
 
-public class DB {
+public class DB extends HashMap<String, Object> {
 
-  private final MongoDatabase mongoDatabase;
-
-  public DB(MongoConnection connection, mongoui.service.MongoDatabase mongoDatabase) {
+  public DB(mongoui.service.MongoDatabase mongoDatabase) {
     super();
-    this.mongoDatabase = mongoDatabase;
+    mongoDatabase.listCollectins().stream().forEach(n -> put(n, new Collection(mongoDatabase, n)));
   }
 
   public Collection getCollection(String name) {
-    return new Collection(mongoDatabase, name);
+    return (Collection)get(name);
   }
 }

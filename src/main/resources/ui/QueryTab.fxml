@@ -5,25 +5,48 @@
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.cell.TreeItemPropertyValueFactory?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Label?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="mongoui.ui.main.QueryTabController">
-	<top><CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased"></CodeArea></top>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="mongoui.ui.main.QueryTabController">
+	<top>
+		<CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased"></CodeArea>
+	</top>
 	<center>
-	<TreeTableView  fx:id="queryResultTree" showRoot="false">
-		<columnResizePolicy><TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
-		<columns>
-			<TreeTableColumn text="Key" prefWidth="10" minWidth="5">
-				<cellValueFactory>
-						<TreeItemPropertyValueFactory property="key" />
-					</cellValueFactory>
-			</TreeTableColumn>
-			<TreeTableColumn text="Value" prefWidth="150">
-				<cellValueFactory>
-						<TreeItemPropertyValueFactory property="displayValue" />
-					</cellValueFactory>
-			</TreeTableColumn>
-		</columns>
-	</TreeTableView>
+		<BorderPane>
+			<top>
+				<HBox alignment="CENTER_RIGHT">
+					<children>
+						<Label text="Limit:" />
+						<TextField fx:id="limitResult" text="100" prefWidth="50" />
+					</children>
+				</HBox>
+			</top>
+			<center>
+				<TreeTableView fx:id="queryResultTree" showRoot="false">
+					<columnResizePolicy>
+						<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+					</columnResizePolicy>
+					<columns>
+						<TreeTableColumn text="Key" prefWidth="10"
+							minWidth="5">
+							<cellValueFactory>
+								<TreeItemPropertyValueFactory
+									property="key" />
+							</cellValueFactory>
+						</TreeTableColumn>
+						<TreeTableColumn text="Value" prefWidth="150">
+							<cellValueFactory>
+								<TreeItemPropertyValueFactory
+									property="displayValue" />
+							</cellValueFactory>
+						</TreeTableColumn>
+					</columns>
+				</TreeTableView>
+			</center>
+		</BorderPane>
 	</center>
 </BorderPane>
 

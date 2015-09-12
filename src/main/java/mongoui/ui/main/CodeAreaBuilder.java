@@ -21,7 +21,7 @@ public class CodeAreaBuilder {
   private static final String BRACKET_PATTERN = "\\[|\\]";
   private static final String SEMICOLON_PATTERN = "\\;";
   private static final String STRING_PATTERN_DOUBLE = "\"([^\"\\\\]|\\\\.)*\"";
-  private static final String STRING_PATTERN_SINGLE = "'([^\"\\\\]|\\\\.)*'";
+  private static final String STRING_PATTERN_SINGLE = "'([^'\\\\]|\\\\.)*'";
   private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
 
   private static final Pattern PATTERN = Pattern.compile("(?<KEYWORD>" + KEYWORD_PATTERN + ")" //
@@ -32,7 +32,7 @@ public class CodeAreaBuilder {
       + "|(?<STRINGDOUBLE>" + STRING_PATTERN_DOUBLE + ")" //
       + "|(?<STRINGSINGLE>" + STRING_PATTERN_SINGLE + ")" //
       + "|(?<COMMENT>" + COMMENT_PATTERN + ")" //
-  );
+      );
 
   public static void setup(CodeArea codeArea) {
     codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
@@ -49,14 +49,14 @@ public class CodeAreaBuilder {
     while (matcher.find()) {
       String styleClass = //
           matcher.group("KEYWORD") != null ? "keyword" : //
-              matcher.group("PAREN") != null ? "paren" : //
-                  matcher.group("BRACE") != null ? "brace" : //
-                      matcher.group("BRACKET") != null ? "bracket" : //
-                          matcher.group("SEMICOLON") != null ? "semicolon" : //
-                              matcher.group("STRINGSINGLE") != null ? "string" : //
-                                  matcher.group("STRINGDOUBLE") != null ? "string" : //
-                                      matcher.group("COMMENT") != null ? "comment" : //
-                                          null;
+            matcher.group("PAREN") != null ? "paren" : //
+              matcher.group("BRACE") != null ? "brace" : //
+                matcher.group("BRACKET") != null ? "bracket" : //
+                  matcher.group("SEMICOLON") != null ? "semicolon" : //
+                    matcher.group("STRINGSINGLE") != null ? "string" : //
+                      matcher.group("STRINGDOUBLE") != null ? "string" : //
+                        matcher.group("COMMENT") != null ? "comment" : //
+                          null;
       /* never happens */ assert styleClass != null;
       spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
       spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());

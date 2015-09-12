@@ -31,4 +31,16 @@ public class MongoDatabase {
   public String toString() {
     return getName();
   }
+
+  public void createCollection(String name) {
+    mongoDb.createCollection(name);
+  }
+
+  public void dropCollection(String name) {
+    mongoDb.getCollection(name).drop();
+  }
+
+  public void drop() {
+    mongoDb.drop();
+  }
 }

@@ -47,12 +47,6 @@ public class UIBuilder {
     primaryStage.show();
   }
 
-  public void loadNewDb() throws IOException {
-    Scene scene = loadScene("/ui/NewDb.fxml", 400, 150);
-    previousScene = primaryStage.getScene();
-    primaryStage.setScene(scene);
-  }
-
   public void back() {
     if (previousScene != null) {
       primaryStage.setScene(previousScene);

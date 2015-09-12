@@ -14,6 +14,7 @@ import com.mongodb.MongoClient;
 
 import mongoui.service.js.api.DB;
 import mongoui.service.js.api.ObjectListPresentationIterables;
+import mongoui.service.js.api.TextPresentation;
 
 public class MongoConnection {
 
@@ -24,21 +25,25 @@ public class MongoConnection {
   }
 
   public List<MongoDatabase> listDbs() {
-    return StreamSupport.stream(client.listDatabaseNames().spliterator(), false).map(n -> client.getDatabase(n)).map(d -> new MongoDatabase(d)).collect(Collectors.toList());
+    return StreamSupport.stream(client.listDatabaseNames().spliterator(), false).map(n -> createMongoDB(n)).collect(Collectors.toList());
+  }
+
+  public MongoDatabase createMongoDB(String name) {
+    return new MongoDatabase(client.getDatabase(name));
   }
 
   public MongoClient getClient() {
     return client;
   }
 
-  public Optional<ObjectListPresentationIterables> eval(MongoDatabase mongoDatabase, String query) throws ScriptException {
+  public Optional<Object> eval(MongoDatabase mongoDatabase, String query) throws ScriptException {
     ScriptEngineManager engineManager = new ScriptEngineManager();
     ScriptEngine engine = engineManager.getEngineByName("nashorn");
     SimpleBindings bindings = new SimpleBindings();
-    bindings.put("db", new DB(this, mongoDatabase));
+    bindings.put("db", new DB(mongoDatabase));
     Object result = engine.eval(query, bindings);
-    if (result instanceof ObjectListPresentationIterables) {
-      return Optional.of((ObjectListPresentationIterables)result);
+    if (result instanceof ObjectListPresentationIterables || result instanceof TextPresentation) {
+      return Optional.of(result);
     }
     return Optional.empty();
   }

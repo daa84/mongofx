@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
@@ -22,6 +23,7 @@ import javafx.scene.input.KeyEvent;
 import mongoui.service.MongoConnection;
 import mongoui.service.MongoDatabase;
 import mongoui.service.js.api.ObjectListPresentationIterables;
+import mongoui.service.js.api.TextPresentation;
 
 public class QueryTabController {
 
@@ -36,6 +38,9 @@ public class QueryTabController {
   private TreeTableView<DocumentTreeValue> queryResultTree;
 
   private MongoDatabase mongoDatabase;
+
+  @FXML
+  private TextField limitResult;
 
   @FXML
   protected void initialize() {
@@ -56,8 +61,8 @@ public class QueryTabController {
   public void codeAreaOnKeyReleased(KeyEvent ev) {
     if (ev.getCode() == KeyCode.F5) {
       try {
-        Optional<ObjectListPresentationIterables> documents = connection.eval(mongoDatabase, codeArea.getText());
-        buildResultTree(documents);
+        Optional<Object> documents = connection.eval(mongoDatabase, codeArea.getText());
+        buildResultView(documents);
       }
       catch (ScriptException e) {
         log.error("Error execute script", e);
@@ -65,10 +70,18 @@ public class QueryTabController {
     }
   }
 
-  private void buildResultTree(Optional<ObjectListPresentationIterables> documents) {
+  private void buildResultView(Optional<Object> documents) {
     TreeItem<DocumentTreeValue> root = new TreeItem<>();
     if (documents.isPresent()) {
-      buildTreeFromDocuments(root, StreamSupport.stream(documents.get().spliterator(), false));
+      Object result = documents.get();
+      if (result instanceof TextPresentation) {
+        root.getChildren().add(new TreeItem<>(new DocumentTreeValue("Result", String.valueOf(result))));
+      }
+      else {
+        buildTreeFromDocuments(root,
+            StreamSupport.stream(((ObjectListPresentationIterables)result).spliterator(), false)//
+            .limit(Integer.parseInt(limitResult.getText())));
+      }
     }
     queryResultTree.setRoot(root);
   }
