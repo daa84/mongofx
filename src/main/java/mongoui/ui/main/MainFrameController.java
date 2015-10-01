@@ -1,10 +1,16 @@
 package mongoui.ui.main;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.reactfx.EventStreams;
 
 import com.google.inject.Inject;
 
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextInputDialog;
@@ -33,9 +39,12 @@ public class MainFrameController {
   @FXML
   private TabPane queryTabs;
 
+  private final Map<Node, QueryTabController> tabData = new HashMap<>();
+
   @FXML
   protected void initialize() {
     treeController.initialize(treeView);
+    EventStreams.simpleChangesOf(queryTabs.getTabs()).subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent())));
   }
 
   public void setConnectionSettings(ConnectionSettings connectionSettings) {
@@ -56,8 +65,11 @@ public class MainFrameController {
     if (selectedItem != null) {
       DbTreeValue value = selectedItem.getValue();
       if (value.isCollectionValue()) {
-        queryTabs.getTabs().add(new Tab(value.getDisplayValue(), uiBuilder.buildQueryNode(dbConnect, value)));
+        Entry<Node, QueryTabController> tabEntry = uiBuilder.buildQueryNode(dbConnect, value);
+        tabData.put(tabEntry.getKey(), tabEntry.getValue());
+        queryTabs.getTabs().add(new Tab(value.getDisplayValue(), tabEntry.getKey()));
         queryTabs.getSelectionModel().selectLast();
+        tabEntry.getValue().startTab();
       }
     }
   }
@@ -68,5 +80,13 @@ public class MainFrameController {
     dialog.setContentText("Enter Name:");
     dialog.setHeaderText("Create new db");
     dialog.showAndWait().ifPresent(r -> treeController.createDB(dialog.getResult()));
+  }
+
+  @FXML
+  public void runCommand() {
+    Tab selectedTab = queryTabs.getSelectionModel().getSelectedItem();
+    if (selectedTab != null) {
+      tabData.get(selectedTab.getContent()).executeScript();
+    }
   }
 }

@@ -3,6 +3,8 @@ package mongoui.ui.main;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -96,13 +98,13 @@ public class UIBuilder {
     return loader;
   }
 
-  public Node buildQueryNode(MongoConnection dbConnect, DbTreeValue dbTreeValue) throws IOException {
+  public Entry<Node, QueryTabController> buildQueryNode(MongoConnection dbConnect, DbTreeValue dbTreeValue) throws IOException {
     URL url = getClass().getResource("/ui/QueryTab.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
     QueryTabController controller = (QueryTabController)loader.getController();
     controller.setDb(dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
     controller.setConnection(dbConnect);
-    return root;
+    return new SimpleEntry<>(root, controller);
   }
 }

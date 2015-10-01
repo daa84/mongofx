@@ -10,12 +10,20 @@
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Button?>
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.scene.control.Tooltip?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="mongoui.ui.main.MainFrameController">
 	<top>
 		<ToolBar>
-			<Button focusTraversable="false"><graphic><FontAwesomeIconView glyphName="PLAY"/></graphic> </Button>
+			<Button focusTraversable="false" onAction="#runCommand">
+				<tooltip>
+				<Tooltip text="Run (F5)"/>
+				</tooltip>
+				<graphic>
+					<FontAwesomeIconView glyphName="PLAY" />
+				</graphic>
+			</Button>
 		</ToolBar>
 	</top>
 	<left>

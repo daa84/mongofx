@@ -59,13 +59,17 @@ public class QueryTabController {
   @FXML
   public void codeAreaOnKeyReleased(KeyEvent ev) {
     if (ev.getCode() == KeyCode.F5) {
-      try {
-        Optional<Object> documents = connection.eval(mongoDatabase, codeArea.getText());
-        buildResultView(documents);
-      }
-      catch (ScriptException e) {
-        log.error("Error execute script", e);
-      }
+      executeScript();
+    }
+  }
+
+  public void executeScript() {
+    try {
+      Optional<Object> documents = connection.eval(mongoDatabase, codeArea.getText());
+      buildResultView(documents);
+    }
+    catch (ScriptException e) {
+      log.error("Error execute script", e);
     }
   }
 
@@ -79,7 +83,7 @@ public class QueryTabController {
       else {
         buildTreeFromDocuments(root,
             StreamSupport.stream(((ObjectListPresentationIterables)result).spliterator(), false)//
-                .limit(Integer.parseInt(limitResult.getText())));
+            .limit(Integer.parseInt(limitResult.getText())));
       }
     }
     queryResultTree.setRoot(root);
@@ -94,7 +98,7 @@ public class QueryTabController {
     Object value = i.getValue().getValue();
     if (value instanceof Document) {
       i.getChildren()
-          .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
+      .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
     }
   }
 
@@ -121,5 +125,16 @@ public class QueryTabController {
       root.getChildren().add(treeItem);
       buildChilds(treeItem);
     }
+  }
+
+  public void startTab() {
+    int startIdx = codeArea.getText().indexOf("{");
+    if (startIdx < 0) {
+      startIdx = 0;
+    }
+    startIdx++;
+    codeArea.selectRange(startIdx, startIdx);
+    codeArea.requestFocus();
+    executeScript();
   }
 }
