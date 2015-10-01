@@ -4,11 +4,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Inject;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -23,15 +27,20 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
+import mongoui.service.Executor;
 import mongoui.service.MongoConnection;
 import mongoui.service.MongoDatabase;
 import mongoui.service.MongoService;
 import mongoui.settings.ConnectionSettings;
 
 public class MainFrameController {
+  private static final Logger log = LoggerFactory.getLogger(MainFrameController.class);
 
   @Inject
   private UIBuilder uiBuilder;
+
+  @Inject
+  private Executor executor;
 
   @Inject
   private MongoService mongoService;
@@ -77,7 +86,32 @@ public class MainFrameController {
   private void reloadDbList() {
     ObservableList<TreeItem<DbTreeValue>> children = treeView.getRoot().getChildren();
     children.clear();
-    children.addAll(buildDbList());
+    Task<List<TreeItem<DbTreeValue>>> loadTask = new Task<List<TreeItem<DbTreeValue>>>() {
+
+      @Override
+      protected List<TreeItem<DbTreeValue>> call() throws Exception {
+        return buildDbList();
+      }
+
+      @Override
+      protected void succeeded() {
+        children.addAll(getValue());
+      }
+
+      @Override
+      protected void failed() {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setHeaderText("Can't connect to MongoDB");
+        Throwable exception = getException();
+        if (exception != null) {
+          log.error("Error", exception);
+          alert.setContentText(exception.getMessage());
+        }
+        alert.showAndWait();
+      }
+    };
+
+    executor.execute(loadTask);
   }
 
   private List<TreeItem<DbTreeValue>> buildDbList() {

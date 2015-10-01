@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.google.inject.Inject;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import mongoui.settings.ConnectionSettings;
 import mongoui.settings.SettingsService;
@@ -21,6 +22,12 @@ public class ConnectionSettingsController {
 
   @FXML
   TextField hostField;
+
+  @FXML
+  PasswordField passField;
+
+  @FXML
+  TextField userField;
 
   @FXML
   public void back() throws IOException {
@@ -40,6 +47,8 @@ public class ConnectionSettingsController {
     }
     this.settings = settings;
     hostField.textProperty().bindBidirectional(settings.hostProperty());
+    userField.textProperty().bindBidirectional(settings.userProperty());
+    passField.textProperty().bindBidirectional(settings.passwordProperty());
   }
 
 }

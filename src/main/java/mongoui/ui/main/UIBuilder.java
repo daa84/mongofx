@@ -37,12 +37,14 @@ public class UIBuilder {
     BorderPane root = load(url, loader);
     ((ConnectionSettingsController)loader.getController()).setSettings(settings);
 
+    primaryStage.setTitle("MongoFX - connection");
     primaryStage.setScene(createScene(root, 400, 400));
     primaryStage.show();
   }
 
   public void loadSettingsWindow() throws IOException {
     Scene scene = loadScene("/ui/SettingsList.fxml", 400, 400);
+    primaryStage.setTitle("MongoFX - settings");
     primaryStage.setScene(scene);
     primaryStage.show();
   }
@@ -60,6 +62,7 @@ public class UIBuilder {
     BorderPane root = load(url, loader);
     ((MainFrameController)loader.getController()).setConnectionSettings(selectedItem);
 
+    primaryStage.setTitle("MongoFX");
     primaryStage.setScene(createScene(root, 600, 400));
     primaryStage.show();
   }

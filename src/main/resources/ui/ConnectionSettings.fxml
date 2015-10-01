@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.PasswordField?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="mongoui.ui.settings.ConnectionSettingsController">
@@ -27,8 +28,8 @@
 				<Label text="Password:" GridPane.columnIndex="0"
 					GridPane.rowIndex="2" />
 				<TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-				<TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
-				<TextField GridPane.columnIndex="1" GridPane.rowIndex="2" />
+				<TextField fx:id="userField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+				<PasswordField fx:id="passField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 			</children>
 		</GridPane>
 	</center>
