@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -84,15 +86,15 @@ public class MainFrameController {
   }
 
   private TreeItem<DbTreeValue> createDbItem(MongoDatabase d) {
-    return new TreeItem<>(new DbTreeValue(d));
+    return new TreeItem<>(new DbTreeValue(d), new FontAwesomeIconView(FontAwesomeIcon.DATABASE));
   }
 
   private void buildDbChilds(TreeItem<DbTreeValue> i) {
     MongoDatabase db = i.getValue().getMongoDatabase();
     i.getChildren()
-    .addAll(db.listCollectins().stream()
-        .map(cn -> new TreeItem<>(new DbTreeValue(db, cn)))
-        .collect(Collectors.toList()));
+        .addAll(db.listCollectins().stream()
+            .map(cn -> new TreeItem<>(new DbTreeValue(db, cn), new FontAwesomeIconView(FontAwesomeIcon.TABLE)))
+            .collect(Collectors.toList()));
   }
 
   @FXML
@@ -166,16 +168,31 @@ public class MainFrameController {
     @Override
     protected void updateItem(DbTreeValue item, boolean empty) {
       super.updateItem(item, empty);
+
+      setGraphic();
+
       if (!empty) {
         setText(item.toString());
         if (item.isCollectionValue()) {
           setContextMenu(collectionContextMenu);
-        } else {
+        }
+        else {
           setContextMenu(dbContextMenu);
         }
-      } else {
+      }
+      else {
         setText(null);
         setContextMenu(null);
+      }
+    }
+
+    private void setGraphic() {
+      TreeItem<DbTreeValue> treeItem = getTreeItem();
+      if (treeItem != null && treeItem.getGraphic() != null) {
+        setGraphic(treeItem.getGraphic());
+      }
+      else {
+        setGraphic(null);
       }
     }
   }
