@@ -56,7 +56,6 @@ public class QueryTabController {
     codeArea.replaceText("db.getCollection('" + collectionName + "').find({})");
   }
 
-
   @FXML
   public void codeAreaOnKeyReleased(KeyEvent ev) {
     if (ev.getCode() == KeyCode.F5) {
@@ -80,7 +79,7 @@ public class QueryTabController {
       else {
         buildTreeFromDocuments(root,
             StreamSupport.stream(((ObjectListPresentationIterables)result).spliterator(), false)//
-            .limit(Integer.parseInt(limitResult.getText())));
+                .limit(Integer.parseInt(limitResult.getText())));
       }
     }
     queryResultTree.setRoot(root);
@@ -95,7 +94,7 @@ public class QueryTabController {
     Object value = i.getValue().getValue();
     if (value instanceof Document) {
       i.getChildren()
-      .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
+          .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
     }
   }
 
@@ -109,9 +108,18 @@ public class QueryTabController {
     }
     if (value instanceof List) {
       TreeItem<DocumentTreeValue> root = new TreeItem<>(new DocumentTreeValue(f.getKey(), value));
-      buildTreeFromDocuments(root, ((List<Object>)value).stream());
+      buildTreeFromArray(root, (List<Object>)value);
       return root;
     }
     return new TreeItem<>(new DocumentTreeValue(f.getKey(), f.getValue()));
+  }
+
+  private void buildTreeFromArray(TreeItem<DocumentTreeValue> root, List<Object> documents) {
+    for (int i = 0; i < documents.size(); i++) {
+      Object item = documents.get(i);
+      TreeItem<DocumentTreeValue> treeItem = new TreeItem<>(new DocumentTreeValue(String.valueOf(i), item));
+      root.getChildren().add(treeItem);
+      buildChilds(treeItem);
+    }
   }
 }
