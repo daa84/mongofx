@@ -2,11 +2,14 @@ package mongoui.ui.main;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.mongodb.client.MongoCollection;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
@@ -84,7 +87,20 @@ public class TreeController {
     i.getChildren()
         .addAll(db.listCollectins().stream()
             .map(cn -> new TreeItem<>(new DbTreeValue(db, cn), new FontAwesomeIconView(FontAwesomeIcon.TABLE)))
-            .collect(Collectors.toList()));
+            .peek(ti -> buildCollectionDetail(ti)).collect(Collectors.toList()));
+  }
+
+  private void buildCollectionDetail(TreeItem<DbTreeValue> ti) {
+    DbTreeValue value = ti.getValue();
+    MongoCollection<Document> collection =
+        value.getMongoDatabase().getMongoDb().getCollection(value.getDisplayValue());
+
+    TreeItem<DbTreeValue> indexCateogry = new TreeItem<>(new DbTreeValue("Indexes"));
+    indexCateogry.getChildren().addAll(StreamSupport.stream(collection.listIndexes().spliterator(), false)
+        .map(d -> new TreeItem<DbTreeValue>(new DbTreeValue((String)d.get("name")))).collect(Collectors.toList()));
+    if (!indexCateogry.getChildren().isEmpty()) {
+      ti.getChildren().add(indexCateogry);
+    }
   }
 
   public void initialize(TreeView<DbTreeValue> treeView) {
@@ -173,16 +189,11 @@ public class TreeController {
     protected void updateItem(DbTreeValue item, boolean empty) {
       super.updateItem(item, empty);
 
-      setGraphic();
+      setupGraphic();
 
       if (!empty) {
         setText(item.toString());
-        if (item.isCollectionValue()) {
-          setContextMenu(collectionContextMenu);
-        }
-        else {
-          setContextMenu(dbContextMenu);
-        }
+        setupContextMenu(item);
       }
       else {
         setText(null);
@@ -190,7 +201,21 @@ public class TreeController {
       }
     }
 
-    private void setGraphic() {
+    private void setupContextMenu(DbTreeValue item) {
+      if (item.isCategory()) {
+        setContextMenu(null);
+        return;
+      }
+
+      if (item.isCollectionValue()) {
+        setContextMenu(collectionContextMenu);
+      }
+      else {
+        setContextMenu(dbContextMenu);
+      }
+    }
+
+    private void setupGraphic() {
       TreeItem<DbTreeValue> treeItem = getTreeItem();
       if (treeItem != null && treeItem.getGraphic() != null) {
         setGraphic(treeItem.getGraphic());

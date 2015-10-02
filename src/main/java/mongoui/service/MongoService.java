@@ -9,7 +9,11 @@ import mongoui.settings.ConnectionSettings;
 @Singleton
 public class MongoService {
 
+  private MongoConnection mongoConnection;
+
   public MongoConnection connect(ConnectionSettings connectionSettings) {
+    closeConnection();
+
     StringBuilder authString = new StringBuilder();
 
     String user = connectionSettings.getUser();
@@ -23,7 +27,20 @@ public class MongoService {
     }
     String uri = String.format("mongodb://%s%s", authString, connectionSettings.getHost());
     MongoClient client = new MongoClient(new MongoClientURI(uri));
-    return new MongoConnection(client);
+    mongoConnection = new MongoConnection(client);
+    return mongoConnection;
+  }
+
+  private void closeConnection() {
+    if (mongoConnection == null) {
+      return;
+    }
+
+    mongoConnection.getClient().close();
+  }
+
+  public void stop() {
+    closeConnection();
   }
 
 }

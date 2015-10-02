@@ -25,7 +25,8 @@ public class Collection {
   }
 
   public void insert(List<Bindings> items) {
-    mongoDatabase.getMongoDb().getCollection(name).insertMany(items.stream().map(JsApiUtils::documentFromMap).collect(Collectors.toList()));
+    mongoDatabase.getMongoDb().getCollection(name)
+        .insertMany(items.stream().map(JsApiUtils::documentFromMap).collect(Collectors.toList()));
   }
 
   public void insert(Bindings item) {
@@ -38,7 +39,11 @@ public class Collection {
   }
 
   public SimpleTextPresentation update(Bindings filter, Bindings update) {
-    return new SimpleTextPresentation(mongoDatabase.getMongoDb().getCollection(name).updateOne(JsApiUtils.dbObjectFromMap(filter),
-        JsApiUtils.dbObjectFromMap(update)).getModifiedCount());
+    return new SimpleTextPresentation(mongoDatabase.getMongoDb().getCollection(name)
+        .updateOne(JsApiUtils.dbObjectFromMap(filter), JsApiUtils.dbObjectFromMap(update)).getModifiedCount());
+  }
+
+  public ObjectListPresentationIterables aggregate(List<Bindings> pipeline) {
+    return new AggregateResultIterable(mongoDatabase, name, JsApiUtils.dbObjectFromList(pipeline));
   }
 }

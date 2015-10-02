@@ -3,9 +3,16 @@ package mongoui.ui.main;
 import mongoui.service.MongoDatabase;
 
 public class DbTreeValue {
-  private final MongoDatabase mongoDatabase;
+  private MongoDatabase mongoDatabase;
   private final String displayValue;
   private boolean isCollectionValue = false;
+  private boolean isCategory = false;
+
+  public DbTreeValue(String displayValue) {
+    super();
+    this.displayValue = displayValue;
+    isCategory = true;
+  }
 
   public DbTreeValue(MongoDatabase mongoDatabase) {
     this.mongoDatabase = mongoDatabase;
@@ -28,6 +35,10 @@ public class DbTreeValue {
 
   public String getDisplayValue() {
     return displayValue;
+  }
+
+  public boolean isCategory() {
+    return isCategory;
   }
 
   @Override

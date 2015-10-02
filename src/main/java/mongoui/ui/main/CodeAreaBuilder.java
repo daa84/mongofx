@@ -9,6 +9,11 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
+import org.fxmisc.wellbehaved.event.EventHandlerHelper;
+import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
+
+import javafx.scene.control.IndexRange;
+import javafx.scene.input.KeyEvent;
 
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
@@ -32,7 +37,7 @@ public class CodeAreaBuilder {
       + "|(?<STRINGDOUBLE>" + STRING_PATTERN_DOUBLE + ")" //
       + "|(?<STRINGSINGLE>" + STRING_PATTERN_SINGLE + ")" //
       + "|(?<COMMENT>" + COMMENT_PATTERN + ")" //
-      );
+  );
 
   public static void setup(CodeArea codeArea) {
     codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
@@ -40,6 +45,23 @@ public class CodeAreaBuilder {
     codeArea.textProperty().addListener((obs, oldText, newText) -> {
       codeArea.setStyleSpans(0, computeHighlighting(newText));
     });
+
+    Builder<KeyEvent> onKeyTyped = EventHandlerHelper.startWith(e -> {
+      String character = e.getCharacter();
+      if ("{".equals(character)) {
+        charRight(codeArea, "}");
+      }
+      else if ("[".equals(character)) {
+        charRight(codeArea, "]");
+      }
+    });
+    codeArea.setOnKeyTyped(onKeyTyped.create());
+  }
+
+  private static void charRight(CodeArea codeArea, String ch) {
+    IndexRange selection = codeArea.getSelection();
+    codeArea.insertText(selection.getStart(), ch);
+    codeArea.selectRange(selection.getStart(), selection.getStart());
   }
 
   private static StyleSpans<Collection<String>> computeHighlighting(String text) {
@@ -49,14 +71,14 @@ public class CodeAreaBuilder {
     while (matcher.find()) {
       String styleClass = //
           matcher.group("KEYWORD") != null ? "keyword" : //
-            matcher.group("PAREN") != null ? "paren" : //
-              matcher.group("BRACE") != null ? "brace" : //
-                matcher.group("BRACKET") != null ? "bracket" : //
-                  matcher.group("SEMICOLON") != null ? "semicolon" : //
-                    matcher.group("STRINGSINGLE") != null ? "string" : //
-                      matcher.group("STRINGDOUBLE") != null ? "string" : //
-                        matcher.group("COMMENT") != null ? "comment" : //
-                          null;
+              matcher.group("PAREN") != null ? "paren" : //
+                  matcher.group("BRACE") != null ? "brace" : //
+                      matcher.group("BRACKET") != null ? "bracket" : //
+                          matcher.group("SEMICOLON") != null ? "semicolon" : //
+                              matcher.group("STRINGSINGLE") != null ? "string" : //
+                                  matcher.group("STRINGDOUBLE") != null ? "string" : //
+                                      matcher.group("COMMENT") != null ? "comment" : //
+                                          null;
       /* never happens */ assert styleClass != null;
       spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
       spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
