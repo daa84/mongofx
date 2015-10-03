@@ -43,6 +43,16 @@ public class JsApiUtils {
     };
   }
 
+  public static ObjectListPresentationIterables iter(Iterable<Document> iterable) {
+    return new ObjectListPresentationIterables() {
+
+      @Override
+      public Iterator<Document> iterator() {
+        return iterable.iterator();
+      }
+    };
+  }
+
   public static <T> T buildOptions(T buildedOptions, Bindings options) {
     Preconditions.checkNotNull(buildedOptions);
     if (options == null || options.isEmpty()) {

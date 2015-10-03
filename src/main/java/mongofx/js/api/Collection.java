@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.script.Bindings;
+import javax.script.SimpleBindings;
 
 import org.bson.Document;
 
@@ -47,11 +48,20 @@ public class Collection {
   }
 
   public SimpleTextPresentation update(Bindings filter, Bindings update, Bindings options) {
-    if (options == null || options.isEmpty()) {
-      return new SimpleTextPresentation(getCollection()
-          .updateOne(JsApiUtils.dbObjectFromMap(filter), JsApiUtils.dbObjectFromMap(update)).getModifiedCount());
+    Boolean multi = false;
+    if (options != null) {
+      options = new SimpleBindings(options);
+      multi = (Boolean)options.remove("multi");
+      if (multi == null) {
+        multi = false;
+      }
     }
 
+    if (multi) {
+      return new SimpleTextPresentation(
+          getCollection().updateMany(JsApiUtils.dbObjectFromMap(filter), JsApiUtils.dbObjectFromMap(update),
+              JsApiUtils.buildOptions(new UpdateOptions(), options)).getModifiedCount());
+    }
     return new SimpleTextPresentation(
         getCollection().updateOne(JsApiUtils.dbObjectFromMap(filter), JsApiUtils.dbObjectFromMap(update),
             JsApiUtils.buildOptions(new UpdateOptions(), options)).getModifiedCount());
@@ -65,10 +75,11 @@ public class Collection {
     return createIndex(index, null);
   }
 
+  public ObjectListPresentationIterables getIndexes() {
+    return JsApiUtils.iter(getCollection().listIndexes());
+  }
+
   public SimpleTextPresentation createIndex(Bindings index, Bindings options) {
-    if (options == null || options.isEmpty()) {
-      return new SimpleTextPresentation(getCollection().createIndex(JsApiUtils.dbObjectFromMap(index)));
-    }
     return new SimpleTextPresentation(getCollection().createIndex(JsApiUtils.dbObjectFromMap(index),
         JsApiUtils.buildOptions(new IndexOptions(), options)));
   }
