@@ -9,7 +9,7 @@
 <?import javafx.scene.control.PasswordField?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="mongoui.ui.settings.ConnectionSettingsController">
+	fx:controller="mongofx.ui.settings.ConnectionSettingsController">
 	<top>
 		<ButtonBar>
 			<buttons>

@@ -13,7 +13,7 @@
 <?import javafx.scene.control.Tooltip?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="mongoui.ui.main.MainFrameController">
+	fx:controller="mongofx.ui.main.MainFrameController">
 	<top>
 		<ToolBar>
 			<Button focusTraversable="false" onAction="#runCommand">

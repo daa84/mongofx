@@ -9,7 +9,7 @@
 <?import javafx.scene.control.Hyperlink?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="mongoui.ui.settings.SettingsListController" prefHeight="200"
+	fx:controller="mongofx.ui.settings.SettingsListController" prefHeight="200"
 	prefWidth="320">
 	<top>
 		<ButtonBar>

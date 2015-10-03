@@ -10,7 +10,7 @@
 <?import javafx.scene.control.Label?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="mongoui.ui.main.QueryTabController">
+	fx:controller="mongofx.ui.main.QueryTabController">
 	<top>
 		<CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased"></CodeArea>
 	</top>
