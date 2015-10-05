@@ -32,9 +32,9 @@ public class JsApiUtils {
     return new Document(from);
   }
 
-  public static ObjectListPresentationIterables singletonIter(final Document doc) {
+  public static ObjectListPresentation singletonIter(final Document doc) {
     final List<Document> list = Collections.singletonList(doc);
-    return new ObjectListPresentationIterables() {
+    return new ObjectListPresentation() {
 
       @Override
       public Iterator<Document> iterator() {
@@ -43,8 +43,8 @@ public class JsApiUtils {
     };
   }
 
-  public static ObjectListPresentationIterables iter(Iterable<Document> iterable) {
-    return new ObjectListPresentationIterables() {
+  public static ObjectListPresentation iter(Iterable<Document> iterable) {
+    return new ObjectListPresentation() {
 
       @Override
       public Iterator<Document> iterator() {

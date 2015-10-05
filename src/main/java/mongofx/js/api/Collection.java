@@ -67,7 +67,7 @@ public class Collection {
             JsApiUtils.buildOptions(new UpdateOptions(), options)).getModifiedCount());
   }
 
-  public ObjectListPresentationIterables aggregate(List<Bindings> pipeline) {
+  public ObjectListPresentation aggregate(List<Bindings> pipeline) {
     return new AggregateResultIterable(mongoDatabase, name, JsApiUtils.dbObjectFromList(pipeline));
   }
 
@@ -75,7 +75,7 @@ public class Collection {
     return createIndex(index, null);
   }
 
-  public ObjectListPresentationIterables getIndexes() {
+  public ObjectListPresentation getIndexes() {
     return JsApiUtils.iter(getCollection().listIndexes());
   }
 

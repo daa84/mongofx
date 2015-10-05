@@ -13,7 +13,7 @@ import javax.script.SimpleBindings;
 import com.mongodb.MongoClient;
 
 import mongofx.js.api.DB;
-import mongofx.js.api.ObjectListPresentationIterables;
+import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
 
 public class MongoConnection {
@@ -42,7 +42,7 @@ public class MongoConnection {
     SimpleBindings bindings = new SimpleBindings();
     bindings.put("db", new DB(mongoDatabase));
     Object result = engine.eval(query, bindings);
-    if (result instanceof ObjectListPresentationIterables || result instanceof TextPresentation) {
+    if (result instanceof ObjectListPresentation || result instanceof TextPresentation) {
       return Optional.of(result);
     }
     return Optional.empty();

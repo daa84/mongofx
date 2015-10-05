@@ -13,7 +13,7 @@ import mongofx.service.MongoDatabase;
  * @author daa
  *
  */
-public class AggregateResultIterable implements ObjectListPresentationIterables {
+public class AggregateResultIterable implements ObjectListPresentation {
   private final MongoDatabase mongoDatabase;
   private final List<BasicDBObject> pipeline;
   private final String collectionName;

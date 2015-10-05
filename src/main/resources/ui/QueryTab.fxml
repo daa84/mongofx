@@ -8,6 +8,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.StackPane?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="mongofx.ui.main.QueryTabController">
@@ -21,30 +26,56 @@
 					<children>
 						<Label text="Limit:" />
 						<TextField fx:id="limitResult" text="100" prefWidth="50" />
+						<fx:define>
+							<ToggleGroup fx:id="viewToogleGroup" />
+						</fx:define>
+						<ToggleButton fx:id="viewAsTree" focusTraversable="false"
+							toggleGroup="$viewToogleGroup" selected="true">
+							<tooltip>
+								<Tooltip text="View as Tree" />
+							</tooltip>
+							<graphic>
+								<FontAwesomeIconView glyphName="TREE" />
+							</graphic>
+						</ToggleButton>
+						<ToggleButton fx:id="viewAsText" focusTraversable="false"
+							toggleGroup="$viewToogleGroup">
+							<tooltip>
+								<Tooltip text="View as Text" />
+							</tooltip>
+							<graphic>
+								<FontAwesomeIconView glyphName="STICKY_NOTE" />
+							</graphic>
+						</ToggleButton>
 					</children>
 				</HBox>
 			</top>
 			<center>
-				<TreeTableView fx:id="queryResultTree" showRoot="false">
-					<columnResizePolicy>
-						<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-					</columnResizePolicy>
-					<columns>
-						<TreeTableColumn text="Key" prefWidth="10"
-							minWidth="5">
-							<cellValueFactory>
-								<TreeItemPropertyValueFactory
-									property="key" />
-							</cellValueFactory>
-						</TreeTableColumn>
-						<TreeTableColumn text="Value" prefWidth="150">
-							<cellValueFactory>
-								<TreeItemPropertyValueFactory
-									property="displayValue" />
-							</cellValueFactory>
-						</TreeTableColumn>
-					</columns>
-				</TreeTableView>
+				<StackPane>
+					<children>
+						<CodeArea fx:id="queryResultText" visible="false"/>
+						<TreeTableView fx:id="queryResultTree" showRoot="false">
+							<columnResizePolicy>
+								<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+							</columnResizePolicy>
+							<columns>
+								<TreeTableColumn text="Key" prefWidth="10"
+									minWidth="5">
+									<cellValueFactory>
+										<TreeItemPropertyValueFactory
+											property="key" />
+									</cellValueFactory>
+								</TreeTableColumn>
+								<TreeTableColumn text="Value" prefWidth="150">
+									<cellValueFactory>
+										<TreeItemPropertyValueFactory
+											property="displayValue" />
+									</cellValueFactory>
+								</TreeTableColumn>
+							</columns>
+						</TreeTableView>
+					</children>
+				</StackPane>
 			</center>
 		</BorderPane>
 	</center>

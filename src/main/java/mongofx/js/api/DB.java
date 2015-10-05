@@ -21,7 +21,7 @@ public class DB extends HashMap<String, Object> {
     return (Collection)get(name);
   }
 
-  public ObjectListPresentationIterables runCommand(Bindings cmd) {
+  public ObjectListPresentation runCommand(Bindings cmd) {
     return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand(JsApiUtils.documentFromMap(cmd)));
   }
 }

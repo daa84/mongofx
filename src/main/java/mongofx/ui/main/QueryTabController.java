@@ -10,17 +10,22 @@ import java.util.stream.StreamSupport;
 import javax.script.ScriptException;
 
 import org.bson.Document;
+import org.bson.json.JsonMode;
+import org.bson.json.JsonWriterSettings;
 import org.fxmisc.richtext.CodeArea;
+import org.reactfx.EventStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import mongofx.js.api.ObjectListPresentationIterables;
+import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
@@ -36,6 +41,8 @@ public class QueryTabController {
 
   @FXML
   private TreeTableView<DocumentTreeValue> queryResultTree;
+  @FXML
+  private CodeArea queryResultText;
 
   private MongoDatabase mongoDatabase;
 
@@ -43,8 +50,21 @@ public class QueryTabController {
   private TextField limitResult;
 
   @FXML
+  private ToggleButton viewAsTree;
+
+  @FXML
+  private ToggleButton viewAsText;
+
+  private ObjectListPresentation objectListResult;
+
+  @FXML
+  private ToggleGroup viewToogleGroup;
+
+  @FXML
   protected void initialize() {
     CodeAreaBuilder.setup(codeArea);
+    CodeAreaBuilder.setup(queryResultText);
+    EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
   public void setConnection(MongoConnection connection) {
@@ -74,19 +94,60 @@ public class QueryTabController {
   }
 
   private void buildResultView(Optional<Object> documents) {
-    TreeItem<DocumentTreeValue> root = new TreeItem<>();
     if (documents.isPresent()) {
       Object result = documents.get();
+
+      objectListResult = null;
+
       if (result instanceof TextPresentation) {
-        root.getChildren().add(new TreeItem<>(new DocumentTreeValue("Result", String.valueOf(result))));
+        setViewModeVisible(false);
+        queryResultText.replaceText(String.valueOf(result));
+        showText();
       }
       else {
-        buildTreeFromDocuments(root,
-            StreamSupport.stream(((ObjectListPresentationIterables)result).spliterator(), false)//
-            .limit(Integer.parseInt(limitResult.getText())));
+        setViewModeVisible(true);
+        objectListResult = (ObjectListPresentation)result;
+        updateResultListView();
       }
     }
-    queryResultTree.setRoot(root);
+  }
+
+  private void updateResultListView() {
+    Stream<Document> resultStream = StreamSupport.stream(objectListResult.spliterator(), false)//
+        .limit(Integer.parseInt(limitResult.getText()));
+
+    if (viewAsTree.isSelected()) {
+      TreeItem<DocumentTreeValue> root = new TreeItem<>();
+      buildTreeFromDocuments(root, resultStream);
+      queryResultTree.setRoot(root);
+      showTree();
+    }
+    else {
+      queryResultText.replaceText(String.valueOf(buildTextFromList(resultStream)));
+      queryResultText.selectRange(0, 0);
+      showText();
+    }
+  }
+
+  private void showText() {
+    queryResultTree.setVisible(false);
+    queryResultText.setVisible(true);
+  }
+
+  private void showTree() {
+    queryResultTree.setVisible(true);
+    queryResultText.clear();
+    queryResultText.setVisible(false);
+  }
+
+  private String buildTextFromList(Stream<Document> resultStream) {
+    return resultStream.map(d -> d.toJson(new JsonWriterSettings(JsonMode.SHELL, true)))
+        .collect(Collectors.joining(",\n", "[", "]"));
+  }
+
+  private void setViewModeVisible(boolean b) {
+    viewAsText.setVisible(b);
+    viewAsTree.setVisible(b);
   }
 
   private void buildTreeFromDocuments(TreeItem<DocumentTreeValue> root, Stream<? extends Object> documents) {
@@ -98,7 +159,7 @@ public class QueryTabController {
     Object value = i.getValue().getValue();
     if (value instanceof Document) {
       i.getChildren()
-      .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
+          .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
     }
   }
 

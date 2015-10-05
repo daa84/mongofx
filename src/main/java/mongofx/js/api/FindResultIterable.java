@@ -9,7 +9,7 @@ import com.mongodb.client.MongoCollection;
 
 import mongofx.service.MongoDatabase;
 
-public class FindResultIterable implements ObjectListPresentationIterables {
+public class FindResultIterable implements ObjectListPresentation {
 
   private final MongoDatabase mongoDatabase;
   private final BasicDBObject findQuery;
