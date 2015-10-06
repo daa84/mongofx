@@ -1,5 +1,6 @@
 package mongofx.ui.main;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Matcher;
@@ -14,14 +15,18 @@ import org.fxmisc.wellbehaved.event.EventHandlerHelper;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
 import org.fxmisc.wellbehaved.event.EventPattern;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
-import javafx.scene.control.Button;
 import javafx.scene.control.IndexRange;
+import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import mongofx.service.AutocompleteService;
+import mongofx.service.AutocompleteService.FieldDescription;
 
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
@@ -45,9 +50,17 @@ public class CodeAreaBuilder {
       + "|(?<STRINGDOUBLE>" + STRING_PATTERN_DOUBLE + ")" //
       + "|(?<STRINGSINGLE>" + STRING_PATTERN_SINGLE + ")" //
       + "|(?<COMMENT>" + COMMENT_PATTERN + ")" //
-  );
+      );
 
-  public static void setup(Stage primaryStage, CodeArea codeArea) {
+  private final CodeArea codeArea;
+  private final Stage primaryStage;
+
+  public CodeAreaBuilder(CodeArea codeArea, Stage primaryStage) {
+    this.codeArea = codeArea;
+    this.primaryStage = primaryStage;
+  }
+
+  public CodeAreaBuilder setup() {
     codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 
     codeArea.textProperty().addListener((obs, oldText, newText) -> {
@@ -73,28 +86,50 @@ public class CodeAreaBuilder {
       }
     });
 
-    Builder<KeyEvent> onKeyPressed = setupAutocomplete(primaryStage, codeArea);
-
     EventHandlerHelper.install(codeArea.onKeyTypedProperty(), onKeyTyped.create());
-    EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
+    return this;
   }
 
-  private static Builder<KeyEvent> setupAutocomplete(Stage primaryStage, CodeArea codeArea) {
+  public CodeAreaBuilder setupAutocomplete(AutocompleteService service) {
     Popup popup = new Popup();
     popup.setAutoHide(true);
-    popup.getContent().add(new Button("Autocomplete here"));
+    popup.setHideOnEscape(true);
+
+    ListView<FieldDescription> listView = createAutocompleteListView(service, popup);
+    popup.getContent().add(listView);
     codeArea.setPopupWindow(popup);
     codeArea.setPopupAlignment(PopupAlignment.CARET_BOTTOM);
     codeArea.setPopupAnchorOffset(new Point2D(1, 1));
 
-    return EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN)).act(ae -> {
+
+    Builder<KeyEvent> onKeyPressed = EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN)).act(ae -> {
       if (popup.isShowing()) {
         popup.hide();
       }
       else {
+        listView.getSelectionModel().select(0);
         popup.show(primaryStage);
       }
     });
+    EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
+    return this;
+  }
+
+  private ListView<FieldDescription> createAutocompleteListView(AutocompleteService service, Popup popup) {
+    ObservableList<FieldDescription> initialValue = FXCollections.observableList(service.findAfterDb(Arrays.asList("")));
+    ListView<FieldDescription> listView = new ListView<>(initialValue);
+
+    Builder<KeyEvent> popupKeyEvents = EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//
+        .on(EventPattern.keyPressed(KeyCode.ENTER)).act(e -> {
+          FieldDescription selectedItem = listView.getSelectionModel().getSelectedItem();
+          if (selectedItem != null) {
+            codeArea.replaceText(codeArea.getSelection(), selectedItem.getName());
+          }
+          popup.hide();
+        });
+    EventHandlerHelper.install(listView.onKeyPressedProperty(), popupKeyEvents.create());
+
+    return listView;
   }
 
   private static void charRight(CodeArea codeArea, String ch) {
@@ -110,14 +145,14 @@ public class CodeAreaBuilder {
     while (matcher.find()) {
       String styleClass = //
           matcher.group("KEYWORD") != null ? "keyword" : //
-              matcher.group("PAREN") != null ? "paren" : //
-                  matcher.group("BRACE") != null ? "brace" : //
-                      matcher.group("BRACKET") != null ? "bracket" : //
-                          matcher.group("SEMICOLON") != null ? "semicolon" : //
-                              matcher.group("STRINGSINGLE") != null ? "string" : //
-                                  matcher.group("STRINGDOUBLE") != null ? "string" : //
-                                      matcher.group("COMMENT") != null ? "comment" : //
-                                          null;
+            matcher.group("PAREN") != null ? "paren" : //
+              matcher.group("BRACE") != null ? "brace" : //
+                matcher.group("BRACKET") != null ? "bracket" : //
+                  matcher.group("SEMICOLON") != null ? "semicolon" : //
+                    matcher.group("STRINGSINGLE") != null ? "string" : //
+                      matcher.group("STRINGDOUBLE") != null ? "string" : //
+                        matcher.group("COMMENT") != null ? "comment" : //
+                          null;
       /* never happens */ assert styleClass != null;
       spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
       spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());

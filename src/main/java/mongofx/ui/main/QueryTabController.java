@@ -29,6 +29,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
+import mongofx.service.AutocompleteService;
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
 
@@ -65,10 +66,13 @@ public class QueryTabController {
   @FXML
   private ToggleGroup viewToogleGroup;
 
+  @Inject
+  private AutocompleteService autocompleteService;
+
   @FXML
   protected void initialize() {
-    CodeAreaBuilder.setup(uiBuilder.getPrimaryStage(), codeArea);
-    CodeAreaBuilder.setup(uiBuilder.getPrimaryStage(), queryResultText);
+    new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService);
+    new CodeAreaBuilder(queryResultText, uiBuilder.getPrimaryStage()).setup();
     EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
@@ -172,7 +176,7 @@ public class QueryTabController {
     Object value = i.getValue().getValue();
     if (value instanceof Document) {
       i.getChildren()
-          .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
+      .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
     }
   }
 
