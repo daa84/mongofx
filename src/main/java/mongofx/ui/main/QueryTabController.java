@@ -17,6 +17,8 @@ import org.reactfx.EventStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -38,6 +40,9 @@ public class QueryTabController {
   private CodeArea codeArea;
 
   private MongoConnection connection;
+
+  @Inject
+  private UIBuilder uiBuilder;
 
   @FXML
   private TreeTableView<DocumentTreeValue> queryResultTree;
@@ -62,8 +67,8 @@ public class QueryTabController {
 
   @FXML
   protected void initialize() {
-    CodeAreaBuilder.setup(codeArea);
-    CodeAreaBuilder.setup(queryResultText);
+    CodeAreaBuilder.setup(uiBuilder.getPrimaryStage(), codeArea);
+    CodeAreaBuilder.setup(uiBuilder.getPrimaryStage(), queryResultText);
     EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
@@ -89,6 +94,7 @@ public class QueryTabController {
       buildResultView(documents);
     }
     catch (ScriptException e) {
+      showOnlyText(e.getMessage());
       log.error("Error execute script", e);
     }
   }
@@ -100,9 +106,7 @@ public class QueryTabController {
       objectListResult = null;
 
       if (result instanceof TextPresentation) {
-        setViewModeVisible(false);
-        queryResultText.replaceText(String.valueOf(result));
-        showText();
+        showOnlyText(String.valueOf(result));
       }
       else {
         setViewModeVisible(true);
@@ -110,6 +114,15 @@ public class QueryTabController {
         updateResultListView();
       }
     }
+    else {
+      showOnlyText("Empty result");
+    }
+  }
+
+  private void showOnlyText(String text) {
+    setViewModeVisible(false);
+    queryResultText.replaceText(text);
+    showText();
   }
 
   private void updateResultListView() {

@@ -7,13 +7,21 @@ import java.util.regex.Pattern;
 
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.PopupAlignment;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
+import org.fxmisc.wellbehaved.event.EventPattern;
 
+import javafx.geometry.Point2D;
+import javafx.scene.control.Button;
 import javafx.scene.control.IndexRange;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
 
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
@@ -39,7 +47,7 @@ public class CodeAreaBuilder {
       + "|(?<COMMENT>" + COMMENT_PATTERN + ")" //
   );
 
-  public static void setup(CodeArea codeArea) {
+  public static void setup(Stage primaryStage, CodeArea codeArea) {
     codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 
     codeArea.textProperty().addListener((obs, oldText, newText) -> {
@@ -54,8 +62,39 @@ public class CodeAreaBuilder {
       else if ("[".equals(character)) {
         charRight(codeArea, "]");
       }
+      else if ("(".equals(character)) {
+        charRight(codeArea, ")");
+      }
+      else if ("\"".equals(character)) {
+        charRight(codeArea, "\"");
+      }
+      else if ("'".equals(character)) {
+        charRight(codeArea, "'");
+      }
     });
-    codeArea.setOnKeyTyped(onKeyTyped.create());
+
+    Builder<KeyEvent> onKeyPressed = setupAutocomplete(primaryStage, codeArea);
+
+    EventHandlerHelper.install(codeArea.onKeyTypedProperty(), onKeyTyped.create());
+    EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
+  }
+
+  private static Builder<KeyEvent> setupAutocomplete(Stage primaryStage, CodeArea codeArea) {
+    Popup popup = new Popup();
+    popup.setAutoHide(true);
+    popup.getContent().add(new Button("Autocomplete here"));
+    codeArea.setPopupWindow(popup);
+    codeArea.setPopupAlignment(PopupAlignment.CARET_BOTTOM);
+    codeArea.setPopupAnchorOffset(new Point2D(1, 1));
+
+    return EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN)).act(ae -> {
+      if (popup.isShowing()) {
+        popup.hide();
+      }
+      else {
+        popup.show(primaryStage);
+      }
+    });
   }
 
   private static void charRight(CodeArea codeArea, String ch) {

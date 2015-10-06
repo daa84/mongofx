@@ -98,7 +98,8 @@ public class UIBuilder {
     return loader;
   }
 
-  public Entry<Node, QueryTabController> buildQueryNode(MongoConnection dbConnect, DbTreeValue dbTreeValue) throws IOException {
+  public Entry<Node, QueryTabController> buildQueryNode(MongoConnection dbConnect, DbTreeValue dbTreeValue)
+      throws IOException {
     URL url = getClass().getResource("/ui/QueryTab.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
@@ -106,5 +107,9 @@ public class UIBuilder {
     controller.setDb(dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
     controller.setConnection(dbConnect);
     return new SimpleEntry<>(root, controller);
+  }
+
+  public Stage getPrimaryStage() {
+    return primaryStage;
   }
 }
