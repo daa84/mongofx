@@ -17,6 +17,7 @@ import mongofx.js.api.DB;
 @Singleton
 public class AutocompleteService {
   private final Map<Class<?>, NavigableMap<String, FieldDescription>> jsInfo = new HashMap<>();
+  private final NavigableMap<String, Class<?>> jsRootFields = new TreeMap<>();
   private boolean initialized = false;
 
   private void initialize() {
@@ -24,16 +25,29 @@ public class AutocompleteService {
       return;
     }
 
+    jsRootFields.put("db", DB.class);
     loadJsInfo(DB.class);
 
     initialized = true;
   }
 
-  public List<FieldDescription> findAfterDb(List<String> paths) {
+  public List<FieldDescription> find(List<String> paths) {
     initialize();
 
-    NavigableMap<String, FieldDescription> root = jsInfo.get(DB.class);
-    for (String path : paths.subList(0, paths.size() - 1)) {
+    if (paths.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    Class<?> rootFieldType = jsRootFields.get(paths.get(0));
+    if (rootFieldType == null) {
+      return Collections.emptyList();
+    }
+    NavigableMap<String, FieldDescription> root = jsInfo.get(rootFieldType);
+    if (root == null) {
+      return Collections.emptyList();
+    }
+
+    for (String path : paths.subList(1, paths.size() - 1)) {
       FieldDescription fieldDescription = root.get(path);
       if (fieldDescription == null) {
         return Collections.emptyList();
@@ -77,7 +91,6 @@ public class AutocompleteService {
       }
     }
   }
-
 
   public static class FieldDescription {
     private final Class<?> fieldType;

@@ -13,7 +13,7 @@ public class AutocompleteServiceTest {
   @Test
   public void test() {
     AutocompleteService service = new AutocompleteService();
-    List<FieldDescription> result = service.findAfterDb(Arrays.asList("getCollection", "find"));
+    List<FieldDescription> result = service.find(Arrays.asList("db", "getCollection", "find"));
 
     Assert.assertEquals(1, result.size());
   }
@@ -21,7 +21,7 @@ public class AutocompleteServiceTest {
   @Test
   public void partSearchTest() {
     AutocompleteService service = new AutocompleteService();
-    List<FieldDescription> result = service.findAfterDb(Arrays.asList("getCollection", "fi"));
+    List<FieldDescription> result = service.find(Arrays.asList("db", "getCollection", "fi"));
 
     Assert.assertEquals(1, result.size());
   }
@@ -29,7 +29,7 @@ public class AutocompleteServiceTest {
   @Test
   public void emptyTest() {
     AutocompleteService service = new AutocompleteService();
-    List<FieldDescription> result = service.findAfterDb(Arrays.asList("getCollection", "tada"));
+    List<FieldDescription> result = service.find(Arrays.asList("db", "getCollection", "tada"));
 
     Assert.assertEquals(0, result.size());
   }
@@ -37,7 +37,7 @@ public class AutocompleteServiceTest {
   @Test
   public void AllTest() {
     AutocompleteService service = new AutocompleteService();
-    List<FieldDescription> result = service.findAfterDb(Arrays.asList("getCollection", ""));
+    List<FieldDescription> result = service.find(Arrays.asList("db", "getCollection", ""));
 
     Assert.assertFalse(result.isEmpty());
   }

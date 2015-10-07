@@ -1,8 +1,9 @@
 package mongofx.ui.main;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,8 +16,6 @@ import org.fxmisc.wellbehaved.event.EventHandlerHelper;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
 import org.fxmisc.wellbehaved.event.EventPattern;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.ListView;
@@ -25,6 +24,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import mongofx.js.support.JsPathBuilder;
 import mongofx.service.AutocompleteService;
 import mongofx.service.AutocompleteService.FieldDescription;
 
@@ -50,7 +50,7 @@ public class CodeAreaBuilder {
       + "|(?<STRINGDOUBLE>" + STRING_PATTERN_DOUBLE + ")" //
       + "|(?<STRINGSINGLE>" + STRING_PATTERN_SINGLE + ")" //
       + "|(?<COMMENT>" + COMMENT_PATTERN + ")" //
-      );
+  );
 
   private final CodeArea codeArea;
   private final Stage primaryStage;
@@ -101,32 +101,48 @@ public class CodeAreaBuilder {
     codeArea.setPopupAlignment(PopupAlignment.CARET_BOTTOM);
     codeArea.setPopupAnchorOffset(new Point2D(1, 1));
 
-
-    Builder<KeyEvent> onKeyPressed = EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN)).act(ae -> {
-      if (popup.isShowing()) {
-        popup.hide();
-      }
-      else {
-        listView.getSelectionModel().select(0);
-        popup.show(primaryStage);
-      }
-    });
+    Builder<KeyEvent> onKeyPressed =
+        EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN)).act(ae -> {
+          if (popup.isShowing()) {
+            popup.hide();
+          }
+          else {
+            List<FieldDescription> autocompleteList = buildAutocompleteFromPosition(service);
+            if (!autocompleteList.isEmpty()) {
+              listView.getItems().clear();
+              listView.getItems().addAll(autocompleteList);
+              listView.getSelectionModel().select(0);
+              popup.show(primaryStage);
+            }
+          }
+        });
     EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
     return this;
   }
 
-  private ListView<FieldDescription> createAutocompleteListView(AutocompleteService service, Popup popup) {
-    ObservableList<FieldDescription> initialValue = FXCollections.observableList(service.findAfterDb(Arrays.asList("")));
-    ListView<FieldDescription> listView = new ListView<>(initialValue);
+  private List<FieldDescription> buildAutocompleteFromPosition(AutocompleteService service) {
+    int cursorPos = codeArea.getSelection().getStart();
+    String headText = codeArea.getText(0, cursorPos);
+    Optional<List<String>> paths = JsPathBuilder.buildPath(headText);
+    if (!paths.isPresent()) {
+      return Collections.emptyList();
+    }
 
-    Builder<KeyEvent> popupKeyEvents = EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//
-        .on(EventPattern.keyPressed(KeyCode.ENTER)).act(e -> {
-          FieldDescription selectedItem = listView.getSelectionModel().getSelectedItem();
-          if (selectedItem != null) {
-            codeArea.replaceText(codeArea.getSelection(), selectedItem.getName());
-          }
-          popup.hide();
-        });
+    return service.find(paths.get());
+  }
+
+  private ListView<FieldDescription> createAutocompleteListView(AutocompleteService service, Popup popup) {
+    ListView<FieldDescription> listView = new ListView<>();
+
+    Builder<KeyEvent> popupKeyEvents =
+        EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//
+            .on(EventPattern.keyPressed(KeyCode.ENTER)).act(e -> {
+              FieldDescription selectedItem = listView.getSelectionModel().getSelectedItem();
+              if (selectedItem != null) {
+                codeArea.replaceText(codeArea.getSelection(), selectedItem.getName());
+              }
+              popup.hide();
+            });
     EventHandlerHelper.install(listView.onKeyPressedProperty(), popupKeyEvents.create());
 
     return listView;
@@ -145,14 +161,14 @@ public class CodeAreaBuilder {
     while (matcher.find()) {
       String styleClass = //
           matcher.group("KEYWORD") != null ? "keyword" : //
-            matcher.group("PAREN") != null ? "paren" : //
-              matcher.group("BRACE") != null ? "brace" : //
-                matcher.group("BRACKET") != null ? "bracket" : //
-                  matcher.group("SEMICOLON") != null ? "semicolon" : //
-                    matcher.group("STRINGSINGLE") != null ? "string" : //
-                      matcher.group("STRINGDOUBLE") != null ? "string" : //
-                        matcher.group("COMMENT") != null ? "comment" : //
-                          null;
+              matcher.group("PAREN") != null ? "paren" : //
+                  matcher.group("BRACE") != null ? "brace" : //
+                      matcher.group("BRACKET") != null ? "bracket" : //
+                          matcher.group("SEMICOLON") != null ? "semicolon" : //
+                              matcher.group("STRINGSINGLE") != null ? "string" : //
+                                  matcher.group("STRINGDOUBLE") != null ? "string" : //
+                                      matcher.group("COMMENT") != null ? "comment" : //
+                                          null;
       /* never happens */ assert styleClass != null;
       spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
       spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
