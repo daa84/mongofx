@@ -1,6 +1,7 @@
 package mongofx.ui.settings;
 
 import java.io.IOException;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +14,12 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import mongofx.settings.ConnectionSettings;
 import mongofx.settings.SettingsService;
 import mongofx.ui.main.UIBuilder;
@@ -37,6 +40,7 @@ public class SettingsListController {
   private Dialog<ConnectionSettings> dialog;
 
   private Node settingsListContent;
+  private ConnectionSettingsController connectionSettingsController;
 
   public final SimpleListProperty<ConnectionSettings> settingsListProperty() {
     return this.settingsList;
@@ -66,15 +70,22 @@ public class SettingsListController {
 
   @FXML
   public void createConnection() throws IOException {
-    dialog.getDialogPane()
-        .setContent(uiBuilder.loadConnectionSetupWindow(new ConnectionSettings(), this, EditMode.CREATE));
+    Entry<ConnectionSettingsController, BorderPane> entry =
+        uiBuilder.loadConnectionSetupWindow(new ConnectionSettings(), this, EditMode.CREATE);
+    dialog.getDialogPane().setContent(entry.getValue());
+    connectionSettingsController = entry.getKey();
+    changeConnectButton("Save and connect");
   }
 
   @FXML
   public void editConnection() throws IOException {
     ConnectionSettings selected = getSelected();
     if (selected != null) {
-      dialog.getDialogPane().setContent(uiBuilder.loadConnectionSetupWindow(selected, this, EditMode.EDIT));
+      Entry<ConnectionSettingsController, BorderPane> entry =
+          uiBuilder.loadConnectionSetupWindow(selected, this, EditMode.EDIT);
+      dialog.getDialogPane().setContent(entry.getValue());
+      connectionSettingsController = entry.getKey();
+      changeConnectButton("Save and connect");
     }
   }
 
@@ -90,7 +101,7 @@ public class SettingsListController {
           settingsService.getSettings().getConnections().remove(selected);
           try {
             settingsService.save();
-            load();
+            initialize();
           }
           catch (Exception e) {
             log.error("Error save settings", e);
@@ -98,6 +109,10 @@ public class SettingsListController {
         }
       });
     }
+  }
+
+  private void changeConnectButton(String text) {
+    dialog.getDialogPane().getButtonTypes().set(0, new ButtonType(text, ButtonData.OK_DONE));
   }
 
   @FXML
@@ -120,5 +135,12 @@ public class SettingsListController {
   public void load() {
     initialize();
     dialog.getDialogPane().setContent(settingsListContent);
+    changeConnectButton("Save");
+  }
+
+  public void saveIfSettingsChanged() throws IOException {
+    if (dialog.getDialogPane().getContent() != settingsListContent) {
+      connectionSettingsController.save();
+    }
   }
 }

@@ -6,6 +6,9 @@ import java.net.URL;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
@@ -25,6 +28,7 @@ import mongofx.ui.settings.SettingsListController;
 
 @Singleton
 public class UIBuilder {
+  private static final Logger log = LoggerFactory.getLogger(UIBuilder.class);
 
   private Injector injector;
   private Stage primaryStage;
@@ -38,7 +42,7 @@ public class UIBuilder {
     this.primaryStage = primaryStage;
   }
 
-  public BorderPane loadConnectionSetupWindow(ConnectionSettings settings,
+  public Entry<ConnectionSettingsController, BorderPane> loadConnectionSetupWindow(ConnectionSettings settings,
       SettingsListController settingsListController, EditMode editMode) throws IOException {
     URL url = getClass().getResource("/ui/ConnectionSettings.fxml");
     final FXMLLoader loader = createLoader(url);
@@ -48,7 +52,7 @@ public class UIBuilder {
     controller.setSettingsController(settingsListController);
     controller.setEditMode(editMode);
 
-    return root;
+    return new SimpleEntry<>(controller, root);
   }
 
   public void showSettingsWindow(MainFrameController controller) throws IOException {
@@ -63,14 +67,20 @@ public class UIBuilder {
     dialog.setTitle("MongoFX - settings");
     dialog.getDialogPane().setContent(root);
     dialog.setResultConverter(bt -> {
-      if (bt == connectButtonType) {
+      if (ButtonData.OK_DONE == bt.getButtonData()) {
         return dialogController.getSelected();
       }
       return null;
     });
     dialogController.setDialog(dialog);
     dialog.showAndWait().ifPresent(connectionSettings -> {
-      controller.setConnectionSettings(connectionSettings);
+      try {
+        dialogController.saveIfSettingsChanged();
+        controller.setConnectionSettings(connectionSettings);
+      }
+      catch (Exception e) {
+        log.error("Can't save changes", e);
+      }
     });
   }
 

@@ -13,8 +13,8 @@
 	<top>
 		<ButtonBar>
 			<buttons>
-				<Hyperlink text="Back" focusTraversable="false" onAction="#back" />
-				<Hyperlink text="Save" focusTraversable="false" onAction="#save" />
+				<Hyperlink text="Back" focusTraversable="false" onAction="#onBack" />
+				<Hyperlink text="Save" focusTraversable="false" onAction="#onSave" />
 			</buttons>
 		</ButtonBar>
 	</top>

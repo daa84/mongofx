@@ -38,7 +38,11 @@ public class AutocompleteService {
       return Collections.emptyList();
     }
 
-    Class<?> rootFieldType = jsRootFields.get(paths.get(0));
+    String firstPathElement = paths.get(0);
+    if (firstPathElement.isEmpty()) {
+      return getRootFields();
+    }
+    Class<?> rootFieldType = jsRootFields.get(firstPathElement);
     if (rootFieldType == null) {
       return Collections.emptyList();
     }
@@ -47,14 +51,16 @@ public class AutocompleteService {
       return Collections.emptyList();
     }
 
-    for (String path : paths.subList(1, paths.size() - 1)) {
-      FieldDescription fieldDescription = root.get(path);
-      if (fieldDescription == null) {
-        return Collections.emptyList();
-      }
-      root = jsInfo.get(fieldDescription.fieldType);
-      if (root == null) {
-        break;
+    if (paths.size() > 1) {
+      for (String path : paths.subList(1, paths.size() - 1)) {
+        FieldDescription fieldDescription = root.get(path);
+        if (fieldDescription == null) {
+          return Collections.emptyList();
+        }
+        root = jsInfo.get(fieldDescription.fieldType);
+        if (root == null) {
+          break;
+        }
       }
     }
 
@@ -63,6 +69,11 @@ public class AutocompleteService {
     }
 
     return find(root, paths.get(paths.size() - 1));
+  }
+
+  private List<FieldDescription> getRootFields() {
+    return jsRootFields.entrySet().stream().map(e -> new FieldDescription(e.getKey(), e.getValue()))
+        .collect(Collectors.toList());
   }
 
   private List<FieldDescription> find(NavigableMap<String, FieldDescription> root, String path) {

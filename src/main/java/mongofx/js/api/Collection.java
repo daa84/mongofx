@@ -67,6 +67,7 @@ public class Collection {
             JsApiUtils.buildOptions(new UpdateOptions(), options)).getModifiedCount());
   }
 
+  @JsField("Provides access to the aggregation pipeline.")
   public ObjectListPresentation aggregate(List<Bindings> pipeline) {
     return new AggregateResultIterable(mongoDatabase, name, JsApiUtils.dbObjectFromList(pipeline));
   }
@@ -86,5 +87,15 @@ public class Collection {
 
   private MongoCollection<Document> getCollection() {
     return mongoDatabase.getMongoDb().getCollection(name);
+  }
+
+  @JsField("Wraps count to return a count of the number of documents in a collection or matching a query.")
+  public void count() {
+    getCollection().count();
+  }
+
+  @JsField("Wraps count to return a count of the number of documents in a collection or matching a query.")
+  public SimpleTextPresentation count(Bindings find) {
+    return new SimpleTextPresentation(getCollection().count(JsApiUtils.dbObjectFromMap(find)));
   }
 }
