@@ -9,36 +9,38 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import mongofx.settings.ConnectionSettings;
 import mongofx.settings.SettingsService;
-import mongofx.ui.main.UIBuilder;
 
 public class ConnectionSettingsController {
-  @Inject
-  private UIBuilder uiBuilder;
-
   @Inject
   private SettingsService settingsService;
 
   private ConnectionSettings settings = new ConnectionSettings();
 
   @FXML
-  TextField hostField;
+  private TextField hostField;
 
   @FXML
-  PasswordField passField;
+  private PasswordField passField;
 
   @FXML
-  TextField userField;
+  private TextField userField;
+
+  private EditMode editMode;
+
+  private SettingsListController settingsListController;
 
   @FXML
   public void back() throws IOException {
-    uiBuilder.loadSettingsWindow();
+    settingsListController.load();
   }
 
   @FXML
   public void save() throws IOException {
-    settingsService.getSettings().getConnections().add(settings);
+    if (editMode == EditMode.CREATE) {
+      settingsService.getSettings().getConnections().add(settings);
+    }
     settingsService.save();
-    uiBuilder.loadSettingsWindow();
+    settingsListController.load();
   }
 
   public void setSettings(ConnectionSettings settings) {
@@ -49,6 +51,14 @@ public class ConnectionSettingsController {
     hostField.textProperty().bindBidirectional(settings.hostProperty());
     userField.textProperty().bindBidirectional(settings.userProperty());
     passField.textProperty().bindBidirectional(settings.passwordProperty());
+  }
+
+  public void setSettingsController(SettingsListController settingsListController) {
+    this.settingsListController = settingsListController;
+  }
+
+  public void setEditMode(EditMode editMode) {
+    this.editMode = editMode;
   }
 
 }

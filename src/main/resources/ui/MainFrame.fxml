@@ -16,9 +16,14 @@
 	fx:controller="mongofx.ui.main.MainFrameController">
 	<top>
 		<ToolBar>
+			<Button focusTraversable="false" onAction="#showConnectionSettings">
+				<graphic>
+					<FontAwesomeIconView glyphName="SERVER" />
+				</graphic>
+			</Button>
 			<Button focusTraversable="false" onAction="#runCommand">
 				<tooltip>
-				<Tooltip text="Run (F5)"/>
+					<Tooltip text="Run (F5)"/>
 				</tooltip>
 				<graphic>
 					<FontAwesomeIconView glyphName="PLAY" />

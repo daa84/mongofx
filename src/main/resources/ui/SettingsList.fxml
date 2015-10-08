@@ -15,8 +15,8 @@
 		<ButtonBar>
 			<buttons>
 				<Hyperlink text="Create" focusTraversable="false" onAction="#createConnection"/>
-				<Hyperlink text="Edit" focusTraversable="false" />
-				<Hyperlink text="Delete" focusTraversable="false" />
+				<Hyperlink text="Edit" focusTraversable="false" onAction="#editConnection"/>
+				<Hyperlink text="Delete" focusTraversable="false" onAction="#deleteConnection"/>
 			</buttons>
 		</ButtonBar>
 	</top>

@@ -45,11 +45,13 @@ public class MainFrameController {
   @FXML
   protected void initialize() {
     treeController.initialize(treeView);
-    EventStreams.simpleChangesOf(queryTabs.getTabs()).subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent())));
+    EventStreams.simpleChangesOf(queryTabs.getTabs())
+        .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent())));
   }
 
   public void setConnectionSettings(ConnectionSettings connectionSettings) {
     dbConnect = mongoService.connect(connectionSettings);
+    queryTabs.getTabs().clear();
     treeController.setDbConnect(dbConnect);
     treeController.reloadDbList();
   }
@@ -89,5 +91,10 @@ public class MainFrameController {
     if (selectedTab != null) {
       tabData.get(selectedTab.getContent()).executeScript();
     }
+  }
+
+  @FXML
+  public void showConnectionSettings() throws IOException {
+    uiBuilder.showSettingsWindow(this);
   }
 }

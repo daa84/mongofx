@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import mongofx.service.Executor;
 import mongofx.service.MongoService;
 import mongofx.settings.SettingsService;
+import mongofx.ui.main.MainFrameController;
 import mongofx.ui.main.UIBuilder;
 
 public class Main extends Application {
@@ -26,7 +27,8 @@ public class Main extends Application {
       UIBuilder builder = injector.getInstance(UIBuilder.class);
       builder.setInjector(injector);
       builder.setStage(primaryStage);
-      builder.loadSettingsWindow();
+      MainFrameController mainController = builder.loadMainWindow();
+      builder.showSettingsWindow(mainController);
     }
     catch (Exception e) {
       e.printStackTrace();

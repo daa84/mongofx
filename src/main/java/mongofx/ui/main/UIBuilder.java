@@ -12,11 +12,16 @@ import com.google.inject.Singleton;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import mongofx.service.MongoConnection;
 import mongofx.settings.ConnectionSettings;
 import mongofx.ui.settings.ConnectionSettingsController;
+import mongofx.ui.settings.EditMode;
+import mongofx.ui.settings.SettingsListController;
 
 @Singleton
 public class UIBuilder {
@@ -33,22 +38,40 @@ public class UIBuilder {
     this.primaryStage = primaryStage;
   }
 
-  public void loadConnectionSetupWindow(ConnectionSettings settings) throws IOException {
+  public BorderPane loadConnectionSetupWindow(ConnectionSettings settings,
+      SettingsListController settingsListController, EditMode editMode) throws IOException {
     URL url = getClass().getResource("/ui/ConnectionSettings.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
-    ((ConnectionSettingsController)loader.getController()).setSettings(settings);
+    ConnectionSettingsController controller = (ConnectionSettingsController)loader.getController();
+    controller.setSettings(settings);
+    controller.setSettingsController(settingsListController);
+    controller.setEditMode(editMode);
 
-    primaryStage.setTitle("MongoFX - connection");
-    primaryStage.setScene(createScene(root, 400, 400));
-    primaryStage.show();
+    return root;
   }
 
-  public void loadSettingsWindow() throws IOException {
-    Scene scene = loadScene("/ui/SettingsList.fxml", 400, 400);
-    primaryStage.setTitle("MongoFX - settings");
-    primaryStage.setScene(scene);
-    primaryStage.show();
+  public void showSettingsWindow(MainFrameController controller) throws IOException {
+    URL url = getClass().getResource("/ui/SettingsList.fxml");
+    final FXMLLoader loader = createLoader(url);
+    BorderPane root = load(url, loader);
+    SettingsListController dialogController = loader.getController();
+
+    ButtonType connectButtonType = new ButtonType("Connect", ButtonData.OK_DONE);
+    Dialog<ConnectionSettings> dialog = new Dialog<>();
+    dialog.getDialogPane().getButtonTypes().addAll(connectButtonType, ButtonType.CANCEL);
+    dialog.setTitle("MongoFX - settings");
+    dialog.getDialogPane().setContent(root);
+    dialog.setResultConverter(bt -> {
+      if (bt == connectButtonType) {
+        return dialogController.getSelected();
+      }
+      return null;
+    });
+    dialogController.setDialog(dialog);
+    dialog.showAndWait().ifPresent(connectionSettings -> {
+      controller.setConnectionSettings(connectionSettings);
+    });
   }
 
   public void back() {
@@ -58,22 +81,16 @@ public class UIBuilder {
     }
   }
 
-  public void loadMainWindow(ConnectionSettings selectedItem) throws IOException {
+  public MainFrameController loadMainWindow() throws IOException {
     URL url = getClass().getResource("/ui/MainFrame.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
-    ((MainFrameController)loader.getController()).setConnectionSettings(selectedItem);
+    MainFrameController mainFrameController = (MainFrameController)loader.getController();
 
     primaryStage.setTitle("MongoFX");
     primaryStage.setScene(createScene(root, 600, 400));
     primaryStage.show();
-  }
-
-  private Scene loadScene(String uiPath, double width, double height) throws IOException {
-    URL url = getClass().getResource(uiPath);
-    final FXMLLoader loader = createLoader(url);
-    BorderPane root = load(url, loader);
-    return createScene(root, width, height);
+    return mainFrameController;
   }
 
   private Scene createScene(BorderPane root, double width, double height) {
