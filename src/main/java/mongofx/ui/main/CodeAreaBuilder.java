@@ -50,7 +50,7 @@ public class CodeAreaBuilder {
       + "|(?<STRINGDOUBLE>" + STRING_PATTERN_DOUBLE + ")" //
       + "|(?<STRINGSINGLE>" + STRING_PATTERN_SINGLE + ")" //
       + "|(?<COMMENT>" + COMMENT_PATTERN + ")" //
-  );
+      );
 
   private final CodeArea codeArea;
   private final Stage primaryStage;
@@ -128,10 +128,8 @@ public class CodeAreaBuilder {
       listView.getSelectionModel().select(0);
       return true;
     }
-    else {
-      popup.hide();
-      return false;
-    }
+    popup.hide();
+    return false;
   }
 
   private List<Suggest> buildAutocompleteFromPosition(AutocompleteService service) {
@@ -150,13 +148,13 @@ public class CodeAreaBuilder {
 
     Builder<KeyEvent> popupKeyEvents =
         EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//
-            .on(EventPattern.keyPressed(KeyCode.ENTER)).act(e -> {
-              Suggest selectedItem = listView.getSelectionModel().getSelectedItem();
-              if (selectedItem != null) {
-                codeArea.replaceText(codeArea.getSelection(), selectedItem.getInserPart());
-              }
-              popup.hide();
-            });
+        .on(EventPattern.keyPressed(KeyCode.ENTER)).act(e -> {
+          Suggest selectedItem = listView.getSelectionModel().getSelectedItem();
+          if (selectedItem != null) {
+            codeArea.replaceText(codeArea.getSelection(), selectedItem.getInserPart());
+          }
+          popup.hide();
+        });
     EventHandlerHelper.install(listView.onKeyPressedProperty(), popupKeyEvents.create());
 
     return listView;
@@ -175,14 +173,14 @@ public class CodeAreaBuilder {
     while (matcher.find()) {
       String styleClass = //
           matcher.group("KEYWORD") != null ? "keyword" : //
-              matcher.group("PAREN") != null ? "paren" : //
-                  matcher.group("BRACE") != null ? "brace" : //
-                      matcher.group("BRACKET") != null ? "bracket" : //
-                          matcher.group("SEMICOLON") != null ? "semicolon" : //
-                              matcher.group("STRINGSINGLE") != null ? "string" : //
-                                  matcher.group("STRINGDOUBLE") != null ? "string" : //
-                                      matcher.group("COMMENT") != null ? "comment" : //
-                                          null;
+            matcher.group("PAREN") != null ? "paren" : //
+              matcher.group("BRACE") != null ? "brace" : //
+                matcher.group("BRACKET") != null ? "bracket" : //
+                  matcher.group("SEMICOLON") != null ? "semicolon" : //
+                    matcher.group("STRINGSINGLE") != null ? "string" : //
+                      matcher.group("STRINGDOUBLE") != null ? "string" : //
+                        matcher.group("COMMENT") != null ? "comment" : //
+                          null;
       /* never happens */ assert styleClass != null;
       spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
       spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());

@@ -9,7 +9,7 @@ import mongofx.service.MongoDatabase;
 @SuppressWarnings("serial")
 public class DB extends HashMap<String, Object> {
 
-  private MongoDatabase mongoDatabase;
+  private final MongoDatabase mongoDatabase;
 
   public DB(mongofx.service.MongoDatabase mongoDatabase) {
     super();
@@ -23,5 +23,9 @@ public class DB extends HashMap<String, Object> {
 
   public ObjectListPresentation runCommand(Bindings cmd) {
     return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand(JsApiUtils.documentFromMap(cmd)));
+  }
+
+  public SimpleTextPresentation getName() {
+    return new SimpleTextPresentation(mongoDatabase.getMongoDb().getName());
   }
 }
