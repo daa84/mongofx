@@ -26,11 +26,11 @@ import javafx.stage.Popup;
 import javafx.stage.Stage;
 import mongofx.js.support.JsPathBuilder;
 import mongofx.service.AutocompleteService;
-import mongofx.service.AutocompleteService.FieldDescription;
+import mongofx.service.AutocompleteService.Suggest;
 
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
-    "db"
+    "db", "function", "var", "for", "if", "else"
   };
 
   private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
@@ -95,7 +95,7 @@ public class CodeAreaBuilder {
     popup.setAutoHide(true);
     popup.setHideOnEscape(true);
 
-    ListView<FieldDescription> listView = createAutocompleteListView(service, popup);
+    ListView<Suggest> listView = createAutocompleteListView(service, popup);
     popup.getContent().add(listView);
     codeArea.setPopupWindow(popup);
     codeArea.setPopupAlignment(PopupAlignment.CARET_BOTTOM);
@@ -107,20 +107,34 @@ public class CodeAreaBuilder {
             popup.hide();
           }
           else {
-            List<FieldDescription> autocompleteList = buildAutocompleteFromPosition(service);
-            if (!autocompleteList.isEmpty()) {
-              listView.getItems().clear();
-              listView.getItems().addAll(autocompleteList);
-              listView.getSelectionModel().select(0);
+            if (updateSuggestion(service, popup, listView)) {
               popup.show(primaryStage);
             }
           }
         });
+    codeArea.textProperty().addListener(text -> {
+      if (popup.isShowing()) {
+        updateSuggestion(service, popup, listView);
+      }
+    });
     EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
     return this;
   }
 
-  private List<FieldDescription> buildAutocompleteFromPosition(AutocompleteService service) {
+  private boolean updateSuggestion(AutocompleteService service, Popup popup, ListView<Suggest> listView) {
+    List<Suggest> autocompleteList = buildAutocompleteFromPosition(service);
+    if (!autocompleteList.isEmpty()) {
+      listView.getItems().setAll(autocompleteList);
+      listView.getSelectionModel().select(0);
+      return true;
+    }
+    else {
+      popup.hide();
+      return false;
+    }
+  }
+
+  private List<Suggest> buildAutocompleteFromPosition(AutocompleteService service) {
     int cursorPos = codeArea.getSelection().getStart();
     String headText = codeArea.getText(0, cursorPos);
     Optional<List<String>> paths = JsPathBuilder.buildPath(headText);
@@ -131,15 +145,15 @@ public class CodeAreaBuilder {
     return service.find(paths.get());
   }
 
-  private ListView<FieldDescription> createAutocompleteListView(AutocompleteService service, Popup popup) {
-    ListView<FieldDescription> listView = new ListView<>();
+  private ListView<Suggest> createAutocompleteListView(AutocompleteService service, Popup popup) {
+    ListView<Suggest> listView = new ListView<>();
 
     Builder<KeyEvent> popupKeyEvents =
         EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//
             .on(EventPattern.keyPressed(KeyCode.ENTER)).act(e -> {
-              FieldDescription selectedItem = listView.getSelectionModel().getSelectedItem();
+              Suggest selectedItem = listView.getSelectionModel().getSelectedItem();
               if (selectedItem != null) {
-                codeArea.replaceText(codeArea.getSelection(), selectedItem.getName());
+                codeArea.replaceText(codeArea.getSelection(), selectedItem.getInserPart());
               }
               popup.hide();
             });

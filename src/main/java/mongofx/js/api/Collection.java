@@ -7,7 +7,9 @@ import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.UpdateOptions;
@@ -90,12 +92,27 @@ public class Collection {
   }
 
   @JsField("Wraps count to return a count of the number of documents in a collection or matching a query.")
-  public void count() {
-    getCollection().count();
+  public SimpleTextPresentation count() {
+    return new SimpleTextPresentation(getCollection().count());
   }
 
   @JsField("Wraps count to return a count of the number of documents in a collection or matching a query.")
   public SimpleTextPresentation count(Bindings find) {
     return new SimpleTextPresentation(getCollection().count(JsApiUtils.dbObjectFromMap(find)));
+  }
+
+  public ObjectListPresentation distinct(String key) {
+    return distinct(key, null);
+  }
+
+  public ObjectListPresentation distinct(String key, Bindings query) {
+    BasicDBObjectBuilder command = new BasicDBObjectBuilder() //
+        .add("distinct", name) //
+        .add("key", key); //
+    if (query != null) {
+      command.add("query", query);
+    }
+
+    return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand((Bson)command.get()));
   }
 }

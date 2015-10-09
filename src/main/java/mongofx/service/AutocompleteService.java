@@ -17,7 +17,7 @@ import mongofx.js.api.DB;
 @Singleton
 public class AutocompleteService {
   private final Map<Class<?>, NavigableMap<String, FieldDescription>> jsInfo = new HashMap<>();
-  private final NavigableMap<String, Class<?>> jsRootFields = new TreeMap<>();
+  private final NavigableMap<String, FieldDescription> jsRootFields = new TreeMap<>();
   private boolean initialized = false;
 
   private void initialize() {
@@ -25,13 +25,13 @@ public class AutocompleteService {
       return;
     }
 
-    jsRootFields.put("db", DB.class);
+    jsRootFields.put("db", new FieldDescription("db", DB.class));
     loadJsInfo(DB.class);
 
     initialized = true;
   }
 
-  public List<FieldDescription> find(List<String> paths) {
+  public List<Suggest> find(List<String> paths) {
     initialize();
 
     if (paths.isEmpty()) {
@@ -42,17 +42,10 @@ public class AutocompleteService {
     if (firstPathElement.isEmpty()) {
       return getRootFields();
     }
-    Class<?> rootFieldType = jsRootFields.get(firstPathElement);
-    if (rootFieldType == null) {
-      return Collections.emptyList();
-    }
-    NavigableMap<String, FieldDescription> root = jsInfo.get(rootFieldType);
-    if (root == null) {
-      return Collections.emptyList();
-    }
+    NavigableMap<String, FieldDescription> root = jsRootFields;
 
     if (paths.size() > 1) {
-      for (String path : paths.subList(1, paths.size() - 1)) {
+      for (String path : paths.subList(0, paths.size() - 1)) {
         FieldDescription fieldDescription = root.get(path);
         if (fieldDescription == null) {
           return Collections.emptyList();
@@ -71,14 +64,14 @@ public class AutocompleteService {
     return find(root, paths.get(paths.size() - 1));
   }
 
-  private List<FieldDescription> getRootFields() {
-    return jsRootFields.entrySet().stream().map(e -> new FieldDescription(e.getKey(), e.getValue()))
-        .collect(Collectors.toList());
+  private List<Suggest> getRootFields() {
+    return jsRootFields.values().stream().map(e -> new Suggest(e)).collect(Collectors.toList());
   }
 
-  private List<FieldDescription> find(NavigableMap<String, FieldDescription> root, String path) {
+  private List<Suggest> find(NavigableMap<String, FieldDescription> root, String path) {
     NavigableMap<String, FieldDescription> tailMap = root.tailMap(path, true);
-    return tailMap.entrySet().stream().filter(e -> e.getKey().startsWith(path)).map(e -> e.getValue())
+    return tailMap.entrySet().stream().filter(e -> e.getKey().startsWith(path)) //
+        .map(e -> new Suggest(e.getValue().name, e.getValue().name.substring(path.length())))
         .collect(Collectors.toList());
   }
 
@@ -100,6 +93,35 @@ public class AutocompleteService {
       if (package1 != null && "mongofx.js.api".equals(package1.getName())) {
         loadJsInfo(returnType);
       }
+    }
+  }
+
+  public static class Suggest {
+    private final String name;
+    private final String inserPart;
+
+    public Suggest(String name, String inserPart) {
+      super();
+      this.name = name;
+      this.inserPart = inserPart;
+    }
+
+    public Suggest(FieldDescription e) {
+      name = e.name;
+      inserPart = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getInserPart() {
+      return inserPart;
+    }
+
+    @Override
+    public String toString() {
+      return name;
     }
   }
 
