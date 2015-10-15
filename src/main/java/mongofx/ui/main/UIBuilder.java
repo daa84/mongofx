@@ -22,6 +22,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import mongofx.service.MongoConnection;
 import mongofx.settings.ConnectionSettings;
+import mongofx.ui.dbtree.DbTreeValue;
 import mongofx.ui.settings.ConnectionSettingsController;
 import mongofx.ui.settings.EditMode;
 import mongofx.ui.settings.SettingsListController;

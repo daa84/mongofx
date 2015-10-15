@@ -1,4 +1,4 @@
-package mongofx.ui.main;
+package mongofx.ui.dbtree;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +28,7 @@ import javafx.scene.control.TreeView;
 import mongofx.service.Executor;
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
-import mongofx.ui.main.DbTreeValue.TreeValueType;
+import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
 
 public class TreeController {
   private static final Logger log = LoggerFactory.getLogger(TreeController.class);
@@ -44,8 +44,7 @@ public class TreeController {
 
   private MongoConnection dbConnect;
 
-
-  void reloadDbList() {
+  public void reloadDbList() {
     ObservableList<TreeItem<DbTreeValue>> children = treeView.getRoot().getChildren();
 
     Task<List<TreeItem<DbTreeValue>>> loadTask = new Task<List<TreeItem<DbTreeValue>>>() {
@@ -78,39 +77,38 @@ public class TreeController {
   }
 
   private List<TreeItem<DbTreeValue>> buildDbList() {
-    return dbConnect.listDbs().stream().map(d -> createDbItem(d)).peek(i -> buildDbChilds(i))
-        .collect(Collectors.toList());
+    return dbConnect.listDbs().stream().map(d -> createDbItem(d)).collect(Collectors.toList());
   }
 
   private TreeItem<DbTreeValue> createDbItem(MongoDatabase d) {
-    return new TreeItem<>(new DbTreeValue(d, d.getName(), TreeValueType.DATABASE), new FontAwesomeIconView(FontAwesomeIcon.DATABASE));
+    return new DynamicTreeItem(new DbTreeValue(d, d.getName(), TreeValueType.DATABASE),
+        new FontAwesomeIconView(FontAwesomeIcon.DATABASE), executor, this::buildDbChilds);
   }
 
-  private void buildDbChilds(TreeItem<DbTreeValue> i) {
-    MongoDatabase db = i.getValue().getMongoDatabase();
-    i.getChildren()
-    .addAll(db.listCollectins().stream()
-        .map(cn -> new TreeItem<>(new DbTreeValue(db, cn, TreeValueType.COLLECTION), new FontAwesomeIconView(FontAwesomeIcon.TABLE)))
-        .peek(ti -> buildCollectionDetail(db, ti)).collect(Collectors.toList()));
+  private List<TreeItem<DbTreeValue>> buildDbChilds(DbTreeValue value) {
+    MongoDatabase db = value.getMongoDatabase();
+    return db.listCollectins().stream()
+        .map(cn -> new TreeItem<>(new DbTreeValue(db, cn, TreeValueType.COLLECTION),
+            new FontAwesomeIconView(FontAwesomeIcon.TABLE)))
+        .peek(ti -> buildCollectionDetail(db, ti)).collect(Collectors.toList());
   }
 
   private void buildCollectionDetail(MongoDatabase db, TreeItem<DbTreeValue> ti) {
-    DbTreeValue value = ti.getValue();
+    DbTreeValue indexCategory = new DbTreeValue(db, "Indexes", TreeValueType.CATEGORY);
+    indexCategory.setCollectionName(ti.getValue().getDisplayValue());
+    ti.getChildren().add(new DynamicTreeItem(indexCategory, new FontAwesomeIconView(FontAwesomeIcon.FOLDER), executor,
+        this::buildIndexes));
+  }
+
+  private List<TreeItem<DbTreeValue>> buildIndexes(DbTreeValue value) {
     MongoCollection<Document> collection =
-        value.getMongoDatabase().getMongoDb().getCollection(value.getDisplayValue());
+        value.getMongoDatabase().getMongoDb().getCollection(value.getCollectionName());
 
-    TreeItem<DbTreeValue> indexCateogry =
-        new TreeItem<>(new DbTreeValue("Indexes"), new FontAwesomeIconView(FontAwesomeIcon.FOLDER));
-
-    indexCateogry.getChildren().addAll(StreamSupport.stream(collection.listIndexes().spliterator(), false).map(d -> {
-      DbTreeValue val = new DbTreeValue(db, (String)d.get("name"), TreeValueType.INDEX);
+    return StreamSupport.stream(collection.listIndexes().spliterator(), false).map(d -> {
+      DbTreeValue val = new DbTreeValue(value.getMongoDatabase(), (String)d.get("name"), TreeValueType.INDEX);
       val.setCollectionName(value.getDisplayValue());
       return new TreeItem<DbTreeValue>(val, new FontAwesomeIconView(FontAwesomeIcon.ASTERISK));
-    }).collect(Collectors.toList()));
-
-    if (!indexCateogry.getChildren().isEmpty()) {
-      ti.getChildren().add(indexCateogry);
-    }
+    }).collect(Collectors.toList());
   }
 
   public void initialize(TreeView<DbTreeValue> treeView) {
@@ -144,7 +142,7 @@ public class TreeController {
     dbContextMenu = new ContextMenu(createCollection, dropCollection);
   }
 
-  void createDB(String dbName) {
+  public void createDB(String dbName) {
     treeView.getRoot().getChildren().add(createDbItem(dbConnect.createMongoDB(dbName)));
   }
 

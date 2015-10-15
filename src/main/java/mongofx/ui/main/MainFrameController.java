@@ -20,7 +20,9 @@ import javafx.scene.input.MouseEvent;
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoService;
 import mongofx.settings.ConnectionSettings;
-import mongofx.ui.main.DbTreeValue.TreeValueType;
+import mongofx.ui.dbtree.DbTreeValue;
+import mongofx.ui.dbtree.TreeController;
+import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
 
 public class MainFrameController {
   @Inject

@@ -1,10 +1,11 @@
-package mongofx.ui.main;
+package mongofx.ui.dbtree;
 
 import mongofx.service.MongoDatabase;
 
 public class DbTreeValue {
   private MongoDatabase mongoDatabase;
   private final String displayValue;
+  private Integer count;
   private String collectionName;
   private final TreeValueType valueType;
 
@@ -47,8 +48,19 @@ public class DbTreeValue {
     this.collectionName = collectionName;
   }
 
+  public void setCount(Integer count) {
+    this.count = count;
+  }
+
+  public Integer getCount() {
+    return count;
+  }
+
   @Override
   public String toString() {
+    if (count != null) {
+      return String.format("%s(%d)", displayValue, count);
+    }
     return displayValue;
   }
 }
