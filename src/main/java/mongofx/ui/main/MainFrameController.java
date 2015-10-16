@@ -21,8 +21,8 @@ import mongofx.service.MongoConnection;
 import mongofx.service.MongoService;
 import mongofx.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
-import mongofx.ui.dbtree.TreeController;
 import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
+import mongofx.ui.dbtree.TreeController;
 
 public class MainFrameController {
   @Inject

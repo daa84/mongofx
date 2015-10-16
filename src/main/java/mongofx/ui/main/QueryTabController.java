@@ -83,6 +83,7 @@ public class QueryTabController {
   public void setDb(MongoDatabase mongoDatabase, String collectionName) {
     this.mongoDatabase = mongoDatabase;
     codeArea.replaceText("db.getCollection('" + collectionName + "').find({})");
+    codeArea.getUndoManager().forgetHistory();
   }
 
   @FXML
@@ -176,7 +177,7 @@ public class QueryTabController {
     Object value = i.getValue().getValue();
     if (value instanceof Document) {
       i.getChildren()
-      .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
+          .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
     }
   }
 

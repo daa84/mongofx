@@ -56,8 +56,7 @@ public class TreeController {
 
       @Override
       protected void succeeded() {
-        children.clear();
-        children.addAll(getValue());
+        children.setAll(getValue());
       }
 
       @Override

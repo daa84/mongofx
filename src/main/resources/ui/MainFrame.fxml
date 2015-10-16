@@ -21,6 +21,14 @@
 					<FontAwesomeIconView glyphName="SERVER" />
 				</graphic>
 			</Button>
+			<Button focusTraversable="false">
+				<tooltip>
+					<Tooltip text="Reload"/>
+				</tooltip>
+				<graphic>
+					<FontAwesomeIconView glyphName="REFRESH" />
+				</graphic>
+			</Button>
 			<Button focusTraversable="false" onAction="#runCommand">
 				<tooltip>
 					<Tooltip text="Run (F5)"/>

@@ -1,8 +1,10 @@
 package mongofx.ui.dbtree;
 
+import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
 
 public class DbTreeValue {
+  private MongoConnection dbConnect;
   private MongoDatabase mongoDatabase;
   private final String displayValue;
   private Integer count;
@@ -13,7 +15,8 @@ public class DbTreeValue {
     COLLECTION,
     CATEGORY,
     INDEX,
-    DATABASE
+    DATABASE,
+    CONNECTION
   };
 
   public DbTreeValue(String displayValue) {
@@ -28,8 +31,19 @@ public class DbTreeValue {
     valueType = type;
   }
 
+  public DbTreeValue(MongoConnection dbConnect, String displayValue) {
+    super();
+    this.dbConnect = dbConnect;
+    this.displayValue = displayValue;
+    valueType = TreeValueType.CONNECTION;
+  }
+
   public MongoDatabase getMongoDatabase() {
     return mongoDatabase;
+  }
+
+  public MongoConnection getDbConnect() {
+    return dbConnect;
   }
 
   public String getDisplayValue() {
