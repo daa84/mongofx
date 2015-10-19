@@ -9,11 +9,7 @@ import mongofx.settings.ConnectionSettings;
 @Singleton
 public class MongoService {
 
-  private MongoConnection mongoConnection;
-
-  public MongoConnection connect(ConnectionSettings connectionSettings) {
-    closeConnection();
-
+  public MongoDbConnection connect(ConnectionSettings connectionSettings) {
     StringBuilder authString = new StringBuilder();
 
     String user = connectionSettings.getUser();
@@ -27,20 +23,28 @@ public class MongoService {
     }
     String uri = String.format("mongodb://%s%s", authString, connectionSettings.getHost());
     MongoClient client = new MongoClient(new MongoClientURI(uri));
-    mongoConnection = new MongoConnection(client);
-    return mongoConnection;
-  }
-
-  private void closeConnection() {
-    if (mongoConnection == null) {
-      return;
-    }
-
-    mongoConnection.getClient().close();
+    MongoConnection mongoConnection = new MongoConnection(client);
+    return new MongoDbConnection(mongoConnection, connectionSettings);
   }
 
   public void stop() {
-    closeConnection();
   }
 
+  public static class MongoDbConnection {
+    private final ConnectionSettings connectionSettings;
+    private final MongoConnection mongoConnection;
+
+    public MongoDbConnection(MongoConnection mongoConnection, ConnectionSettings connectionSettings) {
+      this.mongoConnection = mongoConnection;
+      this.connectionSettings = connectionSettings;
+    }
+
+    public ConnectionSettings getConnectionSettings() {
+      return connectionSettings;
+    }
+
+    public MongoConnection getMongoConnection() {
+      return mongoConnection;
+    }
+  }
 }

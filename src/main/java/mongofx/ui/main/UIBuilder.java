@@ -20,7 +20,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import mongofx.service.MongoConnection;
 import mongofx.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
 import mongofx.ui.settings.ConnectionSettingsController;
@@ -77,7 +76,7 @@ public class UIBuilder {
     dialog.showAndWait().ifPresent(connectionSettings -> {
       try {
         dialogController.saveIfSettingsChanged();
-        controller.setConnectionSettings(connectionSettings);
+        controller.addConnectionSettings(connectionSettings);
       }
       catch (Exception e) {
         log.error("Can't save changes", e);
@@ -126,14 +125,12 @@ public class UIBuilder {
     return loader;
   }
 
-  public Entry<Node, QueryTabController> buildQueryNode(MongoConnection dbConnect, DbTreeValue dbTreeValue)
-      throws IOException {
+  public Entry<Node, QueryTabController> buildQueryNode(DbTreeValue dbTreeValue) throws IOException {
     URL url = getClass().getResource("/ui/QueryTab.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
     QueryTabController controller = (QueryTabController)loader.getController();
     controller.setDb(dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
-    controller.setConnection(dbConnect);
     return new SimpleEntry<>(root, controller);
   }
 

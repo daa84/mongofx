@@ -30,7 +30,6 @@ import javafx.scene.input.KeyEvent;
 import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
 import mongofx.service.AutocompleteService;
-import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
 
 public class QueryTabController {
@@ -39,8 +38,6 @@ public class QueryTabController {
 
   @FXML
   private CodeArea codeArea;
-
-  private MongoConnection connection;
 
   @Inject
   private UIBuilder uiBuilder;
@@ -76,10 +73,6 @@ public class QueryTabController {
     EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
-  public void setConnection(MongoConnection connection) {
-    this.connection = connection;
-  }
-
   public void setDb(MongoDatabase mongoDatabase, String collectionName) {
     this.mongoDatabase = mongoDatabase;
     codeArea.replaceText("db.getCollection('" + collectionName + "').find({})");
@@ -95,7 +88,7 @@ public class QueryTabController {
 
   public void executeScript() {
     try {
-      Optional<Object> documents = connection.eval(mongoDatabase, codeArea.getText());
+      Optional<Object> documents = mongoDatabase.eval(codeArea.getText());
       buildResultView(documents);
     }
     catch (ScriptException e) {

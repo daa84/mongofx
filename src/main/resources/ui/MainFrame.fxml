@@ -41,13 +41,6 @@
 	</top>
 	<left>
 		<TreeView fx:id="treeView" showRoot="false" onMouseClicked="#treeViewClicked">
-			<contextMenu>
-				<ContextMenu>
-					<items>
-						<MenuItem text="Create db" onAction="#onCreateNewDb"></MenuItem>
-					</items>
-				</ContextMenu>
-			</contextMenu>
 		</TreeView>
 	</left>
 	<center>

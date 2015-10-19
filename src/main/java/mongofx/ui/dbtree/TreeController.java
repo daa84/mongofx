@@ -5,16 +5,12 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 import com.mongodb.client.MongoCollection;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -28,10 +24,10 @@ import javafx.scene.control.TreeView;
 import mongofx.service.Executor;
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
+import mongofx.service.MongoService.MongoDbConnection;
 import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
 
 public class TreeController {
-  private static final Logger log = LoggerFactory.getLogger(TreeController.class);
 
   @Inject
   private Executor executor;
@@ -39,43 +35,15 @@ public class TreeController {
   private TreeView<DbTreeValue> treeView;
 
   private ContextMenu dbContextMenu;
+  private ContextMenu connectContextMenu;
   private ContextMenu collectionContextMenu;
   private ContextMenu indexContextMenu;
 
-  private MongoConnection dbConnect;
-
   public void reloadDbList() {
-    ObservableList<TreeItem<DbTreeValue>> children = treeView.getRoot().getChildren();
-
-    Task<List<TreeItem<DbTreeValue>>> loadTask = new Task<List<TreeItem<DbTreeValue>>>() {
-
-      @Override
-      protected List<TreeItem<DbTreeValue>> call() throws Exception {
-        return buildDbList();
-      }
-
-      @Override
-      protected void succeeded() {
-        children.setAll(getValue());
-      }
-
-      @Override
-      protected void failed() {
-        Alert alert = new Alert(AlertType.ERROR);
-        alert.setHeaderText("Can't connect to MongoDB");
-        Throwable exception = getException();
-        if (exception != null) {
-          log.error("Error", exception);
-          alert.setContentText(exception.getMessage());
-        }
-        alert.showAndWait();
-      }
-    };
-
-    executor.execute(loadTask);
+    //TODO: implement context reload without full tree reload
   }
 
-  private List<TreeItem<DbTreeValue>> buildDbList() {
+  private List<TreeItem<DbTreeValue>> buildDbList(MongoConnection dbConnect) {
     return dbConnect.listDbs().stream().map(d -> createDbItem(d)).collect(Collectors.toList());
   }
 
@@ -117,6 +85,13 @@ public class TreeController {
     buildDbContextMenu();
     buildCollectionContextMenu();
     buildIndexContextMenu();
+    buildConnectContextMenu();
+  }
+
+  private void buildConnectContextMenu() {
+    MenuItem createDb = new MenuItem("Create db...");
+    createDb.setOnAction(this::onCreateNewDb);
+    connectContextMenu = new ContextMenu(createDb);
   }
 
   private void buildIndexContextMenu() {
@@ -142,7 +117,22 @@ public class TreeController {
   }
 
   public void createDB(String dbName) {
-    treeView.getRoot().getChildren().add(createDbItem(dbConnect.createMongoDB(dbName)));
+
+  }
+
+  public void onCreateNewDb(ActionEvent ev) {
+    TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+    if (selectedItem == null) {
+      return;
+    }
+
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setContentText("Enter Name:");
+    dialog.setHeaderText("Create new db");
+    dialog.showAndWait().ifPresent(r -> {
+      treeView.getRoot().getChildren()
+          .add(createDbItem(selectedItem.getValue().getDbConnect().createMongoDB(dialog.getResult())));
+    });
   }
 
   private void onCreateNewCollection(ActionEvent ev) {
@@ -207,8 +197,14 @@ public class TreeController {
     });
   }
 
-  public void setDbConnect(MongoConnection dbConnect) {
-    this.dbConnect = dbConnect;
+  public void addDbConnect(MongoDbConnection mongoDbConnection) {
+    //TODO: somehow process connect errors
+    DbTreeValue connectTreeValue =
+        new DbTreeValue(mongoDbConnection.getMongoConnection(), mongoDbConnection.getConnectionSettings().getHost());
+    DynamicTreeItem item = new DynamicTreeItem(connectTreeValue, new FontAwesomeIconView(FontAwesomeIcon.SERVER),
+        executor, tv -> buildDbList(tv.getDbConnect()));
+    item.setExpanded(true);
+    treeView.getRoot().getChildren().add(item);
   }
 
   private class TreeDbCell extends TreeCell<DbTreeValue> {
@@ -230,6 +226,9 @@ public class TreeController {
 
     private void setupContextMenu(DbTreeValue item) {
       TreeValueType valueType = item.getValueType();
+      if (valueType == TreeValueType.CONNECTION) {
+        setContextMenu(connectContextMenu);
+      }
       if (valueType == TreeValueType.DATABASE) {
         setContextMenu(dbContextMenu);
       }

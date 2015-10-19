@@ -94,6 +94,7 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
 
     @Override
     protected void failed() {
+      //TODO: check multi time message when query failed
       loaded = false;
       Alert alert = new Alert(AlertType.ERROR);
       alert.setHeaderText("Can't connect to MongoDB");
