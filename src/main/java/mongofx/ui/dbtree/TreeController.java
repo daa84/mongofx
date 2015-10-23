@@ -7,6 +7,7 @@ import java.util.stream.StreamSupport;
 import org.bson.Document;
 
 import com.google.inject.Inject;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -44,7 +45,13 @@ public class TreeController {
   }
 
   private List<TreeItem<DbTreeValue>> buildDbList(MongoConnection dbConnect) {
-    return dbConnect.listDbs().stream().map(d -> createDbItem(d)).collect(Collectors.toList());
+    try {
+      return dbConnect.listDbs().stream().map(d -> createDbItem(d)).collect(Collectors.toList());
+    }
+    catch (MongoException ex) {
+      dbConnect.getClient().close();
+      throw ex;
+    }
   }
 
   private TreeItem<DbTreeValue> createDbItem(MongoDatabase d) {
@@ -198,11 +205,11 @@ public class TreeController {
   }
 
   public void addDbConnect(MongoDbConnection mongoDbConnection) {
-    //TODO: somehow process connect errors
     DbTreeValue connectTreeValue =
         new DbTreeValue(mongoDbConnection.getMongoConnection(), mongoDbConnection.getConnectionSettings().getHost());
     DynamicTreeItem item = new DynamicTreeItem(connectTreeValue, new FontAwesomeIconView(FontAwesomeIcon.SERVER),
         executor, tv -> buildDbList(tv.getDbConnect()));
+    item.setOnFiled(() -> treeView.getRoot().getChildren().remove(item));
     item.setExpanded(true);
     treeView.getRoot().getChildren().add(item);
   }

@@ -22,6 +22,7 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
 
   private boolean loaded = false;
   private final Function<DbTreeValue, List<TreeItem<DbTreeValue>>> supplier;
+  private Runnable onFiled;
 
   private final ProgressIndicator progress;
   private Node graphic;
@@ -34,6 +35,10 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
 
     progress = new ProgressIndicator();
     progress.setPrefSize(15, 15);
+  }
+
+  public void setOnFiled(Runnable onFiled) {
+    this.onFiled = onFiled;
   }
 
   @Override
@@ -96,6 +101,9 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
     protected void failed() {
       //TODO: check multi time message when query failed
       loaded = false;
+      if (onFiled != null) {
+        onFiled.run();
+      }
       Alert alert = new Alert(AlertType.ERROR);
       alert.setHeaderText("Can't connect to MongoDB");
       Throwable exception = getException();
