@@ -62,7 +62,7 @@ public class MainFrameController {
   protected void initialize() {
     treeController.initialize(treeView);
     EventStreams.simpleChangesOf(queryTabs.getTabs())
-        .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent())));
+    .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent())));
   }
 
   public void addConnectionSettings(ConnectionSettings connectionSettings) {
@@ -101,5 +101,11 @@ public class MainFrameController {
   @FXML
   public void showConnectionSettings() throws IOException {
     uiBuilder.showSettingsWindow(this);
+  }
+
+
+  @FXML
+  public void realoadSelectedTreeItem() {
+    treeController.reloadSelectedTreeItem();
   }
 }

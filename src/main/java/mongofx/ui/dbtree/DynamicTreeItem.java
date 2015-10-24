@@ -117,7 +117,6 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
 
     @Override
     protected void failed() {
-      //TODO: check multi time message when query failed
       loaded = false;
       if (onFiled != null) {
         onFiled.run();

@@ -21,7 +21,7 @@
 					<FontAwesomeIconView glyphName="SERVER" />
 				</graphic>
 			</Button>
-			<Button focusTraversable="false">
+			<Button focusTraversable="false" onAction="#realoadSelectedTreeItem">
 				<tooltip>
 					<Tooltip text="Reload"/>
 				</tooltip>

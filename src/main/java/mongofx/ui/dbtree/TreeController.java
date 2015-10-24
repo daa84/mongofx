@@ -19,6 +19,7 @@
 package mongofx.ui.dbtree;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -58,8 +59,19 @@ public class TreeController {
   private ContextMenu collectionContextMenu;
   private ContextMenu indexContextMenu;
 
-  public void reloadDbList() {
-    //TODO: implement context reload without full tree reload
+  public void reloadSelectedTreeItem() {
+    TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+    findParentOfType(selectedItem, DynamicTreeItem.class).ifPresent(ti -> ti.reload());
+  }
+
+  private Optional<DynamicTreeItem> findParentOfType(TreeItem<DbTreeValue> selectedItem, Class<DynamicTreeItem> class1) {
+    if (selectedItem == null) {
+      return Optional.empty();
+    }
+    if (class1.isAssignableFrom(selectedItem.getClass())) {
+      return Optional.of((DynamicTreeItem)selectedItem);
+    }
+    return findParentOfType(selectedItem.getParent(), class1);
   }
 
   private List<TreeItem<DbTreeValue>> buildDbList(MongoConnection dbConnect) {
@@ -179,7 +191,7 @@ public class TreeController {
     dialog.showAndWait().ifPresent(r -> {
       DbTreeValue value = treeView.getSelectionModel().getSelectedItem().getValue();
       value.getMongoDatabase().createCollection(dialog.getResult());
-      reloadDbList();
+      reloadSelectedTreeItem();
     });
   }
 
@@ -192,7 +204,7 @@ public class TreeController {
     alert.setContentText("Are you sure?");
     alert.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
       value.getMongoDatabase().dropIndex(value.getCollectionName(), indexName);
-      reloadDbList();
+      reloadSelectedTreeItem();
     });
   }
 
@@ -205,7 +217,7 @@ public class TreeController {
     alert.setContentText("Are you sure?");
     alert.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
       value.getMongoDatabase().dropCollection(collectionName);
-      reloadDbList();
+      reloadSelectedTreeItem();
     });
   }
 
@@ -230,7 +242,7 @@ public class TreeController {
     alert.setContentText("Are you sure?");
     alert.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
       value.getMongoDatabase().drop();
-      reloadDbList();
+      reloadSelectedTreeItem();
     });
   }
 
