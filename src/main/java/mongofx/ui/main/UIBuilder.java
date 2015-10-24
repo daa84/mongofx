@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,5 +155,20 @@ public class UIBuilder {
 
   public Stage getPrimaryStage() {
     return primaryStage;
+  }
+
+  public Optional<String> editDocument(String formatJson) {
+    Dialog<String> dialog = new Dialog<>();
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+    dialog.setTitle("MongoFX - edit document");
+    //    dialog.getDialogPane().setContent(root);
+    dialog.setResultConverter(bt -> {
+      if (ButtonData.OK_DONE == bt.getButtonData()) {
+        //TODO: json result
+        return "JSON";
+      }
+      return null;
+    });
+    return dialog.showAndWait();
   }
 }

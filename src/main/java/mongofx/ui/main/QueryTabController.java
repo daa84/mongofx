@@ -18,8 +18,6 @@
 //
 package mongofx.ui.main;
 
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,8 +26,6 @@ import java.util.stream.StreamSupport;
 import javax.script.ScriptException;
 
 import org.bson.Document;
-import org.bson.json.JsonMode;
-import org.bson.json.JsonWriterSettings;
 import org.fxmisc.richtext.CodeArea;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -41,7 +37,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -49,6 +44,8 @@ import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
 import mongofx.service.AutocompleteService;
 import mongofx.service.MongoDatabase;
+import mongofx.ui.result.tree.DocumentTreeValue;
+import mongofx.ui.result.tree.ResultTreeController;
 
 public class QueryTabController {
 
@@ -62,6 +59,7 @@ public class QueryTabController {
 
   @FXML
   private TreeTableView<DocumentTreeValue> queryResultTree;
+
   @FXML
   private CodeArea queryResultText;
 
@@ -84,8 +82,12 @@ public class QueryTabController {
   @Inject
   private AutocompleteService autocompleteService;
 
+  @Inject
+  private ResultTreeController resultTreeController;
+
   @FXML
   protected void initialize() {
+    resultTreeController.setResultTree(queryResultTree);
     new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService);
     new CodeAreaBuilder(queryResultText, uiBuilder.getPrimaryStage()).setup();
     EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
@@ -146,9 +148,7 @@ public class QueryTabController {
         .limit(Integer.parseInt(limitResult.getText()));
 
     if (viewAsTree.isSelected()) {
-      TreeItem<DocumentTreeValue> root = new TreeItem<>();
-      buildTreeFromDocuments(root, resultStream);
-      queryResultTree.setRoot(root);
+      resultTreeController.buildTreeFromDocuments(resultStream);
       showTree();
     }
     else {
@@ -159,62 +159,23 @@ public class QueryTabController {
   }
 
   private void showText() {
-    queryResultTree.setVisible(false);
+    resultTreeController.hide();
     queryResultText.setVisible(true);
   }
 
   private void showTree() {
-    queryResultTree.setVisible(true);
+    resultTreeController.show();
     queryResultText.clear();
     queryResultText.setVisible(false);
   }
 
   private String buildTextFromList(Stream<Document> resultStream) {
-    return resultStream.map(d -> d.toJson(new JsonWriterSettings(JsonMode.SHELL, true)))
-        .collect(Collectors.joining(",\n", "[", "]"));
+    return resultStream.map(DocumentUtils::formatJson).collect(Collectors.joining(",\n", "[", "]"));
   }
 
   private void setViewModeVisible(boolean b) {
     viewAsText.setVisible(b);
     viewAsTree.setVisible(b);
-  }
-
-  private void buildTreeFromDocuments(TreeItem<DocumentTreeValue> root, Stream<? extends Object> documents) {
-    root.getChildren().addAll(documents.map(d -> new TreeItem<>(new DocumentTreeValue(null, d)))
-        .peek(i -> buildChilds(i)).collect(Collectors.toList()));
-  }
-
-  private void buildChilds(TreeItem<DocumentTreeValue> i) {
-    Object value = i.getValue().getValue();
-    if (value instanceof Document) {
-      i.getChildren()
-          .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  private TreeItem<DocumentTreeValue> mapFieldToItem(Entry<String, Object> f) {
-    Object value = f.getValue();
-    if (value instanceof Document) {
-      TreeItem<DocumentTreeValue> root = new TreeItem<>(new DocumentTreeValue(f.getKey(), value));
-      buildChilds(root);
-      return root;
-    }
-    if (value instanceof List) {
-      TreeItem<DocumentTreeValue> root = new TreeItem<>(new DocumentTreeValue(f.getKey(), value));
-      buildTreeFromArray(root, (List<Object>)value);
-      return root;
-    }
-    return new TreeItem<>(new DocumentTreeValue(f.getKey(), f.getValue()));
-  }
-
-  private void buildTreeFromArray(TreeItem<DocumentTreeValue> root, List<Object> documents) {
-    for (int i = 0; i < documents.size(); i++) {
-      Object item = documents.get(i);
-      TreeItem<DocumentTreeValue> treeItem = new TreeItem<>(new DocumentTreeValue(String.valueOf(i), item));
-      root.getChildren().add(treeItem);
-      buildChilds(treeItem);
-    }
   }
 
   public void startTab() {

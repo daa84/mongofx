@@ -16,7 +16,7 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.ui.main;
+package mongofx.ui.result.tree;
 
 import java.util.List;
 
