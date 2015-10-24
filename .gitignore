@@ -2,3 +2,6 @@
 /target/
 /build/
 settings.json
+.project
+.classpath
+/.settings/
