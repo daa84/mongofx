@@ -23,6 +23,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import mongofx.service.Executor;
 import mongofx.service.MongoService;
@@ -46,7 +47,9 @@ public class Main extends Application {
       builder.setInjector(injector);
       builder.setStage(primaryStage);
       MainFrameController mainController = builder.loadMainWindow();
-      builder.showSettingsWindow(mainController);
+
+      // runLater fix bug that makes main window unresizable if another dialog is showed
+      Platform.runLater(() -> builder.showSettingsWindow(mainController));
     }
     catch (Exception e) {
       e.printStackTrace();

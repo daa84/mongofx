@@ -25,6 +25,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.fxmisc.richtext.CodeArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,6 @@ public class UIBuilder {
 
   private Injector injector;
   private Stage primaryStage;
-  private Scene previousScene;
 
   public void setInjector(Injector injector) {
     this.injector = injector;
@@ -62,7 +62,7 @@ public class UIBuilder {
   }
 
   public Entry<ConnectionSettingsController, BorderPane> loadConnectionSetupWindow(ConnectionSettings settings,
-      SettingsListController settingsListController, EditMode editMode) throws IOException {
+      SettingsListController settingsListController, EditMode editMode) {
     URL url = getClass().getResource("/ui/ConnectionSettings.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
@@ -74,7 +74,7 @@ public class UIBuilder {
     return new SimpleEntry<>(controller, root);
   }
 
-  public void showSettingsWindow(MainFrameController controller) throws IOException {
+  public void showSettingsWindow(MainFrameController controller) {
     URL url = getClass().getResource("/ui/SettingsList.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
@@ -84,6 +84,8 @@ public class UIBuilder {
     Dialog<ConnectionSettings> dialog = new Dialog<>();
     dialog.getDialogPane().getButtonTypes().addAll(connectButtonType, ButtonType.CANCEL);
     dialog.setTitle("MongoFX - settings");
+    dialog.setResizable(true);
+
     dialog.getDialogPane().setContent(root);
     dialog.setResultConverter(bt -> {
       if (ButtonData.OK_DONE == bt.getButtonData()) {
@@ -103,14 +105,7 @@ public class UIBuilder {
     });
   }
 
-  public void back() {
-    if (previousScene != null) {
-      primaryStage.setScene(previousScene);
-      previousScene = null;
-    }
-  }
-
-  public MainFrameController loadMainWindow() throws IOException {
+  public MainFrameController loadMainWindow() {
     URL url = getClass().getResource("/ui/MainFrame.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
@@ -129,10 +124,14 @@ public class UIBuilder {
     return scene;
   }
 
-  private BorderPane load(URL url, final FXMLLoader loader) throws IOException {
+  private BorderPane load(URL url, final FXMLLoader loader) {
     BorderPane root;
     try (InputStream in = url.openStream()) {
       root = loader.load(in);
+    }
+    catch (IOException e) {
+      log.error("IOException:",e);
+      return null;
     }
     return root;
   }
@@ -144,7 +143,7 @@ public class UIBuilder {
     return loader;
   }
 
-  public Entry<Node, QueryTabController> buildQueryNode(DbTreeValue dbTreeValue) throws IOException {
+  public Entry<Node, QueryTabController> buildQueryNode(DbTreeValue dbTreeValue) {
     URL url = getClass().getResource("/ui/QueryTab.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
@@ -157,15 +156,21 @@ public class UIBuilder {
     return primaryStage;
   }
 
-  public Optional<String> editDocument(String formatJson) {
+  public Optional<String> editDocument(String formatedJson) {
     Dialog<String> dialog = new Dialog<>();
     dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
     dialog.setTitle("MongoFX - edit document");
-    //    dialog.getDialogPane().setContent(root);
+    dialog.setResizable(true);
+    dialog.getDialogPane().getStylesheets().add(getClass().getResource("/ui/editor.css").toExternalForm());
+
+    final CodeArea codeArea = new CodeArea();
+    codeArea.setPrefSize(500, 400);
+    dialog.getDialogPane().setContent(codeArea);
+    new CodeAreaBuilder(codeArea, primaryStage).setup().setText(formatedJson);
+
     dialog.setResultConverter(bt -> {
       if (ButtonData.OK_DONE == bt.getButtonData()) {
-        //TODO: json result
-        return "JSON";
+        return codeArea.getText();
       }
       return null;
     });

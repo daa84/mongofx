@@ -33,6 +33,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import mongofx.service.MongoDatabase;
 import mongofx.ui.main.DocumentUtils;
 import mongofx.ui.main.UIBuilder;
 
@@ -44,14 +45,17 @@ public class ResultTreeController {
   private TreeTableView<DocumentTreeValue> queryResultTree;
   private final ContextMenu editItemContextMenu;
 
+  private MongoDatabase mongoDatabase;
+
   public ResultTreeController() {
     MenuItem editDocument = new MenuItem("Edit document");
     editDocument.setOnAction(this::editSelected);
     editItemContextMenu = new ContextMenu(editDocument);
   }
 
-  public void setResultTree(TreeTableView<DocumentTreeValue> queryResultTree) {
+  public void initialize(TreeTableView<DocumentTreeValue> queryResultTree, MongoDatabase mongoDatabase) {
     this.queryResultTree = queryResultTree;
+    this.mongoDatabase = mongoDatabase;
     queryResultTree.setRowFactory(ttv -> new ResultRow());
   }
 
@@ -105,8 +109,11 @@ public class ResultTreeController {
       return;
     }
 
-    uiBuilder.editDocument(DocumentUtils.formatJson(selectedItem.getValue().getDocument())).ifPresent(newJson -> {
-      //TODO: update document
+    Document oldDoc = selectedItem.getValue().getDocument();
+    uiBuilder.editDocument(DocumentUtils.formatJson(oldDoc)).ifPresent(newJson -> {
+      Document doc = Document.parse(newJson);
+      //TODO: assign document collection name after execution
+      //      mongoDatabase.getMongoDb().getCollection("test").updateOne(filter, update)
     });
   }
 

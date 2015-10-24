@@ -87,16 +87,16 @@ public class QueryTabController {
 
   @FXML
   protected void initialize() {
-    resultTreeController.setResultTree(queryResultTree);
-    new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService);
     new CodeAreaBuilder(queryResultText, uiBuilder.getPrimaryStage()).setup();
     EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
   public void setDb(MongoDatabase mongoDatabase, String collectionName) {
     this.mongoDatabase = mongoDatabase;
-    codeArea.replaceText("db.getCollection('" + collectionName + "').find({})");
-    codeArea.getUndoManager().forgetHistory();
+    new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService)
+    .setText("db.getCollection('" + collectionName + "').find({})");
+
+    resultTreeController.initialize(queryResultTree, mongoDatabase);
   }
 
   @FXML

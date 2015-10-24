@@ -207,4 +207,10 @@ public class CodeAreaBuilder {
     spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
     return spansBuilder.create();
   }
+
+  public CodeAreaBuilder setText(String formatedJson) {
+    codeArea.replaceText(formatedJson);
+    codeArea.getUndoManager().forgetHistory();
+    return this;
+  }
 }
