@@ -27,6 +27,7 @@ import javax.script.SimpleBindings;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
@@ -103,6 +104,22 @@ public class Collection {
   public SimpleTextPresentation createIndex(Bindings index, Bindings options) {
     return new SimpleTextPresentation(getCollection().createIndex(JsApiUtils.dbObjectFromMap(index),
         JsApiUtils.buildOptions(new IndexOptions(), options)));
+  }
+
+  public ObjectListPresentation reIndex() {
+    return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand(new BasicDBObject("reIndex", name)));
+  }
+
+  public void dropIndex(String indexName) {
+    getCollection().dropIndex(indexName);
+  }
+
+  public void dropIndex(Bindings index) {
+    getCollection().dropIndex(JsApiUtils.dbObjectFromMap(index));
+  }
+
+  public void dropIndexes() {
+    getCollection().dropIndexes();
   }
 
   private MongoCollection<Document> getCollection() {
