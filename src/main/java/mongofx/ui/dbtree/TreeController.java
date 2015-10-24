@@ -67,7 +67,7 @@ public class TreeController {
       return dbConnect.listDbs().stream().map(d -> createDbItem(d)).collect(Collectors.toList());
     }
     catch (MongoException ex) {
-      dbConnect.getClient().close();
+      dbConnect.close();
       throw ex;
     }
   }
@@ -116,7 +116,9 @@ public class TreeController {
   private void buildConnectContextMenu() {
     MenuItem createDb = new MenuItem("Create db...");
     createDb.setOnAction(this::onCreateNewDb);
-    connectContextMenu = new ContextMenu(createDb);
+    MenuItem disconnect = new MenuItem("Disconnect");
+    disconnect.setOnAction(this::onDisconnectDb);
+    connectContextMenu = new ContextMenu(createDb, disconnect);
   }
 
   private void buildIndexContextMenu() {
@@ -156,8 +158,18 @@ public class TreeController {
     dialog.setHeaderText("Create new db");
     dialog.showAndWait().ifPresent(r -> {
       treeView.getRoot().getChildren()
-          .add(createDbItem(selectedItem.getValue().getDbConnect().createMongoDB(dialog.getResult())));
+      .add(createDbItem(selectedItem.getValue().getDbConnect().createMongoDB(dialog.getResult())));
     });
+  }
+
+  public void onDisconnectDb(ActionEvent ev) {
+    TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+    if (selectedItem == null) {
+      return;
+    }
+
+    selectedItem.getValue().getDbConnect().close();
+    removeFromRoot(selectedItem);
   }
 
   private void onCreateNewCollection(ActionEvent ev) {
@@ -227,9 +239,13 @@ public class TreeController {
         new DbTreeValue(mongoDbConnection.getMongoConnection(), mongoDbConnection.getConnectionSettings().getHost());
     DynamicTreeItem item = new DynamicTreeItem(connectTreeValue, new FontAwesomeIconView(FontAwesomeIcon.SERVER),
         executor, tv -> buildDbList(tv.getDbConnect()));
-    item.setOnFiled(() -> treeView.getRoot().getChildren().remove(item));
+    item.setOnFiled(() -> removeFromRoot(item));
     item.setExpanded(true);
     treeView.getRoot().getChildren().add(item);
+  }
+
+  private boolean removeFromRoot(TreeItem<DbTreeValue> selectedItem) {
+    return treeView.getRoot().getChildren().remove(selectedItem);
   }
 
   private class TreeDbCell extends TreeCell<DbTreeValue> {
@@ -254,7 +270,7 @@ public class TreeController {
       if (valueType == TreeValueType.CONNECTION) {
         setContextMenu(connectContextMenu);
       }
-      if (valueType == TreeValueType.DATABASE) {
+      else if (valueType == TreeValueType.DATABASE) {
         setContextMenu(dbContextMenu);
       }
       else if (valueType == TreeValueType.COLLECTION) {
