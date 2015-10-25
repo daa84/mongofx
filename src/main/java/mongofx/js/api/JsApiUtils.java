@@ -58,6 +58,11 @@ public class JsApiUtils {
       public Iterator<Document> iterator() {
         return list.iterator();
       }
+
+      @Override
+      public String getCollectionName() {
+        return null;
+      }
     };
   }
 
@@ -67,6 +72,11 @@ public class JsApiUtils {
       @Override
       public Iterator<Document> iterator() {
         return iterable.iterator();
+      }
+
+      @Override
+      public String getCollectionName() {
+        return null;
       }
     };
   }

@@ -24,10 +24,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.result.UpdateResult;
 
 import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
@@ -38,6 +44,7 @@ import mongofx.ui.main.DocumentUtils;
 import mongofx.ui.main.UIBuilder;
 
 public class ResultTreeController {
+  private static final Logger log = LoggerFactory.getLogger(ResultTreeController.class);
 
   @Inject
   private UIBuilder uiBuilder;
@@ -59,15 +66,11 @@ public class ResultTreeController {
     queryResultTree.setRowFactory(ttv -> new ResultRow());
   }
 
-  public void buildTreeFromDocuments(Stream<Document> resultStream) {
+  public void buildTreeFromDocuments(Stream<Document> resultStream, String collectionName) {
     TreeItem<DocumentTreeValue> root = new TreeItem<>();
-    buildTreeFromDocuments(root, resultStream);
-    queryResultTree.setRoot(root);
-  }
-
-  private void buildTreeFromDocuments(TreeItem<DocumentTreeValue> root, Stream<? extends Object> documents) {
-    root.getChildren().addAll(documents.map(d -> new TreeItem<>(new DocumentTreeValue(null, d)))
+    root.getChildren().addAll(resultStream.map(d -> new TreeItem<>(new DocumentTreeValue(null, d, collectionName)))
         .peek(i -> buildChilds(i)).collect(Collectors.toList()));
+    queryResultTree.setRoot(root);
   }
 
   private void buildChilds(TreeItem<DocumentTreeValue> i) {
@@ -108,13 +111,49 @@ public class ResultTreeController {
     if (selectedItem == null) {
       return;
     }
+    DocumentTreeValue value = selectedItem.getValue();
+    if (value.getCollectionName() == null) {
+      log.warn("Can't find collection name, maybe not root item?");
+      return;
+    }
 
-    Document oldDoc = selectedItem.getValue().getDocument();
-    uiBuilder.editDocument(DocumentUtils.formatJson(oldDoc)).ifPresent(newJson -> {
+    Document oldDoc = value.getDocument();
+    final Object id = oldDoc.get("_id");
+    if (id == null) {
+      log.error("No _id found for updated object");
+      return;
+    }
+    Document toEdit = new Document(oldDoc);
+    toEdit.remove("_id");
+    uiBuilder.editDocument(DocumentUtils.formatJson(toEdit)).ifPresent(newJson -> {
       Document doc = Document.parse(newJson);
-      //TODO: assign document collection name after execution
-      //      mongoDatabase.getMongoDb().getCollection("test").updateOne(filter, update)
+      updateObject(value, doc, id);
     });
+  }
+
+  private void updateObject(DocumentTreeValue value, Document doc, Object id) {
+    try {
+      UpdateResult updateResult = mongoDatabase.getMongoDb().getCollection(value.getCollectionName())
+          .replaceOne(new BasicDBObject("_id", id), doc);
+
+      if (updateResult.getModifiedCount() < 1) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setHeaderText("Document update filed");
+        alert.show();
+      }
+      else {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setHeaderText("Document updated");
+        alert.show();
+      }
+    }
+    catch (Exception ex) {
+      log.warn("Error update document", ex);
+      Alert alert = new Alert(AlertType.ERROR);
+      alert.setHeaderText("Document update filed");
+      alert.setContentText(ex.getMessage());
+      alert.show();
+    }
   }
 
   public void hide() {

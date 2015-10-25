@@ -30,10 +30,22 @@ import org.bson.types.ObjectId;
 public class DocumentTreeValue {
   private final Object value;
   private final String key;
+  private final String collectionName;
 
   public DocumentTreeValue(String key, Object value) {
     this.key = key;
     this.value = value;
+    this.collectionName = null;
+  }
+
+  public DocumentTreeValue(String key, Object value, String collectionName) {
+    this.key = key;
+    this.value = value;
+    this.collectionName = collectionName;
+  }
+
+  public String getCollectionName() {
+    return collectionName;
   }
 
   public Document getDocument() {

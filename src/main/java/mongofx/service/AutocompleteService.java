@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Singleton;
 
 import mongofx.js.api.DB;
+import mongofx.js.api.JsIgnore;
 
 @Singleton
 public class AutocompleteService {
@@ -103,7 +104,7 @@ public class AutocompleteService {
 
     for (Method method : clazz.getDeclaredMethods()) {
       Class<?> returnType = method.getReturnType();
-      if (!Modifier.isPublic(method.getModifiers())) {
+      if (!Modifier.isPublic(method.getModifiers()) || method.getAnnotation(JsIgnore.class) != null) {
         continue;
       }
       fieldsInfo.put(method.getName(), new FieldDescription(method.getName(), returnType));

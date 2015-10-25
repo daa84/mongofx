@@ -45,6 +45,7 @@ public class FindResultIterable implements ObjectListPresentation {
     findQuery = null; // find all
   }
 
+  @JsIgnore
   @Override
   public Iterator<Document> iterator() {
     MongoCollection<Document> collection = getCollection();
@@ -52,6 +53,12 @@ public class FindResultIterable implements ObjectListPresentation {
       return collection.find(findQuery).iterator();
     }
     return collection.find().iterator();
+  }
+
+  @JsIgnore
+  @Override
+  public String getCollectionName() {
+    return collectionName;
   }
 
   private MongoCollection<Document> getCollection() {

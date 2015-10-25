@@ -112,7 +112,7 @@ public class UIBuilder {
     MainFrameController mainFrameController = (MainFrameController)loader.getController();
 
     primaryStage.setTitle("MongoFX");
-    primaryStage.setScene(createScene(root, 600, 400));
+    primaryStage.setScene(createScene(root, 800, 600));
     primaryStage.show();
     return mainFrameController;
   }

@@ -18,10 +18,13 @@
 //
 package mongofx.js.api;
 
-import org.bson.Document;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface ObjectListPresentation extends Iterable<Document> {
-
-  String getCollectionName();
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface JsIgnore {
 
 }

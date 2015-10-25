@@ -48,4 +48,9 @@ public class AggregateResultIterable implements ObjectListPresentation {
     return mongoDatabase.getMongoDb().getCollection(collectionName).aggregate(pipeline).iterator();
   }
 
+  @Override
+  public String getCollectionName() {
+    return collectionName;
+  }
+
 }

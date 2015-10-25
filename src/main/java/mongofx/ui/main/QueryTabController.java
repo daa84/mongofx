@@ -148,7 +148,7 @@ public class QueryTabController {
         .limit(Integer.parseInt(limitResult.getText()));
 
     if (viewAsTree.isSelected()) {
-      resultTreeController.buildTreeFromDocuments(resultStream);
+      resultTreeController.buildTreeFromDocuments(resultStream, objectListResult.getCollectionName());
       showTree();
     }
     else {
