@@ -38,8 +38,8 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import mongofx.settings.ConnectionSettings;
-import mongofx.settings.SettingsService;
+import mongofx.service.settings.ConnectionSettings;
+import mongofx.service.settings.SettingsService;
 import mongofx.ui.main.UIBuilder;
 
 public class SettingsListController {
@@ -50,7 +50,7 @@ public class SettingsListController {
   @Inject
   private UIBuilder uiBuilder;
 
-  private SimpleListProperty<ConnectionSettings> settingsList = new SimpleListProperty<>();
+  private final SimpleListProperty<ConnectionSettings> settingsList = new SimpleListProperty<>();
 
   @FXML
   private TableView<ConnectionSettings> settingsListTable;
@@ -64,12 +64,12 @@ public class SettingsListController {
     return this.settingsList;
   }
 
-  public final javafx.collections.ObservableList<mongofx.settings.ConnectionSettings> getSettingsList() {
+  public final javafx.collections.ObservableList<mongofx.service.settings.ConnectionSettings> getSettingsList() {
     return this.settingsListProperty().get();
   }
 
   public final void setSettingsList(
-      final javafx.collections.ObservableList<mongofx.settings.ConnectionSettings> settingsList) {
+      final javafx.collections.ObservableList<mongofx.service.settings.ConnectionSettings> settingsList) {
     this.settingsListProperty().set(settingsList);
   }
 
@@ -142,6 +142,9 @@ public class SettingsListController {
   }
 
   public ConnectionSettings getSelected() {
+    if (isEditSettingsPage()) {
+      return connectionSettingsController.getSettings();
+    }
     return settingsListTable.getSelectionModel().getSelectedItem();
   }
 
@@ -153,12 +156,16 @@ public class SettingsListController {
   public void load() {
     initialize();
     dialog.getDialogPane().setContent(settingsListContent);
-    changeConnectButton("Save");
+    changeConnectButton("Connect");
   }
 
   public void saveIfSettingsChanged() throws IOException {
-    if (dialog.getDialogPane().getContent() != settingsListContent) {
+    if (isEditSettingsPage()) {
       connectionSettingsController.save();
     }
+  }
+
+  private boolean isEditSettingsPage() {
+    return dialog.getDialogPane().getContent() != settingsListContent;
   }
 }

@@ -35,7 +35,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
 import mongofx.service.MongoService;
-import mongofx.settings.ConnectionSettings;
+import mongofx.service.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
 import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
 import mongofx.ui.dbtree.TreeController;

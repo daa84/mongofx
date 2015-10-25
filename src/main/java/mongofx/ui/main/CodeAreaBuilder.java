@@ -180,7 +180,7 @@ public class CodeAreaBuilder {
 
   private static void charRight(CodeArea codeArea, String ch) {
     IndexRange selection = codeArea.getSelection();
-    codeArea.insertText(selection.getStart(), ch);
+    codeArea.replaceSelection(ch);
     codeArea.selectRange(selection.getStart(), selection.getStart());
   }
 

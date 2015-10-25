@@ -25,8 +25,8 @@ import com.google.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import mongofx.settings.ConnectionSettings;
-import mongofx.settings.SettingsService;
+import mongofx.service.settings.ConnectionSettings;
+import mongofx.service.settings.SettingsService;
 
 public class ConnectionSettingsController {
   @Inject
@@ -83,6 +83,10 @@ public class ConnectionSettingsController {
 
   public void setEditMode(EditMode editMode) {
     this.editMode = editMode;
+  }
+
+  public ConnectionSettings getSettings() {
+    return settings;
   }
 
 }

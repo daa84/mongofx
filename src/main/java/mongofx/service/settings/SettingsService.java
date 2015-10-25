@@ -16,7 +16,7 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.settings;
+package mongofx.service.settings;
 
 import java.io.File;
 import java.io.IOException;

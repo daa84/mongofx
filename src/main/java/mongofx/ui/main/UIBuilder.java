@@ -29,9 +29,11 @@ import org.fxmisc.richtext.CodeArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -40,7 +42,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import mongofx.settings.ConnectionSettings;
+import mongofx.service.PropertiesService;
+import mongofx.service.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
 import mongofx.ui.settings.ConnectionSettingsController;
 import mongofx.ui.settings.EditMode;
@@ -49,6 +52,9 @@ import mongofx.ui.settings.SettingsListController;
 @Singleton
 public class UIBuilder {
   private static final Logger log = LoggerFactory.getLogger(UIBuilder.class);
+
+  @Inject
+  private PropertiesService properteisService;
 
   private Injector injector;
   private Stage primaryStage;
@@ -111,7 +117,7 @@ public class UIBuilder {
     BorderPane root = load(url, loader);
     MainFrameController mainFrameController = (MainFrameController)loader.getController();
 
-    primaryStage.setTitle("MongoFX");
+    primaryStage.setTitle("MongoFX " + properteisService.getVersion());
     primaryStage.setScene(createScene(root, 800, 600));
     primaryStage.show();
     return mainFrameController;
@@ -165,8 +171,9 @@ public class UIBuilder {
 
     final CodeArea codeArea = new CodeArea();
     codeArea.setPrefSize(500, 400);
-    dialog.getDialogPane().setContent(codeArea);
     new CodeAreaBuilder(codeArea, primaryStage).setup().setText(formatedJson);
+    dialog.getDialogPane().setContent(codeArea);
+    Platform.runLater(() -> codeArea.requestFocus());
 
     dialog.setResultConverter(bt -> {
       if (ButtonData.OK_DONE == bt.getButtonData()) {

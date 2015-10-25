@@ -27,7 +27,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 import mongofx.service.Executor;
 import mongofx.service.MongoService;
-import mongofx.settings.SettingsService;
+import mongofx.service.settings.SettingsService;
 import mongofx.ui.main.MainFrameController;
 import mongofx.ui.main.UIBuilder;
 

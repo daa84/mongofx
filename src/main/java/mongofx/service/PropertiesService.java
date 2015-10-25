@@ -16,29 +16,32 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.settings;
+package mongofx.service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.util.Properties;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class Settings {
-  private List<ConnectionSettings> connections;
+import com.google.inject.Singleton;
 
-  public List<ConnectionSettings> getConnections() {
-    if (connections == null) {
-      connections = new ArrayList<>();
+@Singleton
+public class PropertiesService {
+  private static final Logger log = LoggerFactory.getLogger(PropertiesService.class);
+
+  private static Properties properties = new Properties();
+
+  static {
+    try {
+      properties.load(PropertiesService.class.getResourceAsStream("/app.properties"));
     }
-    return connections;
+    catch (IOException e) {
+      log.error("IOException:",e);
+    }
   }
 
-  public void setConnections(List<ConnectionSettings> connections) {
-    this.connections = connections;
-  }
-
-  @JsonIgnore
-  public boolean isEmpty() {
-    return connections == null || connections.isEmpty();
+  public String getVersion() {
+    return properties.getProperty("mongofx.version");
   }
 }

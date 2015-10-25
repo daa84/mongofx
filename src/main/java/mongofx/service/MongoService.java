@@ -22,7 +22,7 @@ import com.google.inject.Singleton;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
-import mongofx.settings.ConnectionSettings;
+import mongofx.service.settings.ConnectionSettings;
 
 @Singleton
 public class MongoService {
