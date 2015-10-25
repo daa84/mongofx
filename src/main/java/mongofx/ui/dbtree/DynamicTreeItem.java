@@ -45,6 +45,8 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
   private final ProgressIndicator progress;
   private Node graphic;
 
+  private LoadTask currentLoadTask;
+
   public DynamicTreeItem(DbTreeValue value, Node graphic, Executor executor,
       Function<DbTreeValue, List<TreeItem<DbTreeValue>>> supplier) {
     super(value, graphic);
@@ -53,6 +55,12 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
 
     progress = new ProgressIndicator();
     progress.setPrefSize(15, 15);
+
+    parentProperty().addListener(e -> {
+      if (getParent() == null && currentLoadTask != null) {
+        currentLoadTask.cancel(true);
+      }
+    });
   }
 
   public void setOnFiled(Runnable onFiled) {
@@ -80,7 +88,11 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
     loaded = true;
     graphic = getGraphic();
     setGraphic(progress);
-    executor.execute(new LoadTask(children));
+    if (currentLoadTask != null) {
+      currentLoadTask.cancel(true);
+    }
+    currentLoadTask = new LoadTask(children);
+    executor.execute(currentLoadTask);
   }
 
   public void reload() {
@@ -106,6 +118,7 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
     protected void done() {
       //FIXME: does not work on empty result
       setGraphic(graphic);
+      currentLoadTask = null;
     }
 
     @Override
