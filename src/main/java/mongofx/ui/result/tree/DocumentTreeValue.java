@@ -84,4 +84,11 @@ public class DocumentTreeValue {
   public Object getValue() {
     return value;
   }
+
+  public String getTypeDescription() {
+    if (value != null) {
+      return value.getClass().getSimpleName();
+    }
+    return null;
+  }
 }

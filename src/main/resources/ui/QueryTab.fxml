@@ -72,6 +72,12 @@
 											property="displayValue" />
 									</cellValueFactory>
 								</TreeTableColumn>
+								<TreeTableColumn text="Type" prefWidth="150">
+									<cellValueFactory>
+										<TreeItemPropertyValueFactory
+											property="typeDescription" />
+									</cellValueFactory>
+								</TreeTableColumn>
 							</columns>
 						</TreeTableView>
 					</children>
