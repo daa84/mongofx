@@ -5,3 +5,5 @@ settings.json
 .project
 .classpath
 /.settings/
+MongoUI.iml
+/.idea/
