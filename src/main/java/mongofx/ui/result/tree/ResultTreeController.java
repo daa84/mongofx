@@ -18,30 +18,28 @@
 //
 package mongofx.ui.result.tree;
 
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.result.UpdateResult;
+import javafx.event.ActionEvent;
+import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import mongofx.service.MongoDatabase;
+import mongofx.ui.main.DocumentUtils;
+import mongofx.ui.main.UIBuilder;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.result.UpdateResult;
-
-import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.TreeTableView;
-import mongofx.service.MongoDatabase;
-import mongofx.ui.main.DocumentUtils;
-import mongofx.ui.main.UIBuilder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ResultTreeController {
   private static final Logger log = LoggerFactory.getLogger(ResultTreeController.class);
@@ -50,14 +48,39 @@ public class ResultTreeController {
   private UIBuilder uiBuilder;
 
   private TreeTableView<DocumentTreeValue> queryResultTree;
-  private final ContextMenu editItemContextMenu;
+  private ContextMenu topLevelContextMenu;
 
   private MongoDatabase mongoDatabase;
+  private ContextMenu childContextMenu;
 
   public ResultTreeController() {
+    buildTopLevelContextMenu();
+    buildChildContextMenu();
+  }
+
+  private void buildChildContextMenu() {
+    MenuItem copyValue = new MenuItem("Copy value");
+    copyValue.setOnAction(this::copyValue);
     MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
-    editItemContextMenu = new ContextMenu(editDocument);
+    childContextMenu = new ContextMenu(copyValue, editDocument);
+  }
+
+  private void copyValue(ActionEvent actionEvent) {
+    TreeItem<DocumentTreeValue> selectedItem = queryResultTree.getSelectionModel().getSelectedItem();
+    if (selectedItem == null) {
+      return;
+    }
+
+    ClipboardContent content = new ClipboardContent();
+    content.putString(String.valueOf(selectedItem.getValue()));
+    Clipboard.getSystemClipboard().setContent(content);
+  }
+
+  private void buildTopLevelContextMenu() {
+    MenuItem editDocument = new MenuItem("Edit document...");
+    editDocument.setOnAction(this::editSelected);
+    topLevelContextMenu = new ContextMenu(editDocument);
   }
 
   public void initialize(TreeTableView<DocumentTreeValue> queryResultTree, MongoDatabase mongoDatabase) {
@@ -77,7 +100,7 @@ public class ResultTreeController {
     Object value = i.getValue().getValue();
     if (value instanceof Document) {
       i.getChildren()
-      .addAll(((Document)value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
+      .addAll(((Document) value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
     }
   }
 
@@ -178,7 +201,11 @@ public class ResultTreeController {
       if (empty) {
         setContextMenu(null);
       } else {
-        setContextMenu(editItemContextMenu);
+        if (item.isTopLevel()) {
+          setContextMenu(topLevelContextMenu);
+        } else {
+          setContextMenu(childContextMenu);
+        }
       }
     }
   }
