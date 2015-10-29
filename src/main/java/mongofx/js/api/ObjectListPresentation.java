@@ -23,5 +23,4 @@ import org.bson.Document;
 public interface ObjectListPresentation extends Iterable<Document> {
 
   String getCollectionName();
-
 }

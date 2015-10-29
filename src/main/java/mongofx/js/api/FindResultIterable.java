@@ -18,14 +18,13 @@
 //
 package mongofx.js.api;
 
-import java.util.Iterator;
-
-import org.bson.Document;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
-
 import mongofx.service.MongoDatabase;
+import org.bson.Document;
+
+import java.util.Iterator;
+import java.util.function.Consumer;
 
 public class FindResultIterable implements ObjectListPresentation {
 
@@ -67,5 +66,10 @@ public class FindResultIterable implements ObjectListPresentation {
 
   public TextPresentation count() {
     return new SimpleTextPresentation(getCollection().count(findQuery));
+  }
+
+  @Override
+  public void forEach(Consumer<? super Document> action) {
+    iterator().forEachRemaining(action);
   }
 }
