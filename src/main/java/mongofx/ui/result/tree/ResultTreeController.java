@@ -55,7 +55,7 @@ public class ResultTreeController {
   private MongoDatabase mongoDatabase;
 
   public ResultTreeController() {
-    MenuItem editDocument = new MenuItem("Edit document");
+    MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
     editItemContextMenu = new ContextMenu(editDocument);
   }
@@ -111,11 +111,7 @@ public class ResultTreeController {
     if (selectedItem == null) {
       return;
     }
-    DocumentTreeValue value = selectedItem.getValue();
-    if (value.getCollectionName() == null) {
-      log.warn("Can't find collection name, maybe not root item?");
-      return;
-    }
+    DocumentTreeValue value = getTopLevelValue(selectedItem);
 
     Document oldDoc = value.getDocument();
     final Object id = oldDoc.get("_id");
@@ -129,6 +125,17 @@ public class ResultTreeController {
       Document doc = Document.parse(newJson);
       updateObject(value, doc, id);
     });
+  }
+
+  private DocumentTreeValue getTopLevelValue(TreeItem<DocumentTreeValue> selectedItem) {
+    while(selectedItem != null) {
+      DocumentTreeValue value = selectedItem.getValue();
+      if (value.isTopLevel()) {
+        return value;
+      }
+      selectedItem = selectedItem.getParent();
+    }
+    return null;
   }
 
   private void updateObject(DocumentTreeValue value, Document doc, Object id) {

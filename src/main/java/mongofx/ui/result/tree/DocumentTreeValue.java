@@ -68,7 +68,7 @@ public class DocumentTreeValue {
   }
 
   public String getKey() {
-    if (key == null && value instanceof Document) {
+    if (isTopLevel() && value instanceof Document) {
       Object id = ((Document)value).get("_id");
       if (id != null) {
         if (id instanceof ObjectId) {
@@ -76,7 +76,7 @@ public class DocumentTreeValue {
         }
         return id.toString();
       }
-      return "id not found";
+      return "";
     }
     return key;
   }
@@ -90,5 +90,9 @@ public class DocumentTreeValue {
       return value.getClass().getSimpleName();
     }
     return null;
+  }
+
+  public boolean isTopLevel() {
+    return key == null;
   }
 }
