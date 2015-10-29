@@ -25,6 +25,7 @@ import java.util.stream.StreamSupport;
 
 import javax.script.ScriptException;
 
+import javafx.scene.Node;
 import org.bson.Document;
 import org.fxmisc.richtext.CodeArea;
 import org.reactfx.EventStreams;
@@ -61,7 +62,9 @@ public class QueryTabController {
   private TreeTableView<DocumentTreeValue> queryResultTree;
 
   @FXML
-  private CodeArea queryResultText;
+  private EditorController queryResultTextController;
+  @FXML
+  private Node queryResultText;
 
   private MongoDatabase mongoDatabase;
 
@@ -87,7 +90,6 @@ public class QueryTabController {
 
   @FXML
   protected void initialize() {
-    new CodeAreaBuilder(queryResultText, uiBuilder.getPrimaryStage()).setup();
     EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
@@ -139,7 +141,7 @@ public class QueryTabController {
 
   private void showOnlyText(String text) {
     setViewModeVisible(false);
-    queryResultText.replaceText(text);
+    queryResultTextController.replaceText(text);
     showText();
   }
 
@@ -152,8 +154,8 @@ public class QueryTabController {
       showTree();
     }
     else {
-      queryResultText.replaceText(String.valueOf(buildTextFromList(resultStream)));
-      queryResultText.selectRange(0, 0);
+      queryResultTextController.replaceText(String.valueOf(buildTextFromList(resultStream)));
+      queryResultTextController.selectRange(0, 0);
       showText();
     }
   }
@@ -165,7 +167,7 @@ public class QueryTabController {
 
   private void showTree() {
     resultTreeController.show();
-    queryResultText.clear();
+    queryResultTextController.clear();
     queryResultText.setVisible(false);
   }
 

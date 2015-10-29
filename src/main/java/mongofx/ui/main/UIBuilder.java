@@ -115,7 +115,7 @@ public class UIBuilder {
     URL url = getClass().getResource("/ui/MainFrame.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
-    MainFrameController mainFrameController = (MainFrameController)loader.getController();
+    MainFrameController mainFrameController = loader.getController();
 
     primaryStage.setTitle("MongoFX " + properteisService.getVersion());
     primaryStage.setScene(createScene(root, 800, 600));
@@ -153,7 +153,7 @@ public class UIBuilder {
     URL url = getClass().getResource("/ui/QueryTab.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
-    QueryTabController controller = (QueryTabController)loader.getController();
+    QueryTabController controller = loader.getController();
     controller.setDb(dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
     return new SimpleEntry<>(root, controller);
   }
@@ -169,11 +169,7 @@ public class UIBuilder {
     dialog.setResizable(true);
     dialog.getDialogPane().getStylesheets().add(getClass().getResource("/ui/editor.css").toExternalForm());
 
-    final CodeArea codeArea = new CodeArea();
-    codeArea.setPrefSize(500, 400);
-    new CodeAreaBuilder(codeArea, primaryStage).setup().setText(formatedJson);
-    dialog.getDialogPane().setContent(codeArea);
-    Platform.runLater(() -> codeArea.requestFocus());
+    CodeArea codeArea = setupEditorArea(formatedJson, dialog);
 
     dialog.setResultConverter(bt -> {
       if (ButtonData.OK_DONE == bt.getButtonData()) {
@@ -182,5 +178,20 @@ public class UIBuilder {
       return null;
     });
     return dialog.showAndWait();
+  }
+
+  private CodeArea setupEditorArea(String formatedJson, Dialog<String> dialog) {
+    URL url = getClass().getResource("/ui/Editor.fxml");
+    final FXMLLoader loader = createLoader(url);
+    BorderPane root = load(url, loader);
+    EditorController editorController = loader.getController();
+    CodeArea codeArea = editorController.getCodeArea();
+    codeArea.setPrefSize(500, 400);
+    codeArea.replaceText(formatedJson);
+    codeArea.getUndoManager().forgetHistory();
+
+    dialog.getDialogPane().setContent(root);
+    Platform.runLater(() -> codeArea.requestFocus());
+    return codeArea;
   }
 }

@@ -53,7 +53,7 @@
 			<center>
 				<StackPane>
 					<children>
-						<CodeArea fx:id="queryResultText" visible="false" editable="false"/>
+						<fx:include fx:id="queryResultText" source="Editor.fxml" visible="false"/>
 						<TreeTableView fx:id="queryResultTree" showRoot="false">
 							<columnResizePolicy>
 								<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

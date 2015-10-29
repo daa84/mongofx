@@ -155,10 +155,6 @@ public class TreeController {
     dbContextMenu = new ContextMenu(createCollection, dropCollection);
   }
 
-  public void createDB(String dbName) {
-
-  }
-
   public void onCreateNewDb(ActionEvent ev) {
     TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
     if (selectedItem == null) {
