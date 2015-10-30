@@ -25,7 +25,6 @@ import java.util.stream.StreamSupport;
 
 import javax.script.ScriptException;
 
-import javafx.scene.Node;
 import org.bson.Document;
 import org.fxmisc.richtext.CodeArea;
 import org.reactfx.EventStreams;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -99,6 +99,8 @@ public class QueryTabController {
     .setText("db.getCollection('" + collectionName + "').find({})");
 
     resultTreeController.initialize(queryResultTree, mongoDatabase);
+
+    queryResultTextController.disableEdit();
   }
 
   @FXML
