@@ -125,11 +125,11 @@ public class CodeAreaBuilder {
             popup.hide();
           }
           else {
-            if (updateSuggestion(service, popup, listView)) {
-              popup.show(primaryStage);
-            }
+            showPopup(service, popup, listView);
           }
-        });
+        }) //
+        .on(EventPattern.keyPressed(KeyCode.PERIOD)).act(ae -> showPopup(service, popup, listView));
+
     codeArea.textProperty().addListener(text -> {
       if (popup.isShowing()) {
         updateSuggestion(service, popup, listView);
@@ -137,6 +137,12 @@ public class CodeAreaBuilder {
     });
     EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
     return this;
+  }
+
+  private void showPopup(AutocompleteService service, Popup popup, ListView<Suggest> listView) {
+    if (!popup.isShowing() && updateSuggestion(service, popup, listView)) {
+      popup.show(primaryStage);
+    }
   }
 
   private boolean updateSuggestion(AutocompleteService service, Popup popup, ListView<Suggest> listView) {

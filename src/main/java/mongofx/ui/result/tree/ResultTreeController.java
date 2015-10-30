@@ -61,9 +61,11 @@ public class ResultTreeController {
   private void buildChildContextMenu() {
     MenuItem copyValue = new MenuItem("Copy value");
     copyValue.setOnAction(this::copyValue);
+    MenuItem copyJson = new MenuItem("Copy JSON");
+    copyJson.setOnAction(this::copyJson);
     MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
-    childContextMenu = new ContextMenu(copyValue, editDocument);
+    childContextMenu = new ContextMenu(editDocument, copyJson, copyValue);
   }
 
   private void copyValue(ActionEvent actionEvent) {
@@ -72,15 +74,36 @@ public class ResultTreeController {
       return;
     }
 
+    setToClipboard(selectedItem.getValue());
+  }
+
+  private void setToClipboard(Object value) {
     ClipboardContent content = new ClipboardContent();
-    content.putString(String.valueOf(selectedItem.getValue()));
+    content.putString(String.valueOf(value));
     Clipboard.getSystemClipboard().setContent(content);
   }
 
   private void buildTopLevelContextMenu() {
     MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
-    topLevelContextMenu = new ContextMenu(editDocument);
+    MenuItem copyJson = new MenuItem("Copy JSON");
+    copyJson.setOnAction(this::copyJson);
+    topLevelContextMenu = new ContextMenu(editDocument, copyJson);
+  }
+
+  private void copyJson(ActionEvent actionEvent) {
+    TreeItem<DocumentTreeValue> selectedItem = queryResultTree.getSelectionModel().getSelectedItem();
+    if (selectedItem == null) {
+      return;
+    }
+
+    DocumentTreeValue value = selectedItem.getValue();
+    if (value.getValue() instanceof Document) {
+      setToClipboard(DocumentUtils.formatJson((Document) value.getValue()));
+    }
+    else {
+      setToClipboard(String.format("{\"%s\": \"%s\"}", value.getKey(), value.getValue()));
+    }
   }
 
   public void initialize(TreeTableView<DocumentTreeValue> queryResultTree, MongoDatabase mongoDatabase) {
