@@ -20,9 +20,10 @@ package mongofx.ui.dbtree;
 
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
+import mongofx.service.MongoService.MongoDbConnection;
 
 public class DbTreeValue {
-  private MongoConnection dbConnect;
+  private MongoDbConnection dbConnect;
   private MongoDatabase mongoDatabase;
   private final String displayValue;
   private Integer count;
@@ -49,7 +50,7 @@ public class DbTreeValue {
     valueType = type;
   }
 
-  public DbTreeValue(MongoConnection dbConnect, String displayValue) {
+  public DbTreeValue(MongoDbConnection dbConnect, String displayValue) {
     super();
     this.dbConnect = dbConnect;
     this.displayValue = displayValue;
@@ -60,8 +61,12 @@ public class DbTreeValue {
     return mongoDatabase;
   }
 
-  public MongoConnection getDbConnect() {
+  public MongoDbConnection getHostConnect() {
     return dbConnect;
+  }
+
+  public MongoConnection getMongoConnection() {
+    return dbConnect.getMongoConnection();
   }
 
   public String getDisplayValue() {

@@ -166,7 +166,7 @@ public class TreeController {
     dialog.setHeaderText("Create new db");
     dialog.showAndWait().ifPresent(r -> {
       treeView.getRoot().getChildren()
-      .add(createDbItem(selectedItem.getValue().getDbConnect().createMongoDB(dialog.getResult())));
+      .add(createDbItem(selectedItem.getValue().getMongoConnection().createMongoDB(dialog.getResult())));
     });
   }
 
@@ -176,7 +176,7 @@ public class TreeController {
       return;
     }
 
-    selectedItem.getValue().getDbConnect().close();
+    selectedItem.getValue().getMongoConnection().close();
     removeFromRoot(selectedItem);
   }
 
@@ -244,9 +244,9 @@ public class TreeController {
 
   public void addDbConnect(MongoDbConnection mongoDbConnection) {
     DbTreeValue connectTreeValue =
-        new DbTreeValue(mongoDbConnection.getMongoConnection(), mongoDbConnection.getConnectionSettings().getHost());
+        new DbTreeValue(mongoDbConnection, mongoDbConnection.getConnectionSettings().getHost());
     DynamicTreeItem item = new DynamicTreeItem(connectTreeValue, new FontAwesomeIconView(FontAwesomeIcon.SERVER),
-        executor, tv -> buildDbList(tv.getDbConnect()));
+        executor, tv -> buildDbList(tv.getHostConnect().getMongoConnection()));
     item.setOnFiled(() -> removeFromRoot(item));
     item.setExpanded(true);
     treeView.getRoot().getChildren().add(item);

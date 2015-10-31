@@ -81,12 +81,22 @@ public class MainFrameController {
     if (selectedItem != null) {
       DbTreeValue value = selectedItem.getValue();
       if (value.getValueType() == TreeValueType.COLLECTION) {
-        Entry<Node, QueryTabController> tabEntry = uiBuilder.buildQueryNode(value);
+        TreeItem<DbTreeValue> dbItem = findParentNode(selectedItem, TreeValueType.CONNECTION);
+        Entry<Node, QueryTabController> tabEntry = uiBuilder.buildQueryNode(dbItem.getValue().getHostConnect(), value);
         tabData.put(tabEntry.getKey(), tabEntry.getValue());
         queryTabs.getTabs().add(new Tab(value.getDisplayValue(), tabEntry.getKey()));
         queryTabs.getSelectionModel().selectLast();
         tabEntry.getValue().startTab();
       }
+    }
+  }
+
+  private TreeItem<DbTreeValue> findParentNode(TreeItem<DbTreeValue> item, TreeValueType type) {
+    while(true) {
+      if (item.getValue().getValueType() == type) {
+        return item;
+      }
+      item = item.getParent();
     }
   }
 

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
@@ -45,6 +46,7 @@ import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
 import mongofx.service.AutocompleteService;
 import mongofx.service.MongoDatabase;
+import mongofx.service.MongoService.MongoDbConnection;
 import mongofx.ui.result.tree.DocumentTreeValue;
 import mongofx.ui.result.tree.ResultTreeController;
 
@@ -88,12 +90,15 @@ public class QueryTabController {
   @Inject
   private ResultTreeController resultTreeController;
 
+  private final SimpleStringProperty connectedServerName = new SimpleStringProperty();
+  private final SimpleStringProperty connectedDBName = new SimpleStringProperty();
+
   @FXML
   protected void initialize() {
     EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
-  public void setDb(MongoDatabase mongoDatabase, String collectionName) {
+  public void setDb(MongoDbConnection mongoDbConnection, MongoDatabase mongoDatabase, String collectionName) {
     this.mongoDatabase = mongoDatabase;
     new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService)
     .setText("db.getCollection('" + collectionName + "').find({})");
@@ -101,6 +106,9 @@ public class QueryTabController {
     resultTreeController.initialize(queryResultTree, mongoDatabase);
 
     queryResultTextController.disableEdit();
+
+    setConnectedServerName(mongoDbConnection.getConnectionSettings().getHost());
+    setConnectedDBName(mongoDatabase.getName());
   }
 
   @FXML
@@ -192,4 +200,29 @@ public class QueryTabController {
     codeArea.requestFocus();
     executeScript();
   }
+
+  public SimpleStringProperty connectedServerNameProperty() {
+    return this.connectedServerName;
+  }
+
+  public String getConnectedServerName() {
+    return this.connectedServerNameProperty().get();
+  }
+
+  public void setConnectedServerName(final String connectedServerName) {
+    this.connectedServerNameProperty().set(connectedServerName);
+  }
+
+  public SimpleStringProperty connectedDBNameProperty() {
+    return this.connectedDBName;
+  }
+
+  public String getConnectedDBName() {
+    return this.connectedDBNameProperty().get();
+  }
+
+  public void setConnectedDBName(final String connectedDBName) {
+    this.connectedDBNameProperty().set(connectedDBName);
+  }
+
 }

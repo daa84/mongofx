@@ -43,6 +43,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import mongofx.service.MongoService.MongoDbConnection;
 import mongofx.service.PropertiesService;
 import mongofx.service.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
@@ -150,12 +151,12 @@ public class UIBuilder {
     return loader;
   }
 
-  public Entry<Node, QueryTabController> buildQueryNode(DbTreeValue dbTreeValue) {
+  public Entry<Node, QueryTabController> buildQueryNode(MongoDbConnection mongoConnection, DbTreeValue dbTreeValue) {
     URL url = getClass().getResource("/ui/QueryTab.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
     QueryTabController controller = loader.getController();
-    controller.setDb(dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
+    controller.setDb(mongoConnection, dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
     return new SimpleEntry<>(root, controller);
   }
 

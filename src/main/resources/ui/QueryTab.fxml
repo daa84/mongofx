@@ -13,15 +13,32 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.geometry.Insets?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="mongofx.ui.main.QueryTabController">
 	<top>
-		<CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased"></CodeArea>
-	</top>
-	<center>
 		<BorderPane>
 			<top>
+				<HBox alignment="CENTER_LEFT" spacing="10" prefHeight="25">
+					<children>
+					<Label text="${controller.connectedServerName}">
+						<graphic>
+							<FontAwesomeIconView glyphName="SERVER" />
+						</graphic>
+					</Label>
+					<Label text="${controller.connectedDBName}">
+						<graphic>
+							<FontAwesomeIconView glyphName="DATABASE" />
+						</graphic>
+					</Label>
+					</children>
+				</HBox>
+			</top>
+			<center>
+				<CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased" />
+			</center>
+			<bottom>
 				<HBox alignment="CENTER_RIGHT">
 					<children>
 						<Label text="Limit:" />
@@ -49,41 +66,42 @@
 						</ToggleButton>
 					</children>
 				</HBox>
-			</top>
-			<center>
-				<StackPane>
-					<children>
-						<fx:include fx:id="queryResultText" source="Editor.fxml" visible="false"/>
-						<TreeTableView fx:id="queryResultTree" showRoot="false">
-							<columnResizePolicy>
-								<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-							</columnResizePolicy>
-							<columns>
-								<TreeTableColumn text="Key" prefWidth="10"
-									minWidth="5">
-									<cellValueFactory>
-										<TreeItemPropertyValueFactory
-											property="key" />
-									</cellValueFactory>
-								</TreeTableColumn>
-								<TreeTableColumn text="Value" prefWidth="150">
-									<cellValueFactory>
-										<TreeItemPropertyValueFactory
-											property="displayValue" />
-									</cellValueFactory>
-								</TreeTableColumn>
-								<TreeTableColumn text="Type" prefWidth="150">
-									<cellValueFactory>
-										<TreeItemPropertyValueFactory
-											property="typeDescription" />
-									</cellValueFactory>
-								</TreeTableColumn>
-							</columns>
-						</TreeTableView>
-					</children>
-				</StackPane>
-			</center>
+			</bottom>
 		</BorderPane>
+	</top>
+	<center>
+		<StackPane>
+			<children>
+				<fx:include fx:id="queryResultText" source="Editor.fxml"
+					visible="false" />
+				<TreeTableView fx:id="queryResultTree" showRoot="false">
+					<columnResizePolicy>
+						<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+					</columnResizePolicy>
+					<columns>
+						<TreeTableColumn text="Key" prefWidth="10"
+							minWidth="5">
+							<cellValueFactory>
+								<TreeItemPropertyValueFactory
+									property="key" />
+							</cellValueFactory>
+						</TreeTableColumn>
+						<TreeTableColumn text="Value" prefWidth="150">
+							<cellValueFactory>
+								<TreeItemPropertyValueFactory
+									property="displayValue" />
+							</cellValueFactory>
+						</TreeTableColumn>
+						<TreeTableColumn text="Type" prefWidth="150">
+							<cellValueFactory>
+								<TreeItemPropertyValueFactory
+									property="typeDescription" />
+							</cellValueFactory>
+						</TreeTableColumn>
+					</columns>
+				</TreeTableView>
+			</children>
+		</StackPane>
 	</center>
 </BorderPane>
 
