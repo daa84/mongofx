@@ -18,28 +18,32 @@
 //
 package mongofx.ui.result.tree;
 
-import com.google.inject.Inject;
-import com.mongodb.BasicDBObject;
-import com.mongodb.client.result.UpdateResult;
-import javafx.event.ActionEvent;
-import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
-import mongofx.service.MongoDatabase;
-import mongofx.ui.main.DocumentUtils;
-import mongofx.ui.main.UIBuilder;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.google.inject.Inject;
+import com.mongodb.BasicDBObject;
+import com.mongodb.client.result.UpdateResult;
+
+import javafx.event.ActionEvent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.TreeTableView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import mongofx.service.MongoDatabase;
+import mongofx.ui.main.DocumentUtils;
+import mongofx.ui.main.UIBuilder;
 
 public class ResultTreeController {
   private static final Logger log = LoggerFactory.getLogger(ResultTreeController.class);

@@ -19,6 +19,7 @@
 package mongofx.ui.main;
 
 import java.util.Optional;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
+import com.mongodb.client.MongoCursor;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -156,17 +158,20 @@ public class QueryTabController {
   }
 
   private void updateResultListView() {
-    Stream<Document> resultStream = StreamSupport.stream(objectListResult.spliterator(), false)//
-        .limit(Integer.parseInt(limitResult.getText()));
+    //TODO: cache results
+    try(MongoCursor<Document> iterator = objectListResult.iterator()) {
+      Stream<Document> resultStream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)//
+          .limit(Integer.parseInt(limitResult.getText()));
 
-    if (viewAsTree.isSelected()) {
-      resultTreeController.buildTreeFromDocuments(resultStream, objectListResult.getCollectionName());
-      showTree();
-    }
-    else {
-      queryResultTextController.replaceText(String.valueOf(buildTextFromList(resultStream)));
-      queryResultTextController.selectRange(0, 0);
-      showText();
+      if (viewAsTree.isSelected()) {
+        resultTreeController.buildTreeFromDocuments(resultStream, objectListResult.getCollectionName());
+        showTree();
+      }
+      else {
+        queryResultTextController.replaceText(String.valueOf(buildTextFromList(resultStream)));
+        queryResultTextController.selectRange(0, 0);
+        showText();
+      }
     }
   }
 

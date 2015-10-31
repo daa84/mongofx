@@ -18,12 +18,12 @@
 //
 package mongofx.js.api;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.bson.Document;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.MongoCursor;
 
 import mongofx.service.MongoDatabase;
 
@@ -44,7 +44,7 @@ public class AggregateResultIterable implements ObjectListPresentation {
   }
 
   @Override
-  public Iterator<Document> iterator() {
+  public MongoCursor<Document> iterator() {
     return mongoDatabase.getMongoDb().getCollection(collectionName).aggregate(pipeline).iterator();
   }
 

@@ -31,10 +31,14 @@ import java.util.stream.Collectors;
 
 import javax.script.Bindings;
 
+import org.bson.BsonDocument;
 import org.bson.Document;
 
 import com.google.common.base.Preconditions;
 import com.mongodb.BasicDBObject;
+import com.mongodb.ServerAddress;
+import com.mongodb.ServerCursor;
+import com.mongodb.client.MongoCursor;
 
 public class JsApiUtils {
 
@@ -55,8 +59,8 @@ public class JsApiUtils {
     return new ObjectListPresentation() {
 
       @Override
-      public Iterator<Document> iterator() {
-        return list.iterator();
+      public MongoCursor<Document> iterator() {
+        return new SimpleIteratorMongoCursor(list.iterator());
       }
 
       @Override
@@ -70,8 +74,8 @@ public class JsApiUtils {
     return new ObjectListPresentation() {
 
       @Override
-      public Iterator<Document> iterator() {
-        return iterable.iterator();
+      public MongoCursor<Document> iterator() {
+        return new SimpleIteratorMongoCursor(iterable.iterator());
       }
 
       @Override
@@ -110,5 +114,47 @@ public class JsApiUtils {
       }
     }
     return buildedOptions;
+  }
+
+  public static Document convertBsonToDocument(BsonDocument in) {
+    return Document.parse(in.toJson());
+  }
+
+  public static class SimpleIteratorMongoCursor implements MongoCursor<Document> {
+    private final Iterator<Document> iter;
+
+    public SimpleIteratorMongoCursor(Iterator<Document> iter) {
+      this.iter = iter;
+    }
+
+    @Override
+    public void close() {
+    }
+
+    @Override
+    public boolean hasNext() {
+      return iter.hasNext();
+    }
+
+    @Override
+    public Document next() {
+      return iter.next();
+    }
+
+    @Override
+    public Document tryNext() {
+      return iter.hasNext() ? iter.next() : null;
+    }
+
+    @Override
+    public ServerCursor getServerCursor() {
+      return null;
+    }
+
+    @Override
+    public ServerAddress getServerAddress() {
+      return null;
+    }
+
   }
 }

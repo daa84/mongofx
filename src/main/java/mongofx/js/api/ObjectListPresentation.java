@@ -20,7 +20,11 @@ package mongofx.js.api;
 
 import org.bson.Document;
 
-public interface ObjectListPresentation extends Iterable<Document> {
+import com.mongodb.client.MongoCursor;
+
+public interface ObjectListPresentation {
 
   String getCollectionName();
+
+  MongoCursor<Document> iterator();
 }
