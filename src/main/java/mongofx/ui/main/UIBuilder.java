@@ -41,6 +41,7 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import mongofx.service.PropertiesService;
 import mongofx.service.settings.ConnectionSettings;
@@ -190,7 +191,8 @@ public class UIBuilder {
     codeArea.replaceText(formatedJson);
     codeArea.getUndoManager().forgetHistory();
 
-    dialog.getDialogPane().setContent(root);
+    // stackpane is workaround https://github.com/TomasMikula/RichTextFX/issues/196
+    dialog.getDialogPane().setContent(new StackPane(root));
     Platform.runLater(() -> codeArea.requestFocus());
     return codeArea;
   }
