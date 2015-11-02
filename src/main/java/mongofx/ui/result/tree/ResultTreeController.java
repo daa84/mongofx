@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javafx.scene.control.*;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +33,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.result.UpdateResult;
 
 import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableRow;
-import javafx.scene.control.TreeTableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import mongofx.service.MongoDatabase;
@@ -69,7 +64,7 @@ public class ResultTreeController {
     copyJson.setOnAction(this::copyJson);
     MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
-    childContextMenu = new ContextMenu(editDocument, copyJson, copyValue);
+    childContextMenu = new ContextMenu(editDocument, new SeparatorMenuItem(), copyJson, copyValue);
   }
 
   private void copyValue(ActionEvent actionEvent) {
@@ -92,7 +87,33 @@ public class ResultTreeController {
     editDocument.setOnAction(this::editSelected);
     MenuItem copyJson = new MenuItem("Copy JSON");
     copyJson.setOnAction(this::copyJson);
-    topLevelContextMenu = new ContextMenu(editDocument, copyJson);
+    MenuItem deleteDocument = new MenuItem("Delete document...");
+    deleteDocument.setOnAction(this::deleteDocument);
+    topLevelContextMenu = new ContextMenu(editDocument, new SeparatorMenuItem(), copyJson, new SeparatorMenuItem(), deleteDocument);
+  }
+
+  private void deleteDocument(ActionEvent actionEvent) {
+    TreeItem<DocumentTreeValue> selectedItem = queryResultTree.getSelectionModel().getSelectedItem();
+    if (selectedItem == null) {
+      return;
+    }
+
+    DocumentTreeValue topLevelValue = getTopLevelValue(selectedItem);
+    final Object id = topLevelValue.getDocument().get("_id");
+    if (id == null) {
+      log.error("No _id found for updated object");
+      return;
+    }
+
+    Alert alert = new Alert(AlertType.CONFIRMATION);
+    alert.setHeaderText("Do you want to delete selected document?");
+    alert.setContentText(id.toString());
+    alert.showAndWait().ifPresent(sb -> {
+      if (sb == ButtonType.OK) {
+        mongoDatabase.getMongoDb().getCollection(topLevelValue.getCollectionName()).deleteOne(new BasicDBObject("_id", id));
+        queryResultTree.getRoot().getChildren().remove(topLevelValue);
+      }
+    });
   }
 
   private void copyJson(ActionEvent actionEvent) {

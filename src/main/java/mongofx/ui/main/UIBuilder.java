@@ -164,14 +164,14 @@ public class UIBuilder {
     return primaryStage;
   }
 
-  public Optional<String> editDocument(String formatedJson) {
+  public Optional<String> editDocument(String formattedJson) {
     Dialog<String> dialog = new Dialog<>();
     dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
     dialog.setTitle("MongoFX - edit document");
     dialog.setResizable(true);
     dialog.getDialogPane().getStylesheets().add(getClass().getResource("/ui/editor.css").toExternalForm());
 
-    CodeArea codeArea = setupEditorArea(formatedJson, dialog);
+    CodeArea codeArea = setupEditorArea(formattedJson, dialog);
 
     dialog.setResultConverter(bt -> {
       if (ButtonData.OK_DONE == bt.getButtonData()) {
@@ -182,14 +182,14 @@ public class UIBuilder {
     return dialog.showAndWait();
   }
 
-  private CodeArea setupEditorArea(String formatedJson, Dialog<String> dialog) {
+  private CodeArea setupEditorArea(String formattedJson, Dialog<String> dialog) {
     URL url = getClass().getResource("/ui/Editor.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
     EditorController editorController = loader.getController();
     CodeArea codeArea = editorController.getCodeArea();
     codeArea.setPrefSize(500, 400);
-    codeArea.replaceText(formatedJson);
+    codeArea.replaceText(formattedJson);
     codeArea.getUndoManager().forgetHistory();
 
     // stackpane is workaround https://github.com/TomasMikula/RichTextFX/issues/196

@@ -157,17 +157,15 @@ public class TreeController {
 
   public void onCreateNewDb(ActionEvent ev) {
     TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
-    if (selectedItem == null) {
+    if (selectedItem == null || selectedItem.getValue().getValueType() != TreeValueType.CONNECTION) {
       return;
     }
 
     TextInputDialog dialog = new TextInputDialog();
     dialog.setContentText("Enter Name:");
     dialog.setHeaderText("Create new db");
-    dialog.showAndWait().ifPresent(r -> {
-      treeView.getRoot().getChildren()
-      .add(createDbItem(selectedItem.getValue().getMongoConnection().createMongoDB(dialog.getResult())));
-    });
+    dialog.showAndWait().ifPresent(r -> selectedItem.getChildren()
+      .add(createDbItem(selectedItem.getValue().getMongoConnection().createMongoDB(dialog.getResult()))));
   }
 
   public void onDisconnectDb(ActionEvent ev) {
