@@ -12,18 +12,16 @@
     <center><CodeArea fx:id="codeArea"/></center>
     <bottom>
         <HBox spacing="10" alignment="CENTER_LEFT" visible="false" fx:id="searchBox">
-            <children>
-                <Label text="Search:"/>
-                <TextField fx:id="searchField" onKeyPressed="#onSearchFieldKeyPressed"/>
-                <Button text="Next" onAction="#searchNext"/>
-                <Button text="Previous" onAction="#searchPrevious"/>
-                <Label fx:id="infoLabel"/>
-                <Button onAction="#closeSearchBox">
-                    <graphic>
-                        <FontAwesomeIconView glyphName="CLOSE" />
-                    </graphic>
-                </Button>
-            </children>
+            <Label text="Search:"/>
+            <TextField fx:id="searchField" onKeyPressed="#onSearchFieldKeyPressed"/>
+            <Button text="Next" onAction="#searchNext"/>
+            <Button text="Previous" onAction="#searchPrevious"/>
+            <Label fx:id="infoLabel"/>
+            <Button onAction="#closeSearchBox">
+                <graphic>
+                    <FontAwesomeIconView glyphName="CLOSE"/>
+                </graphic>
+            </Button>
         </HBox>
     </bottom>
 </BorderPane>

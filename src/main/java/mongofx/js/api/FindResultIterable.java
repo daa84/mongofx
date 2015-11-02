@@ -73,8 +73,7 @@ public class FindResultIterable implements ObjectListPresentation {
       com.mongodb.client.MongoDatabase mongoDb = mongoDatabase.getMongoDb();
       Field f = mongoDb.getClass().getDeclaredField("executor");
       f.setAccessible(true);
-      OperationExecutor executor = (OperationExecutor) f.get(mongoDb);
-      return executor;
+      return (OperationExecutor) f.get(mongoDb);
     }
     catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
       log.error("Exception:",e);

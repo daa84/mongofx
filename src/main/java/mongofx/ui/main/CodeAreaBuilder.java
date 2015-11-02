@@ -113,7 +113,7 @@ public class CodeAreaBuilder {
     popup.setAutoHide(true);
     popup.setHideOnEscape(true);
 
-    ListView<Suggest> listView = createAutocompleteListView(service, popup);
+    ListView<Suggest> listView = createAutocompleteListView(popup);
     popup.getContent().add(listView);
     codeArea.setPopupWindow(popup);
     codeArea.setPopupAlignment(PopupAlignment.CARET_BOTTOM);
@@ -167,7 +167,7 @@ public class CodeAreaBuilder {
     return service.find(paths.get());
   }
 
-  private ListView<Suggest> createAutocompleteListView(AutocompleteService service, Popup popup) {
+  private ListView<Suggest> createAutocompleteListView(Popup popup) {
     ListView<Suggest> listView = new ListView<>();
 
     Builder<KeyEvent> popupKeyEvents =

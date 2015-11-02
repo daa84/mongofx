@@ -169,7 +169,7 @@ public class QueryTabController {
       }
       else {
         queryResultTextController.replaceText(String.valueOf(buildTextFromList(resultStream)));
-        queryResultTextController.selectRange(0, 0);
+        queryResultTextController.selectRange(0);
         showText();
       }
     }

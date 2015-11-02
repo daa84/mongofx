@@ -83,8 +83,8 @@ public class EditorController {
     codeArea.replaceText(s);
   }
 
-  public void selectRange(int anchor, int caretPosition) {
-    codeArea.selectRange(anchor, caretPosition);
+  public void selectRange(int caretPosition) {
+    codeArea.selectRange(0, caretPosition);
   }
 
   public void searchNext() {

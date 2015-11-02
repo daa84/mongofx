@@ -74,7 +74,7 @@ public class UIBuilder {
     URL url = getClass().getResource("/ui/ConnectionSettings.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
-    ConnectionSettingsController controller = (ConnectionSettingsController)loader.getController();
+    ConnectionSettingsController controller = loader.getController();
     controller.setSettings(settings);
     controller.setSettingsController(settingsListController);
     controller.setEditMode(editMode);

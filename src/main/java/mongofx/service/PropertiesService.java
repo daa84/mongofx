@@ -30,7 +30,7 @@ import com.google.inject.Singleton;
 public class PropertiesService {
   private static final Logger log = LoggerFactory.getLogger(PropertiesService.class);
 
-  private static Properties properties = new Properties();
+  private static final Properties properties = new Properties();
 
   static {
     try {

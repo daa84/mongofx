@@ -57,7 +57,7 @@ public class FindIterable implements Iterable<Document>{
 
   @Override
   public MongoCursor<Document> iterator() {
-    return new MongoBatchCursorAdapter<Document>(executor.execute(createQueryOperation(), readPreference));
+    return new MongoBatchCursorAdapter<>(executor.execute(createQueryOperation(), readPreference));
   }
 
   public BsonDocument explainIterator(ExplainVerbosity explainVerbosity) {
@@ -65,7 +65,7 @@ public class FindIterable implements Iterable<Document>{
   }
 
   private FindOperation<Document> createQueryOperation() {
-    return new FindOperation<Document>(namespace, codecRegistry.get(Document.class))
+    return new FindOperation<>(namespace, codecRegistry.get(Document.class))
         .filter(filter.toBsonDocument(Document.class, codecRegistry))
         .batchSize(findOptions.getBatchSize())
         .skip(findOptions.getSkip())

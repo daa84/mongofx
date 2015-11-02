@@ -33,7 +33,6 @@
 					</cellValueFactory>
 				</TableColumn>
 			</columns>
-			<items></items>
 		</TableView>
 	</center>
 </BorderPane>

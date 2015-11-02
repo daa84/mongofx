@@ -20,17 +20,15 @@
 	</top>
 	<center>
 		<GridPane vgap="5" hgap="5">
-			<children>
-				<Label text="Connection host" GridPane.columnIndex="0"
-					GridPane.rowIndex="0" />
-				<Label text="Username:" GridPane.columnIndex="0"
-					GridPane.rowIndex="1" />
-				<Label text="Password:" GridPane.columnIndex="0"
-					GridPane.rowIndex="2" />
-				<TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-				<TextField fx:id="userField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-				<PasswordField fx:id="passField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-			</children>
+			<Label text="Connection host" GridPane.columnIndex="0"
+				   GridPane.rowIndex="0"/>
+			<Label text="Username:" GridPane.columnIndex="0"
+				   GridPane.rowIndex="1"/>
+			<Label text="Password:" GridPane.columnIndex="0"
+				   GridPane.rowIndex="2"/>
+			<TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+			<TextField fx:id="userField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+			<PasswordField fx:id="passField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 		</GridPane>
 	</center>
 </BorderPane>

@@ -98,8 +98,8 @@ public class ResultTreeController {
       return;
     }
 
-    DocumentTreeValue topLevelValue = getTopLevelValue(selectedItem);
-    final Object id = topLevelValue.getDocument().get("_id");
+    TreeItem<DocumentTreeValue> topLevelItem = getTopLevelItem(selectedItem);
+    final Object id = topLevelItem.getValue().getDocument().get("_id");
     if (id == null) {
       log.error("No _id found for updated object");
       return;
@@ -110,8 +110,8 @@ public class ResultTreeController {
     alert.setContentText(id.toString());
     alert.showAndWait().ifPresent(sb -> {
       if (sb == ButtonType.OK) {
-        mongoDatabase.getMongoDb().getCollection(topLevelValue.getCollectionName()).deleteOne(new BasicDBObject("_id", id));
-        queryResultTree.getRoot().getChildren().remove(topLevelValue);
+        mongoDatabase.getMongoDb().getCollection(topLevelItem.getValue().getCollectionName()).deleteOne(new BasicDBObject("_id", id));
+        queryResultTree.getRoot().getChildren().remove(topLevelItem);
       }
     });
   }
@@ -182,7 +182,7 @@ public class ResultTreeController {
     if (selectedItem == null) {
       return;
     }
-    DocumentTreeValue value = getTopLevelValue(selectedItem);
+    DocumentTreeValue value = getTopLevelItem(selectedItem).getValue();
 
     Document oldDoc = value.getDocument();
     final Object id = oldDoc.get("_id");
@@ -198,11 +198,11 @@ public class ResultTreeController {
     });
   }
 
-  private DocumentTreeValue getTopLevelValue(TreeItem<DocumentTreeValue> selectedItem) {
+  private TreeItem<DocumentTreeValue> getTopLevelItem(TreeItem<DocumentTreeValue> selectedItem) {
     while(selectedItem != null) {
       DocumentTreeValue value = selectedItem.getValue();
       if (value.isTopLevel()) {
-        return value;
+        return selectedItem;
       }
       selectedItem = selectedItem.getParent();
     }

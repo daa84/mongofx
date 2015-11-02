@@ -76,7 +76,7 @@ public class MainFrameController {
     }
   }
 
-  private void openTab() throws IOException {
+  private void openTab() {
     TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
     if (selectedItem != null) {
       DbTreeValue value = selectedItem.getValue();

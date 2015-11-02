@@ -111,7 +111,7 @@ public class TreeController {
     return StreamSupport.stream(collection.listIndexes().spliterator(), false).map(d -> {
       DbTreeValue val = new DbTreeValue(value.getMongoDatabase(), (String)d.get("name"), TreeValueType.INDEX);
       val.setCollectionName(value.getDisplayValue());
-      return new TreeItem<DbTreeValue>(val, new FontAwesomeIconView(FontAwesomeIcon.ASTERISK));
+      return new TreeItem<>(val, new FontAwesomeIconView(FontAwesomeIcon.ASTERISK));
     }).collect(Collectors.toList());
   }
 
