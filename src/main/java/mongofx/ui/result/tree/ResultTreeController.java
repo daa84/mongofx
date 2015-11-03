@@ -18,27 +18,26 @@
 //
 package mongofx.ui.result.tree;
 
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javafx.scene.control.*;
-import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.result.UpdateResult;
-
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import mongofx.service.MongoDatabase;
 import mongofx.ui.main.DocumentUtils;
 import mongofx.ui.main.UIBuilder;
+import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ResultTreeController {
   private static final Logger log = LoggerFactory.getLogger(ResultTreeController.class);
@@ -51,20 +50,30 @@ public class ResultTreeController {
 
   private MongoDatabase mongoDatabase;
   private ContextMenu childContextMenu;
+  private String collectionName;
 
   public ResultTreeController() {
     buildTopLevelContextMenu();
     buildChildContextMenu();
   }
 
+  private void buildRootContextMenu() {
+    MenuItem insertDocument = new MenuItem("Insert document...");
+    insertDocument.setOnAction(this::insertDocument);
+    ContextMenu contextMenu = new ContextMenu(insertDocument);
+    queryResultTree.setContextMenu(contextMenu);
+  }
+
   private void buildChildContextMenu() {
+    MenuItem insertDocument = new MenuItem("Insert document...");
+    insertDocument.setOnAction(this::insertDocument);
+    MenuItem editDocument = new MenuItem("Edit document...");
+    editDocument.setOnAction(this::editSelected);
     MenuItem copyValue = new MenuItem("Copy value");
     copyValue.setOnAction(this::copyValue);
     MenuItem copyJson = new MenuItem("Copy JSON");
     copyJson.setOnAction(this::copyJson);
-    MenuItem editDocument = new MenuItem("Edit document...");
-    editDocument.setOnAction(this::editSelected);
-    childContextMenu = new ContextMenu(editDocument, new SeparatorMenuItem(), copyJson, copyValue);
+    childContextMenu = new ContextMenu(insertDocument, editDocument, new SeparatorMenuItem(), copyJson, copyValue);
   }
 
   private void copyValue(ActionEvent actionEvent) {
@@ -83,13 +92,29 @@ public class ResultTreeController {
   }
 
   private void buildTopLevelContextMenu() {
+    MenuItem insertDocument = new MenuItem("Insert document...");
+    insertDocument.setOnAction(this::insertDocument);
     MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
     MenuItem copyJson = new MenuItem("Copy JSON");
     copyJson.setOnAction(this::copyJson);
     MenuItem deleteDocument = new MenuItem("Delete document...");
     deleteDocument.setOnAction(this::deleteDocument);
-    topLevelContextMenu = new ContextMenu(editDocument, new SeparatorMenuItem(), copyJson, new SeparatorMenuItem(), deleteDocument);
+    topLevelContextMenu = new ContextMenu(insertDocument, editDocument, new SeparatorMenuItem(), copyJson, new SeparatorMenuItem(), deleteDocument);
+  }
+
+  private void insertDocument(ActionEvent actionEvent) {
+    ObservableList<TreeItem<DocumentTreeValue>> items = queryResultTree.getRoot().getChildren();
+    if (items.isEmpty()) {
+      return;
+    }
+
+    if (collectionName == null) {
+      log.info("Can't find collection name");
+      return;
+    }
+
+    uiBuilder.editDocument("{\n\n}", 2).ifPresent(s -> mongoDatabase.getMongoDb().getCollection(collectionName).insertOne(Document.parse(s)));
   }
 
   private void deleteDocument(ActionEvent actionEvent) {
@@ -110,7 +135,7 @@ public class ResultTreeController {
     alert.setContentText(id.toString());
     alert.showAndWait().ifPresent(sb -> {
       if (sb == ButtonType.OK) {
-        mongoDatabase.getMongoDb().getCollection(topLevelItem.getValue().getCollectionName()).deleteOne(new BasicDBObject("_id", id));
+        mongoDatabase.getMongoDb().getCollection(collectionName).deleteOne(new BasicDBObject("_id", id));
         queryResultTree.getRoot().getChildren().remove(topLevelItem);
       }
     });
@@ -135,12 +160,15 @@ public class ResultTreeController {
     this.queryResultTree = queryResultTree;
     this.mongoDatabase = mongoDatabase;
     queryResultTree.setRowFactory(ttv -> new ResultRow());
+    buildRootContextMenu();
   }
 
   public void buildTreeFromDocuments(Stream<Document> resultStream, String collectionName) {
+    this.collectionName = collectionName;
+
     TreeItem<DocumentTreeValue> root = new TreeItem<>();
-    root.getChildren().addAll(resultStream.map(d -> new TreeItem<>(new DocumentTreeValue(null, d, collectionName)))
-        .peek(i -> buildChilds(i)).collect(Collectors.toList()));
+    root.getChildren().addAll(resultStream.map(d -> new TreeItem<>(new DocumentTreeValue(null, d)))
+        .peek(this::buildChilds).collect(Collectors.toList()));
     queryResultTree.setRoot(root);
   }
 
@@ -148,7 +176,7 @@ public class ResultTreeController {
     Object value = i.getValue().getValue();
     if (value instanceof Document) {
       i.getChildren()
-      .addAll(((Document) value).entrySet().stream().map(f -> mapFieldToItem(f)).collect(Collectors.toList()));
+      .addAll(((Document) value).entrySet().stream().map(this::mapFieldToItem).collect(Collectors.toList()));
     }
   }
 
@@ -192,10 +220,7 @@ public class ResultTreeController {
     }
     Document toEdit = new Document(oldDoc);
     toEdit.remove("_id");
-    uiBuilder.editDocument(DocumentUtils.formatJson(toEdit)).ifPresent(newJson -> {
-      Document doc = Document.parse(newJson);
-      updateObject(value, doc, id);
-    });
+    uiBuilder.editDocument(DocumentUtils.formatJson(toEdit), 2).ifPresent(newJson -> updateObject(Document.parse(newJson), id));
   }
 
   private TreeItem<DocumentTreeValue> getTopLevelItem(TreeItem<DocumentTreeValue> selectedItem) {
@@ -209,9 +234,9 @@ public class ResultTreeController {
     return null;
   }
 
-  private void updateObject(DocumentTreeValue value, Document doc, Object id) {
+  private void updateObject(Document doc, Object id) {
     try {
-      UpdateResult updateResult = mongoDatabase.getMongoDb().getCollection(value.getCollectionName())
+      UpdateResult updateResult = mongoDatabase.getMongoDb().getCollection(collectionName)
           .replaceOne(new BasicDBObject("_id", id), doc);
 
       if (updateResult.getModifiedCount() < 1) {

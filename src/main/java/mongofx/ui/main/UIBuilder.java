@@ -164,14 +164,14 @@ public class UIBuilder {
     return primaryStage;
   }
 
-  public Optional<String> editDocument(String formattedJson) {
+  public Optional<String> editDocument(String formattedJson, int cursorPosition) {
     Dialog<String> dialog = new Dialog<>();
     dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
     dialog.setTitle("MongoFX - edit document");
     dialog.setResizable(true);
     dialog.getDialogPane().getStylesheets().add(getClass().getResource("/ui/editor.css").toExternalForm());
 
-    CodeArea codeArea = setupEditorArea(formattedJson, dialog);
+    CodeArea codeArea = setupEditorArea(formattedJson, dialog, cursorPosition);
 
     dialog.setResultConverter(bt -> {
       if (ButtonData.OK_DONE == bt.getButtonData()) {
@@ -182,7 +182,7 @@ public class UIBuilder {
     return dialog.showAndWait();
   }
 
-  private CodeArea setupEditorArea(String formattedJson, Dialog<String> dialog) {
+  private CodeArea setupEditorArea(String formattedJson, Dialog<String> dialog, int cursorPosition) {
     URL url = getClass().getResource("/ui/Editor.fxml");
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
@@ -194,7 +194,10 @@ public class UIBuilder {
 
     // stackpane is workaround https://github.com/TomasMikula/RichTextFX/issues/196
     dialog.getDialogPane().setContent(new StackPane(root));
-    Platform.runLater(() -> codeArea.requestFocus());
+    Platform.runLater(() -> {
+      codeArea.positionCaret(cursorPosition);
+      codeArea.requestFocus();
+    });
     return codeArea;
   }
 }
