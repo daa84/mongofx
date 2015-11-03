@@ -1,2 +1,7 @@
 /* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
 @import "/styles/glyphs.css";
+
+.query-scroller {
+  -fx-border-radius: 5 5 5 5;
+  -fx-background-radius: 5 5 5 5;  
+}

@@ -5,6 +5,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import org.fxmisc.richtext.CodeArea?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+<?import mongofx.ui.control.NumberTextField?>
+
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="mongofx.ui.main.QueryTabController">
 	<top>
@@ -28,8 +32,25 @@
 			</center>
 			<bottom>
 				<HBox alignment="CENTER_RIGHT">
-					<Label text="Limit:"/>
-					<TextField fx:id="limitResult" text="100" prefWidth="50"/>
+					<padding>
+						<Insets top="2" bottom="2" />
+					</padding>
+					<Button onAction="#resultScrollLeft">
+						<graphic>
+							<FontAwesomeIconView glyphName="ANGLE_LEFT" />
+						</graphic>
+					</Button>
+					<NumberTextField fx:id="offsetResult" text="0" prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER"/>
+					<NumberTextField fx:id="limitResult" text="50" prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER"/>
+					<Button onAction="#resultScrollRight">
+						<graphic>
+							<FontAwesomeIconView glyphName="ANGLE_RIGHT" />
+						</graphic>
+						<HBox.margin>
+							<Insets right="10" />
+						</HBox.margin>
+					</Button>
+					
 					<fx:define>
 						<ToggleGroup fx:id="viewToogleGroup"/>
 					</fx:define>

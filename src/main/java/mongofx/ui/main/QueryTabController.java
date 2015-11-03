@@ -76,6 +76,9 @@ public class QueryTabController {
   private TextField limitResult;
 
   @FXML
+  private TextField offsetResult;
+
+  @FXML
   private ToggleButton viewAsTree;
 
   @FXML
@@ -230,4 +233,34 @@ public class QueryTabController {
     this.connectedDBNameProperty().set(connectedDBName);
   }
 
+  @FXML
+  public void resultScrollLeft() {
+    int offset = getOffset() - getLimit();
+    if (offset < 0) {
+      offset = 0;
+    }
+    if (offset == getOffset()) {
+      return;
+    }
+    offsetResult.setText(String.valueOf(offset));
+    executeScript();
+  }
+
+  private int getOffset() {
+    return Integer.parseInt(offsetResult.getText());
+  }
+
+  private int getLimit() {
+    return Integer.parseInt(limitResult.getText());
+  }
+
+  @FXML
+  public void resultScrollRight() {
+    int offset = getOffset();
+    if (offset >= Integer.MAX_VALUE - getLimit()) {
+      return;
+    }
+    offsetResult.setText(String.valueOf(offset + getLimit()));
+    executeScript();
+  }
 }
