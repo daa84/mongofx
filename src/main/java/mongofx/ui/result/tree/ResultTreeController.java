@@ -104,11 +104,6 @@ public class ResultTreeController {
   }
 
   private void insertDocument(ActionEvent actionEvent) {
-    ObservableList<TreeItem<DocumentTreeValue>> items = queryResultTree.getRoot().getChildren();
-    if (items.isEmpty()) {
-      return;
-    }
-
     if (collectionName == null) {
       log.info("Can't find collection name");
       return;

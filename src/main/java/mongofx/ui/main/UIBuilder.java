@@ -195,7 +195,7 @@ public class UIBuilder {
     // stackpane is workaround https://github.com/TomasMikula/RichTextFX/issues/196
     dialog.getDialogPane().setContent(new StackPane(root));
     Platform.runLater(() -> {
-      codeArea.positionCaret(cursorPosition);
+      codeArea.selectRange(cursorPosition, cursorPosition);
       codeArea.requestFocus();
     });
     return codeArea;

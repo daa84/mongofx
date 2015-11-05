@@ -91,7 +91,7 @@ public class TreeController {
 
   private List<TreeItem<DbTreeValue>> buildDbChilds(DbTreeValue value) {
     MongoDatabase db = value.getMongoDatabase();
-    return db.listCollectins().stream()
+    return db.listCollections().stream()
         .map(cn -> new TreeItem<>(new DbTreeValue(db, cn, TreeValueType.COLLECTION),
             new FontAwesomeIconView(FontAwesomeIcon.TABLE)))
         .peek(ti -> buildCollectionDetail(db, ti)).collect(Collectors.toList());
@@ -140,11 +140,29 @@ public class TreeController {
   }
 
   private void buildCollectionContextMenu() {
+    MenuItem copyCollection = new MenuItem("Copy collection...");
+    copyCollection.setOnAction(this::onCopyCollection);
     MenuItem removeAllDocs = new MenuItem("Remove All Documents...");
     removeAllDocs.setOnAction(this::onRemoveAllDocuments);
     MenuItem dropCollection = new MenuItem("Drop Collection...");
     dropCollection.setOnAction(this::onDropCollection);
-    collectionContextMenu = new ContextMenu(removeAllDocs, dropCollection);
+    collectionContextMenu = new ContextMenu(copyCollection, removeAllDocs, dropCollection);
+  }
+
+  private void onCopyCollection(ActionEvent actionEvent) {
+    TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+    if (selectedItem == null) {
+      return;
+    }
+
+    DbTreeValue value = selectedItem.getValue();
+    TextInputDialog dialog = new TextInputDialog(value.getDisplayValue() + "_copy");
+    dialog.setContentText("New collection name:");
+    dialog.setHeaderText("Copy collection");
+    dialog.showAndWait().ifPresent(targetCollection -> {
+      new CopyCollectionHelper(value.getMongoDatabase(), value.getDisplayValue(), targetCollection).copy();
+      ((DynamicTreeItem)selectedItem.getParent()).reload();
+    });
   }
 
   private void buildDbContextMenu() {

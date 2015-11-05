@@ -49,7 +49,7 @@ public class MongoDatabase {
     return mongoDb.getName();
   }
 
-  public List<String> listCollectins() {
+  public List<String> listCollections() {
     return StreamSupport.stream(mongoDb.listCollectionNames().spliterator(), false).collect(Collectors.toList());
   }
 

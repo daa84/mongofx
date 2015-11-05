@@ -30,18 +30,13 @@ public class DbTreeValue {
   private String collectionName;
   private final TreeValueType valueType;
 
-  public static enum TreeValueType {
+  public enum TreeValueType {
     COLLECTION,
     CATEGORY,
     INDEX,
     DATABASE,
     CONNECTION
   };
-
-  public DbTreeValue(String displayValue) {
-    this.displayValue = displayValue;
-    valueType = TreeValueType.CATEGORY;
-  }
 
   public DbTreeValue(MongoDatabase mongoDatabase, String displayValue, TreeValueType type) {
     super();
@@ -96,7 +91,7 @@ public class DbTreeValue {
   @Override
   public String toString() {
     if (count != null) {
-      return String.format("%s(%d)", displayValue, count);
+      return String.format("%s (%d)", displayValue, count);
     }
     return displayValue;
   }
