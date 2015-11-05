@@ -31,7 +31,7 @@
 				<CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased" />
 			</center>
 			<bottom>
-				<HBox alignment="CENTER_RIGHT">
+				<HBox alignment="CENTER_RIGHT" visible="${controller.showObjectListControls}">
 					<padding>
 						<Insets top="2" bottom="2" />
 					</padding>
@@ -40,7 +40,7 @@
 							<FontAwesomeIconView glyphName="ANGLE_LEFT" />
 						</graphic>
 					</Button>
-					<NumberTextField fx:id="offsetResult" text="0" prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER"/>
+					<NumberTextField fx:id="skipResult" text="0" prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER"/>
 					<NumberTextField fx:id="limitResult" text="50" prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER"/>
 					<Button onAction="#resultScrollRight">
 						<graphic>
@@ -52,10 +52,10 @@
 					</Button>
 					
 					<fx:define>
-						<ToggleGroup fx:id="viewToogleGroup"/>
+						<ToggleGroup fx:id="viewToggleGroup"/>
 					</fx:define>
 					<ToggleButton fx:id="viewAsTree" focusTraversable="false"
-								  toggleGroup="$viewToogleGroup" selected="true">
+								  toggleGroup="$viewToggleGroup" selected="true">
 						<tooltip>
 							<Tooltip text="View as Tree"/>
 						</tooltip>
@@ -64,7 +64,7 @@
 						</graphic>
 					</ToggleButton>
 					<ToggleButton fx:id="viewAsText" focusTraversable="false"
-								  toggleGroup="$viewToogleGroup">
+								  toggleGroup="$viewToggleGroup">
 						<tooltip>
 							<Tooltip text="View as Text"/>
 						</tooltip>

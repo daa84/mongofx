@@ -19,6 +19,7 @@
 package mongofx.js.api;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.bson.BsonDocument;
@@ -44,6 +45,8 @@ public class FindResultIterable implements ObjectListPresentation {
   private final BasicDBObject findQuery;
   private final String collectionName;
   private final FindOptions findOptions = new FindOptions();
+  private Integer skip = null;
+  private Integer limit = null;
 
   public FindResultIterable(MongoDatabase mongoDatabase, String collectionName, BasicDBObject findQuery) {
     this.mongoDatabase = mongoDatabase;
@@ -57,11 +60,33 @@ public class FindResultIterable implements ObjectListPresentation {
     findQuery = new BasicDBObject(); // find all
   }
 
+  @Override
+  public Optional<Integer> getSkip() {
+    return Optional.ofNullable(skip);
+  }
+
+  @Override
+  public Optional<Integer> getLimit() {
+    return Optional.ofNullable(limit);
+  }
+
+  public FindResultIterable skip(int skip) {
+    this.skip = skip;
+    return this;
+  }
+
+  public FindResultIterable limit(int limit) {
+    this.limit = limit;
+    return this;
+  }
+
   @JsIgnore
   @Override
-  public MongoCursor<Document> iterator() {
+  public MongoCursor<Document> iterator(int skip, int limit) {
     MongoCollection<Document> collection = getCollection();
 
+    findOptions.skip(skip);
+    findOptions.limit(limit);
     return new FindIterable(new MongoNamespace(mongoDatabase.getName(), collectionName), collection.getCodecRegistry(), //
         collection.getReadPreference(), getExecutor(), findQuery, findOptions).iterator();
   }
@@ -106,6 +131,6 @@ public class FindResultIterable implements ObjectListPresentation {
   }
 
   public void forEach(Consumer<? super Document> action) {
-    iterator().forEachRemaining(action);
+    iterator(0, 0).forEachRemaining(action);
   }
 }

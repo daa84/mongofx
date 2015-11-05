@@ -22,9 +22,15 @@ import org.bson.Document;
 
 import com.mongodb.client.MongoCursor;
 
+import java.util.Optional;
+
 public interface ObjectListPresentation {
 
   String getCollectionName();
 
-  MongoCursor<Document> iterator();
+  Optional<Integer> getSkip();
+
+  Optional<Integer> getLimit();
+
+  MongoCursor<Document> iterator(int skip, int limit);
 }

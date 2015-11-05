@@ -163,11 +163,11 @@ public class ResultTreeController {
     buildRootContextMenu();
   }
 
-  public void buildTreeFromDocuments(Stream<Document> resultStream, String collectionName) {
+  public void buildTreeFromDocuments(List<Document> documents, String collectionName) {
     this.collectionName = collectionName;
 
     TreeItem<DocumentTreeValue> root = new TreeItem<>();
-    root.getChildren().addAll(resultStream.map(d -> new TreeItem<>(new DocumentTreeValue(null, d)))
+    root.getChildren().addAll(documents.stream().map(d -> new TreeItem<>(new DocumentTreeValue(null, d)))
         .peek(this::buildChilds).collect(Collectors.toList()));
     queryResultTree.setRoot(root);
   }

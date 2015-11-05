@@ -19,21 +19,16 @@
 package mongofx.ui.main;
 
 import java.util.Optional;
-import java.util.Spliterators;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import javax.script.ScriptException;
 
-import org.bson.Document;
+import javafx.beans.property.SimpleBooleanProperty;
 import org.fxmisc.richtext.CodeArea;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.mongodb.client.MongoCursor;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -76,7 +71,7 @@ public class QueryTabController {
   private TextField limitResult;
 
   @FXML
-  private TextField offsetResult;
+  private TextField skipResult;
 
   @FXML
   private ToggleButton viewAsTree;
@@ -84,10 +79,8 @@ public class QueryTabController {
   @FXML
   private ToggleButton viewAsText;
 
-  private ObjectListPresentation objectListResult;
-
   @FXML
-  private ToggleGroup viewToogleGroup;
+  private ToggleGroup viewToggleGroup;
 
   @Inject
   private AutocompleteService autocompleteService;
@@ -98,9 +91,13 @@ public class QueryTabController {
   private final SimpleStringProperty connectedServerName = new SimpleStringProperty();
   private final SimpleStringProperty connectedDBName = new SimpleStringProperty();
 
+  private final SimpleBooleanProperty showObjectListControls = new SimpleBooleanProperty();
+
+  private QueryResultHolder queryResult;
+
   @FXML
   protected void initialize() {
-    EventStreams.changesOf(viewToogleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
+    EventStreams.changesOf(viewToggleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
   public void setDb(MongoDbConnection mongoDbConnection, MongoDatabase mongoDatabase, String collectionName) {
@@ -126,7 +123,19 @@ public class QueryTabController {
   public void executeScript() {
     try {
       Optional<Object> documents = mongoDatabase.eval(codeArea.getText());
-      buildResultView(documents);
+
+      if (documents.isPresent()) {
+        Object result = documents.get();
+        if (result instanceof TextPresentation) {
+          queryResult = new QueryResultHolder((TextPresentation) result);
+        } else {
+          queryResult = new QueryResultHolder((ObjectListPresentation) result);
+        }
+      } else {
+        queryResult = new QueryResultHolder();
+      }
+
+      buildResultView();
     }
     catch (ScriptException e) {
       showOnlyText(e.getMessage());
@@ -134,18 +143,13 @@ public class QueryTabController {
     }
   }
 
-  private void buildResultView(Optional<Object> documents) {
-    if (documents.isPresent()) {
-      Object result = documents.get();
-
-      objectListResult = null;
-
-      if (result instanceof TextPresentation) {
-        showOnlyText(String.valueOf(result));
+  private void buildResultView() {
+    if (!queryResult.isEmpty()) {
+      if (queryResult.isTextOnlyPresentation()) {
+        showOnlyText(queryResult.getTextPresentationString());
       }
       else {
         setViewModeVisible(true);
-        objectListResult = (ObjectListPresentation)result;
         updateResultListView();
       }
     }
@@ -161,20 +165,16 @@ public class QueryTabController {
   }
 
   private void updateResultListView() {
-    //TODO: cache results
-    try(MongoCursor<Document> iterator = objectListResult.iterator()) {
-      Stream<Document> resultStream = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)//
-          .limit(Integer.parseInt(limitResult.getText()));
+    queryResult.getSkip().ifPresent(skip -> skipResult.setText(String.valueOf(skip)));
+    queryResult.getLimit().ifPresent(limit -> limitResult.setText(String.valueOf(limit)));
 
-      if (viewAsTree.isSelected()) {
-        resultTreeController.buildTreeFromDocuments(resultStream, objectListResult.getCollectionName());
-        showTree();
-      }
-      else {
-        queryResultTextController.replaceText(String.valueOf(buildTextFromList(resultStream)));
-        queryResultTextController.selectRange(0);
-        showText();
-      }
+    if (viewAsTree.isSelected()) {
+      resultTreeController.buildTreeFromDocuments(queryResult.getDocuments(getSkip(), getLimit()), queryResult.getCollectionName());
+      showTree();
+    } else {
+      queryResultTextController.replaceText(queryResult.getListPresentationString(getSkip(), getLimit()));
+      queryResultTextController.selectRange(0);
+      showText();
     }
   }
 
@@ -189,13 +189,8 @@ public class QueryTabController {
     queryResultText.setVisible(false);
   }
 
-  private String buildTextFromList(Stream<Document> resultStream) {
-    return resultStream.map(DocumentUtils::formatJson).collect(Collectors.joining(",\n", "[", "]"));
-  }
-
   private void setViewModeVisible(boolean b) {
-    viewAsText.setVisible(b);
-    viewAsTree.setVisible(b);
+    setShowObjectListControls(b);
   }
 
   public void startTab() {
@@ -235,19 +230,19 @@ public class QueryTabController {
 
   @FXML
   public void resultScrollLeft() {
-    int offset = getOffset() - getLimit();
+    int offset = getSkip() - getLimit();
     if (offset < 0) {
       offset = 0;
     }
-    if (offset == getOffset()) {
+    if (offset == getSkip()) {
       return;
     }
-    offsetResult.setText(String.valueOf(offset));
-    executeScript();
+    skipResult.setText(String.valueOf(offset));
+    updateResultListView();
   }
 
-  private int getOffset() {
-    return Integer.parseInt(offsetResult.getText());
+  private int getSkip() {
+    return Integer.parseInt(skipResult.getText());
   }
 
   private int getLimit() {
@@ -256,11 +251,23 @@ public class QueryTabController {
 
   @FXML
   public void resultScrollRight() {
-    int offset = getOffset();
+    int offset = getSkip();
     if (offset >= Integer.MAX_VALUE - getLimit()) {
       return;
     }
-    offsetResult.setText(String.valueOf(offset + getLimit()));
-    executeScript();
+    skipResult.setText(String.valueOf(offset + getLimit()));
+    updateResultListView();
+  }
+
+  public boolean getShowObjectListControls() {
+    return showObjectListControls.get();
+  }
+
+  public void setShowObjectListControls(boolean showObjectListControls) {
+    this.showObjectListControls.set(showObjectListControls);
+  }
+
+  public SimpleBooleanProperty showObjectListControlsProperty() {
+    return showObjectListControls;
   }
 }

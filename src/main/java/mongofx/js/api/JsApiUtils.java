@@ -20,14 +20,11 @@ package mongofx.js.api;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.script.Bindings;
 
@@ -59,13 +56,23 @@ public class JsApiUtils {
     return new ObjectListPresentation() {
 
       @Override
-      public MongoCursor<Document> iterator() {
-        return new SimpleIteratorMongoCursor(list.iterator());
+      public MongoCursor<Document> iterator(int skip, int limit) {
+        return new SimpleIteratorMongoCursor(list.stream().skip(skip).limit(limit).iterator());
       }
 
       @Override
       public String getCollectionName() {
         return null;
+      }
+
+      @Override
+      public Optional<Integer> getSkip() {
+        return Optional.empty();
+      }
+
+      @Override
+      public Optional<Integer> getLimit() {
+        return Optional.empty();
       }
     };
   }
@@ -74,13 +81,23 @@ public class JsApiUtils {
     return new ObjectListPresentation() {
 
       @Override
-      public MongoCursor<Document> iterator() {
-        return new SimpleIteratorMongoCursor(iterable.iterator());
+      public MongoCursor<Document> iterator(int skip, int limit) {
+        return new SimpleIteratorMongoCursor(StreamSupport.stream(iterable.spliterator(), false).skip(skip).limit(limit).iterator());
       }
 
       @Override
       public String getCollectionName() {
         return null;
+      }
+
+      @Override
+      public Optional<Integer> getSkip() {
+        return Optional.empty();
+      }
+
+      @Override
+      public Optional<Integer> getLimit() {
+        return Optional.empty();
       }
     };
   }

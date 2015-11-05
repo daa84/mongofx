@@ -19,6 +19,9 @@
 package mongofx.js.api;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 
@@ -44,13 +47,25 @@ public class AggregateResultIterable implements ObjectListPresentation {
   }
 
   @Override
-  public MongoCursor<Document> iterator() {
-    return mongoDatabase.getMongoDb().getCollection(collectionName).aggregate(pipeline).iterator();
+  public String getCollectionName() {
+    return collectionName;
   }
 
   @Override
-  public String getCollectionName() {
-    return collectionName;
+  public Optional<Integer> getSkip() {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<Integer> getLimit() {
+    return Optional.empty();
+  }
+
+  @Override
+  public MongoCursor<Document> iterator(int skip, int limit) {
+    try (MongoCursor<Document> iterator = mongoDatabase.getMongoDb().getCollection(collectionName).aggregate(pipeline).iterator()) {
+      return new JsApiUtils.SimpleIteratorMongoCursor(StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false).skip(skip).limit(limit).iterator());
+    }
   }
 
 }
