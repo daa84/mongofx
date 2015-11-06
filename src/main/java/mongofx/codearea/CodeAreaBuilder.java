@@ -16,10 +16,12 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.ui.main;
+package mongofx.codearea;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -34,6 +36,7 @@ import org.fxmisc.wellbehaved.event.EventHandlerHelper;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
 import org.fxmisc.wellbehaved.event.EventPattern;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.ListView;
@@ -48,7 +51,7 @@ import mongofx.service.AutocompleteService.Suggest;
 
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
-    "db", "function", "var", "for", "if", "else"
+    "db", "function", "var", "for", "if", "else", "return", "while"
   };
 
   private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
@@ -70,6 +73,16 @@ public class CodeAreaBuilder {
       + "|(?<COMMENT>" + COMMENT_PATTERN + ")" //
       );
 
+  private static final BracketsMatcher BRACKETS_MATCHER;
+
+  static {
+    HashMap<Character, Character> brackets = new HashMap<>();
+    brackets.put('[', ']');
+    brackets.put('{', '}');
+    brackets.put('(', ')');
+    BRACKETS_MATCHER = new BracketsMatcher(brackets);
+  }
+
   private final CodeArea codeArea;
   private final Stage primaryStage;
 
@@ -83,6 +96,10 @@ public class CodeAreaBuilder {
 
     codeArea.textProperty().addListener((obs, oldText, newText) -> {
       codeArea.setStyleSpans(0, computeHighlighting(newText));
+    });
+
+    codeArea.caretPositionProperty().addListener(c -> {
+      codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText()));
     });
 
     Builder<KeyEvent> onKeyTyped = EventHandlerHelper.startWith(e -> {
@@ -119,7 +136,7 @@ public class CodeAreaBuilder {
     codeArea.setPopupAlignment(PopupAlignment.CARET_BOTTOM);
     codeArea.setPopupAnchorOffset(new Point2D(1, 1));
 
-    Builder<KeyEvent> onKeyPressed =
+    Builder<KeyEvent> onKey =
         EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN)).act(ae -> {
           if (popup.isShowing()) {
             popup.hide();
@@ -128,14 +145,16 @@ public class CodeAreaBuilder {
             showPopup(service, popup, listView);
           }
         }) //
-        .on(EventPattern.keyPressed(KeyCode.PERIOD)).act(ae -> showPopup(service, popup, listView));
+        .on(EventPattern.keyReleased(KeyCode.PERIOD)).act(ae -> showPopup(service, popup, listView));
 
     codeArea.textProperty().addListener(text -> {
       if (popup.isShowing()) {
         updateSuggestion(service, popup, listView);
       }
     });
-    EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
+    EventHandler<KeyEvent> onKeyHandler = onKey.create();
+    EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyHandler);
+    EventHandlerHelper.install(codeArea.onKeyReleasedProperty(), onKeyHandler);
     return this;
   }
 
@@ -190,7 +209,10 @@ public class CodeAreaBuilder {
     codeArea.selectRange(selection.getStart(), selection.getStart());
   }
 
-  private static StyleSpans<Collection<String>> computeHighlighting(String text) {
+  private StyleSpans<Collection<String>> computeHighlighting(String text) {
+    int caretPosition = codeArea.getCaretPosition();
+    int bracketMatchPosition = BRACKETS_MATCHER.findPair(text, caretPosition);
+
     Matcher matcher = PATTERN.matcher(text);
     int lastKwEnd = 0;
     StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
@@ -207,8 +229,18 @@ public class CodeAreaBuilder {
                           null;
       /* never happens */ assert styleClass != null;
       spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
-      spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
-      lastKwEnd = matcher.end();
+      int matchEnd = matcher.end();
+      int matchLength = matchEnd - matcher.start();
+
+      if (bracketMatchPosition >= 0 && //
+          (matchEnd - 1 == caretPosition ||
+          matchEnd - 1 == bracketMatchPosition)) {
+        spansBuilder.add(Arrays.asList(styleClass, "breacket-highlight"), matchLength);
+      } else {
+        spansBuilder.add(Collections.singleton(styleClass), matchLength);
+      }
+
+      lastKwEnd = matchEnd;
     }
     spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
     return spansBuilder.create();

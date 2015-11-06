@@ -24,3 +24,7 @@
 .comment {
 	-fx-fill: cadetblue;
 }
+
+.breacket-highlight {
+	-fx-fill: lightblue;
+}

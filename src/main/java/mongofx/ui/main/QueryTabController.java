@@ -39,6 +39,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import mongofx.codearea.CodeAreaBuilder;
 import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
 import mongofx.service.AutocompleteService;
