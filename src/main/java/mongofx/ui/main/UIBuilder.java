@@ -156,7 +156,11 @@ public class UIBuilder {
     final FXMLLoader loader = createLoader(url);
     BorderPane root = load(url, loader);
     QueryTabController controller = loader.getController();
-    controller.setDb(mongoConnection, dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
+    if (dbTreeValue.getValueType() == DbTreeValue.TreeValueType.COLLECTION) {
+      controller.setDb(mongoConnection, dbTreeValue.getMongoDatabase(), dbTreeValue.getDisplayValue());
+    } else {
+      controller.setDb(mongoConnection, dbTreeValue.getMongoDatabase(), null);
+    }
     return new SimpleEntry<>(root, controller);
   }
 

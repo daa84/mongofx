@@ -60,7 +60,7 @@ public class MainFrameController {
 
   @FXML
   protected void initialize() {
-    treeController.initialize(treeView);
+    treeController.initialize(treeView, this);
     EventStreams.simpleChangesOf(queryTabs.getTabs())
     .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent())));
   }
@@ -76,11 +76,11 @@ public class MainFrameController {
     }
   }
 
-  private void openTab() {
+  public void openTab() {
     TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
     if (selectedItem != null) {
       DbTreeValue value = selectedItem.getValue();
-      if (value.getValueType() == TreeValueType.COLLECTION) {
+      if (value.getValueType() == TreeValueType.COLLECTION || value.getValueType() == TreeValueType.DATABASE) {
         TreeItem<DbTreeValue> dbItem = findParentNode(selectedItem, TreeValueType.CONNECTION);
         Entry<Node, QueryTabController> tabEntry = uiBuilder.buildQueryNode(dbItem.getValue().getHostConnect(), value);
         tabData.put(tabEntry.getKey(), tabEntry.getValue());

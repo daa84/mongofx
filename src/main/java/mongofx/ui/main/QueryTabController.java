@@ -102,8 +102,12 @@ public class QueryTabController {
 
   public void setDb(MongoDbConnection mongoDbConnection, MongoDatabase mongoDatabase, String collectionName) {
     this.mongoDatabase = mongoDatabase;
-    new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService)
-    .setText("db.getCollection('" + collectionName + "').find({})");
+    CodeAreaBuilder builder = new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService);
+    if (collectionName != null) {
+      builder.setText("db.getCollection('" + collectionName + "').find({})");
+    } else {
+      builder.setText("db");
+    }
 
     resultTreeController.initialize(queryResultTree, mongoDatabase);
 
@@ -194,9 +198,10 @@ public class QueryTabController {
   }
 
   public void startTab() {
-    int startIdx = codeArea.getText().indexOf("{");
+    String text = codeArea.getText();
+    int startIdx = text.indexOf("{");
     if (startIdx < 0) {
-      startIdx = 0;
+      startIdx = text.length() - 1;
     }
     startIdx++;
     codeArea.selectRange(startIdx, startIdx);

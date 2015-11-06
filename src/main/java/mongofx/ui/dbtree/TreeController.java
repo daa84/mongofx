@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import mongofx.ui.main.MainFrameController;
 import org.bson.Document;
 
 import com.google.inject.Inject;
@@ -53,6 +54,7 @@ public class TreeController {
   private Executor executor;
 
   private TreeView<DbTreeValue> treeView;
+  private MainFrameController mainFrameController;
 
   private ContextMenu dbContextMenu;
   private ContextMenu connectContextMenu;
@@ -115,8 +117,9 @@ public class TreeController {
     }).collect(Collectors.toList());
   }
 
-  public void initialize(TreeView<DbTreeValue> treeView) {
+  public void initialize(TreeView<DbTreeValue> treeView, MainFrameController mainFrameController) {
     this.treeView = treeView;
+    this.mainFrameController = mainFrameController;
     treeView.setRoot(new TreeItem<>());
     treeView.setCellFactory(tv -> new TreeDbCell());
     buildDbContextMenu();
@@ -140,13 +143,15 @@ public class TreeController {
   }
 
   private void buildCollectionContextMenu() {
+    MenuItem openShell = new MenuItem("Open Shell");
+    openShell.setOnAction(this::onOpenShell);
     MenuItem copyCollection = new MenuItem("Copy collection...");
     copyCollection.setOnAction(this::onCopyCollection);
     MenuItem removeAllDocs = new MenuItem("Remove All Documents...");
     removeAllDocs.setOnAction(this::onRemoveAllDocuments);
     MenuItem dropCollection = new MenuItem("Drop Collection...");
     dropCollection.setOnAction(this::onDropCollection);
-    collectionContextMenu = new ContextMenu(copyCollection, removeAllDocs, dropCollection);
+    collectionContextMenu = new ContextMenu(openShell, copyCollection, removeAllDocs, dropCollection);
   }
 
   private void onCopyCollection(ActionEvent actionEvent) {
@@ -166,11 +171,17 @@ public class TreeController {
   }
 
   private void buildDbContextMenu() {
+    MenuItem openShell = new MenuItem("Open Shell");
+    openShell.setOnAction(this::onOpenShell);
     MenuItem createCollection = new MenuItem("Create collection");
     createCollection.setOnAction(this::onCreateNewCollection);
     MenuItem dropCollection = new MenuItem("Drop db");
     dropCollection.setOnAction(this::onDropDB);
-    dbContextMenu = new ContextMenu(createCollection, dropCollection);
+    dbContextMenu = new ContextMenu(openShell, createCollection, dropCollection);
+  }
+
+  private void onOpenShell(ActionEvent actionEvent) {
+    mainFrameController.openTab();
   }
 
   public void onCreateNewDb(ActionEvent ev) {
