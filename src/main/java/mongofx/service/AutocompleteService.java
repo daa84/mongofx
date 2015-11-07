@@ -50,7 +50,7 @@ public class AutocompleteService {
     initialized = true;
   }
 
-  public List<Suggest> find(List<String> paths) {
+  public List<Suggest> find(List<String> paths, Map<Class<?>, NavigableMap<String, FieldDescription>> dynamicJsInfo) {
     initialize();
 
     if (paths.isEmpty()) {
@@ -69,7 +69,7 @@ public class AutocompleteService {
         if (fieldDescription == null) {
           return Collections.emptyList();
         }
-        root = jsInfo.get(fieldDescription.fieldType);
+        root = getJoinedTypeInfo(fieldDescription, dynamicJsInfo);
         if (root == null) {
           break;
         }
@@ -81,6 +81,28 @@ public class AutocompleteService {
     }
 
     return find(root, paths.get(paths.size() - 1));
+  }
+
+  private NavigableMap<String, FieldDescription> getJoinedTypeInfo(FieldDescription fieldDescription,
+      Map<Class<?>, NavigableMap<String, FieldDescription>> dynamicJsInfo) {
+    NavigableMap<String, FieldDescription> staticItemType = jsInfo.get(fieldDescription.fieldType);
+    NavigableMap<String, FieldDescription> dynamicItemType = dynamicJsInfo.get(fieldDescription.fieldType);
+    return joinTypeInfo(staticItemType, dynamicItemType);
+  }
+
+  private NavigableMap<String, FieldDescription> joinTypeInfo(NavigableMap<String, FieldDescription> staticItemType,
+      NavigableMap<String, FieldDescription> dynamicItemType) {
+    if (dynamicItemType == null) {
+      return staticItemType;
+    }
+    if (staticItemType == null) {
+      return dynamicItemType;
+    }
+
+    NavigableMap<String, FieldDescription> joinedMap = new TreeMap<>();
+    joinedMap.putAll(staticItemType);
+    joinedMap.putAll(dynamicItemType);
+    return joinedMap;
   }
 
   private List<Suggest> getRootFields() {

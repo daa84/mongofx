@@ -40,6 +40,7 @@ import mongofx.js.api.TextPresentation;
  */
 public class MongoDatabase {
   private final com.mongodb.client.MongoDatabase mongoDb;
+  private List<String> cachedCollectionNames;
 
   public MongoDatabase(com.mongodb.client.MongoDatabase mongoDb) {
     this.mongoDb = mongoDb;
@@ -49,8 +50,16 @@ public class MongoDatabase {
     return mongoDb.getName();
   }
 
+  public List<String> getCachedCollections() {
+    if (cachedCollectionNames != null) {
+      return cachedCollectionNames;
+    }
+    return listCollections();
+  }
+
   public List<String> listCollections() {
-    return StreamSupport.stream(mongoDb.listCollectionNames().spliterator(), false).collect(Collectors.toList());
+    cachedCollectionNames = StreamSupport.stream(mongoDb.listCollectionNames().spliterator(), false).collect(Collectors.toList());
+    return cachedCollectionNames;
   }
 
   public com.mongodb.client.MongoDatabase getMongoDb() {

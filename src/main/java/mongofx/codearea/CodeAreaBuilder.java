@@ -46,8 +46,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import mongofx.js.support.JsPathBuilder;
-import mongofx.service.AutocompleteService;
 import mongofx.service.AutocompleteService.Suggest;
+import mongofx.ui.main.AutocompletionEngine;
 
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
@@ -138,7 +138,7 @@ public class CodeAreaBuilder {
     }
   }
 
-  public CodeAreaBuilder setupAutocomplete(AutocompleteService service) {
+  public CodeAreaBuilder setupAutocomplete(AutocompletionEngine service) {
     Popup popup = new Popup();
     popup.setAutoHide(true);
     popup.setHideOnEscape(true);
@@ -171,13 +171,13 @@ public class CodeAreaBuilder {
     return this;
   }
 
-  private void showPopup(AutocompleteService service, Popup popup, ListView<Suggest> listView) {
+  private void showPopup(AutocompletionEngine service, Popup popup, ListView<Suggest> listView) {
     if (!popup.isShowing() && updateSuggestion(service, popup, listView)) {
       popup.show(primaryStage);
     }
   }
 
-  private boolean updateSuggestion(AutocompleteService service, Popup popup, ListView<Suggest> listView) {
+  private boolean updateSuggestion(AutocompletionEngine service, Popup popup, ListView<Suggest> listView) {
     List<Suggest> autocompleteList = buildAutocompleteFromPosition(service);
     if (!autocompleteList.isEmpty()) {
       listView.getItems().setAll(autocompleteList);
@@ -188,7 +188,7 @@ public class CodeAreaBuilder {
     return false;
   }
 
-  private List<Suggest> buildAutocompleteFromPosition(AutocompleteService service) {
+  private List<Suggest> buildAutocompleteFromPosition(AutocompletionEngine service) {
     int cursorPos = codeArea.getSelection().getStart();
     String headText = codeArea.getText(0, cursorPos);
     Optional<List<String>> paths = JsPathBuilder.buildPath(headText);

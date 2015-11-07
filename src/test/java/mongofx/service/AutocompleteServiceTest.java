@@ -19,19 +19,52 @@
 package mongofx.service;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import mongofx.js.api.Collection;
+import mongofx.js.api.DB;
+import mongofx.service.AutocompleteService.FieldDescription;
 import mongofx.service.AutocompleteService.Suggest;
 
 public class AutocompleteServiceTest {
 
   @Test
+  public void testSmallPathDynamicMap() {
+    AutocompleteService service = new AutocompleteService();
+    Map<Class<?>, NavigableMap<String, FieldDescription>> dynamicJsInfo = new HashMap<>();
+    NavigableMap<String, FieldDescription> collectionDynamic = new TreeMap<>();
+    collectionDynamic.put("find2", new FieldDescription("find2", String.class));
+    collectionDynamic.put("find", new FieldDescription("find", String.class));
+    dynamicJsInfo.put(DB.class, collectionDynamic);
+    List<Suggest> result = service.find(Arrays.asList("db", "find"), dynamicJsInfo);
+
+    Assert.assertEquals(2, result.size());
+  }
+
+  @Test
+  public void testDynamicMap() {
+    AutocompleteService service = new AutocompleteService();
+    Map<Class<?>, NavigableMap<String, FieldDescription>> dynamicJsInfo = new HashMap<>();
+    NavigableMap<String, FieldDescription> collectionDynamic = new TreeMap<>();
+    collectionDynamic.put("find2", new FieldDescription("find2", String.class));
+    dynamicJsInfo.put(Collection.class, collectionDynamic);
+    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "find"), dynamicJsInfo);
+
+    Assert.assertEquals(2, result.size());
+  }
+
+  @Test
   public void test() {
     AutocompleteService service = new AutocompleteService();
-    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "find"));
+    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "find"), Collections.emptyMap());
 
     Assert.assertEquals(1, result.size());
   }
@@ -39,7 +72,7 @@ public class AutocompleteServiceTest {
   @Test
   public void partSearchTest() {
     AutocompleteService service = new AutocompleteService();
-    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "fi"));
+    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "fi"), Collections.emptyMap());
 
     Assert.assertEquals(1, result.size());
     Assert.assertEquals("find", result.get(0).getName());
@@ -49,7 +82,7 @@ public class AutocompleteServiceTest {
   @Test
   public void emptyTest() {
     AutocompleteService service = new AutocompleteService();
-    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "tada"));
+    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "tada"), Collections.emptyMap());
 
     Assert.assertEquals(0, result.size());
   }
@@ -57,7 +90,7 @@ public class AutocompleteServiceTest {
   @Test
   public void AllTest() {
     AutocompleteService service = new AutocompleteService();
-    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", ""));
+    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", ""), Collections.emptyMap());
 
     Assert.assertFalse(result.isEmpty());
   }

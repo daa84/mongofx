@@ -22,7 +22,6 @@ import java.util.Optional;
 
 import javax.script.ScriptException;
 
-import javafx.beans.property.SimpleBooleanProperty;
 import org.fxmisc.richtext.CodeArea;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -42,7 +42,6 @@ import javafx.scene.input.KeyEvent;
 import mongofx.codearea.CodeAreaBuilder;
 import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
-import mongofx.service.AutocompleteService;
 import mongofx.service.MongoDatabase;
 import mongofx.service.MongoService.MongoDbConnection;
 import mongofx.ui.result.tree.DocumentTreeValue;
@@ -84,7 +83,7 @@ public class QueryTabController {
   private ToggleGroup viewToggleGroup;
 
   @Inject
-  private AutocompleteService autocompleteService;
+  private AutocompletionEngine autocompleteService;
 
   @Inject
   private ResultTreeController resultTreeController;
@@ -103,6 +102,7 @@ public class QueryTabController {
 
   public void setDb(MongoDbConnection mongoDbConnection, MongoDatabase mongoDatabase, String collectionName) {
     this.mongoDatabase = mongoDatabase;
+    autocompleteService.setMongoDb(mongoDatabase);
     CodeAreaBuilder builder = new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService);
     if (collectionName != null) {
       builder.setText("db.getCollection('" + collectionName + "').find({})");
