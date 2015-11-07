@@ -95,11 +95,11 @@ public class CodeAreaBuilder {
     codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 
     codeArea.textProperty().addListener((obs, oldText, newText) -> {
-      codeArea.setStyleSpans(0, computeHighlighting(newText));
+      updateStyles(newText);
     });
 
     codeArea.caretPositionProperty().addListener(c -> {
-      codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText()));
+      updateStyles(codeArea.getText());
     });
 
     Builder<KeyEvent> onKeyTyped = EventHandlerHelper.startWith(e -> {
@@ -123,6 +123,19 @@ public class CodeAreaBuilder {
 
     EventHandlerHelper.install(codeArea.onKeyTypedProperty(), onKeyTyped.create());
     return this;
+  }
+
+  int oldCaretPosition = 0;
+  String oldText = null;
+
+  private void updateStyles(String newText) {
+    int caretPosition = codeArea.getCaretPosition();
+    if (newText != oldText // compare by object link not by text
+        || oldCaretPosition != caretPosition) {
+      oldText = newText;
+      oldCaretPosition = caretPosition;
+      codeArea.setStyleSpans(0, computeHighlighting(newText, caretPosition));
+    }
   }
 
   public CodeAreaBuilder setupAutocomplete(AutocompleteService service) {
@@ -209,8 +222,7 @@ public class CodeAreaBuilder {
     codeArea.selectRange(selection.getStart(), selection.getStart());
   }
 
-  private StyleSpans<Collection<String>> computeHighlighting(String text) {
-    int caretPosition = codeArea.getCaretPosition();
+  private StyleSpans<Collection<String>> computeHighlighting(String text, int caretPosition) {
     int bracketMatchPosition = BRACKETS_MATCHER.findPair(text, caretPosition);
 
     Matcher matcher = PATTERN.matcher(text);
