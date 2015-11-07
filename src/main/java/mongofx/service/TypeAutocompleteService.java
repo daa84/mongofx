@@ -34,7 +34,7 @@ import mongofx.js.api.DB;
 import mongofx.js.api.JsIgnore;
 
 @Singleton
-public class AutocompleteService {
+public class TypeAutocompleteService {
   private final Map<Class<?>, NavigableMap<String, FieldDescription>> jsInfo = new HashMap<>();
   private final NavigableMap<String, FieldDescription> jsRootFields = new TreeMap<>();
   private boolean initialized = false;
@@ -137,38 +137,9 @@ public class AutocompleteService {
     }
   }
 
-  public static class Suggest {
-    private final String name;
-    private final String inserPart;
-
-    public Suggest(String name, String inserPart) {
-      super();
-      this.name = name;
-      this.inserPart = inserPart;
-    }
-
-    public Suggest(FieldDescription e) {
-      name = e.name;
-      inserPart = name;
-    }
-
-    public String getName() {
-      return name;
-    }
-
-    public String getInserPart() {
-      return inserPart;
-    }
-
-    @Override
-    public String toString() {
-      return name;
-    }
-  }
-
   public static class FieldDescription {
     private final Class<?> fieldType;
-    private final String name;
+    final String name;
 
     public FieldDescription(String name, Class<?> returnType) {
       this.name = name;

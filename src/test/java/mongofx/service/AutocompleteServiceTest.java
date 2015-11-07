@@ -31,14 +31,13 @@ import org.junit.Test;
 
 import mongofx.js.api.Collection;
 import mongofx.js.api.DB;
-import mongofx.service.AutocompleteService.FieldDescription;
-import mongofx.service.AutocompleteService.Suggest;
+import mongofx.service.TypeAutocompleteService.FieldDescription;
 
 public class AutocompleteServiceTest {
 
   @Test
   public void testSmallPathDynamicMap() {
-    AutocompleteService service = new AutocompleteService();
+    TypeAutocompleteService service = new TypeAutocompleteService();
     Map<Class<?>, NavigableMap<String, FieldDescription>> dynamicJsInfo = new HashMap<>();
     NavigableMap<String, FieldDescription> collectionDynamic = new TreeMap<>();
     collectionDynamic.put("find2", new FieldDescription("find2", String.class));
@@ -51,7 +50,7 @@ public class AutocompleteServiceTest {
 
   @Test
   public void testDynamicMap() {
-    AutocompleteService service = new AutocompleteService();
+    TypeAutocompleteService service = new TypeAutocompleteService();
     Map<Class<?>, NavigableMap<String, FieldDescription>> dynamicJsInfo = new HashMap<>();
     NavigableMap<String, FieldDescription> collectionDynamic = new TreeMap<>();
     collectionDynamic.put("find2", new FieldDescription("find2", String.class));
@@ -63,7 +62,7 @@ public class AutocompleteServiceTest {
 
   @Test
   public void test() {
-    AutocompleteService service = new AutocompleteService();
+    TypeAutocompleteService service = new TypeAutocompleteService();
     List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "find"), Collections.emptyMap());
 
     Assert.assertEquals(1, result.size());
@@ -71,7 +70,7 @@ public class AutocompleteServiceTest {
 
   @Test
   public void partSearchTest() {
-    AutocompleteService service = new AutocompleteService();
+    TypeAutocompleteService service = new TypeAutocompleteService();
     List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "fi"), Collections.emptyMap());
 
     Assert.assertEquals(1, result.size());
@@ -81,7 +80,7 @@ public class AutocompleteServiceTest {
 
   @Test
   public void emptyTest() {
-    AutocompleteService service = new AutocompleteService();
+    TypeAutocompleteService service = new TypeAutocompleteService();
     List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "tada"), Collections.emptyMap());
 
     Assert.assertEquals(0, result.size());
@@ -89,7 +88,7 @@ public class AutocompleteServiceTest {
 
   @Test
   public void AllTest() {
-    AutocompleteService service = new AutocompleteService();
+    TypeAutocompleteService service = new TypeAutocompleteService();
     List<Suggest> result = service.find(Arrays.asList("db", "getCollection", ""), Collections.emptyMap());
 
     Assert.assertFalse(result.isEmpty());

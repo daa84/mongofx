@@ -146,6 +146,10 @@ public class QueryTabController {
       showOnlyText(e.getMessage());
       log.error("Error execute script", e);
     }
+    catch (Exception e) {
+      showOnlyText(e.getMessage());
+      log.error("Error execute script", e);
+    }
   }
 
   private void buildResultView() {
@@ -165,6 +169,9 @@ public class QueryTabController {
 
   private void showOnlyText(String text) {
     setViewModeVisible(false);
+    if (text == null) {
+      text = "Empty result";
+    }
     queryResultTextController.replaceText(text);
     showText();
   }

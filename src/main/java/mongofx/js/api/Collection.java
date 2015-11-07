@@ -150,4 +150,18 @@ public class Collection {
 
     return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand((Bson)command.get()));
   }
+
+  @JsField("Updates an existing document or inserts a new document, depending on its document parameter.")
+  public SimpleTextPresentation save(Bindings document) {
+    Object id = document.get("_id");
+
+    if (id != null) {
+      Document toUpdate = new Document(document);
+      return new SimpleTextPresentation(
+          getCollection().replaceOne(new BasicDBObject("_id", id), toUpdate, new UpdateOptions().upsert(true)).getModifiedCount());
+    }
+
+    getCollection().insertOne(JsApiUtils.documentFromMap(document));
+    return new SimpleTextPresentation(1);
+  }
 }

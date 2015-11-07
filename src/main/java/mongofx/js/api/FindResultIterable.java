@@ -19,8 +19,14 @@
 package mongofx.js.api;
 
 import java.lang.reflect.Field;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
+
+import javax.script.Bindings;
+import javax.script.SimpleBindings;
 
 import org.bson.BsonDocument;
 import org.bson.Document;
@@ -38,7 +44,7 @@ import com.mongodb.operation.OperationExecutor;
 import mongofx.driver.FindIterable;
 import mongofx.service.MongoDatabase;
 
-public class FindResultIterable implements ObjectListPresentation {
+public class FindResultIterable implements ObjectListPresentation, Iterable<Bindings> {
   private static final Logger log = LoggerFactory.getLogger(FindResultIterable.class);
 
   private final MongoDatabase mongoDatabase;
@@ -130,7 +136,14 @@ public class FindResultIterable implements ObjectListPresentation {
     return JsApiUtils.singletonIter(JsApiUtils.convertBsonToDocument(res));
   }
 
-  public void forEach(Consumer<? super Document> action) {
-    iterator(0, 0).forEachRemaining(action);
+  @Override
+  public void forEach(Consumer<? super Bindings> action) {
+    Iterable.super.forEach(action);
+  }
+
+  @Override
+  public Iterator<Bindings> iterator() {
+    return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(skip != null ? skip : 0, limit != null ? limit : 0), 0), false)
+        .map(v -> (Bindings)new SimpleBindings(v)).iterator();
   }
 }

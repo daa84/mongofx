@@ -46,7 +46,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import mongofx.js.support.JsPathBuilder;
-import mongofx.service.AutocompleteService.Suggest;
+import mongofx.service.Suggest;
 import mongofx.ui.main.AutocompletionEngine;
 
 public class CodeAreaBuilder {

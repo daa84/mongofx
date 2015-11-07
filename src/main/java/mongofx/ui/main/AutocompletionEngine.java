@@ -20,6 +20,7 @@ package mongofx.ui.main;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -29,21 +30,29 @@ import com.google.inject.Inject;
 
 import mongofx.js.api.Collection;
 import mongofx.js.api.DB;
-import mongofx.service.AutocompleteService;
-import mongofx.service.AutocompleteService.FieldDescription;
-import mongofx.service.AutocompleteService.Suggest;
 import mongofx.service.MongoDatabase;
+import mongofx.service.Suggest;
+import mongofx.service.TemplateAutocompleteService;
+import mongofx.service.TypeAutocompleteService;
+import mongofx.service.TypeAutocompleteService.FieldDescription;
 
 public class AutocompletionEngine {
 
   @Inject
-  private AutocompleteService service;
+  private TypeAutocompleteService jsService;
+
+  @Inject
+  private TemplateAutocompleteService templateService;
 
   private MongoDatabase mongoDb;
 
   public List<Suggest> find(List<String> paths) {
-    Map<Class<?>, NavigableMap<String, FieldDescription>> dynamicInfo = buildDynamicInfo();
-    return service.find(paths, dynamicInfo);
+    List<Suggest> result = new LinkedList<>();
+    result.addAll(jsService.find(paths, buildDynamicInfo()));
+    if (paths != null && !paths.isEmpty()) {
+      result.addAll(templateService.find(paths.get(paths.size() - 1)));
+    }
+    return result;
   }
 
 
