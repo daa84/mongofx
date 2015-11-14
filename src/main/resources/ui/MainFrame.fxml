@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="mongofx.ui.main.MainFrameController">
+	fx:controller="mongofx.ui.main.MainFrameController" fx:id="mainFrame">
 	<top>
 		<ToolBar>
 			<Button focusTraversable="false" onAction="#showConnectionSettings">
@@ -26,6 +26,22 @@
 				</tooltip>
 				<graphic>
 					<FontAwesomeIconView glyphName="PLAY" />
+				</graphic>
+			</Button>
+			<Button focusTraversable="false" onAction="#saveBuffer">
+				<tooltip>
+					<Tooltip text="Save (Ctrl+S)"/>
+				</tooltip>
+				<graphic>
+					<FontAwesomeIconView glyphName="SAVE" />
+				</graphic>
+			</Button>
+			<Button focusTraversable="false" onAction="#openBuffer">
+				<tooltip>
+					<Tooltip text="Save (Ctrl+O)"/>
+				</tooltip>
+				<graphic>
+					<FontAwesomeIconView glyphName="FOLDER_OPEN" />
 				</graphic>
 			</Button>
 		</ToolBar>

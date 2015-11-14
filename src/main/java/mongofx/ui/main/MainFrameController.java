@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.fxmisc.wellbehaved.event.EventHandlerHelper;
+import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
+import org.fxmisc.wellbehaved.event.EventPattern;
 import org.reactfx.EventStreams;
 
 import com.google.inject.Inject;
@@ -33,7 +36,11 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import mongofx.service.MongoService;
 import mongofx.service.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
@@ -59,10 +66,17 @@ public class MainFrameController {
   private final Map<Node, QueryTabController> tabData = new HashMap<>();
 
   @FXML
+  private BorderPane mainFrame;
+
+  @FXML
   protected void initialize() {
     treeController.initialize(treeView, this);
     EventStreams.simpleChangesOf(queryTabs.getTabs())
     .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent())));
+
+    Builder<KeyEvent> mainEvents = EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.S, KeyCombination.CONTROL_DOWN)).act(a -> saveBuffer())//
+        .on(EventPattern.keyPressed(KeyCode.O, KeyCombination.CONTROL_DOWN)).act(a -> openBuffer());
+    EventHandlerHelper.install(mainFrame.onKeyPressedProperty(), mainEvents.create());
   }
 
   public void addConnectionSettings(ConnectionSettings connectionSettings) {
@@ -117,5 +131,21 @@ public class MainFrameController {
   @FXML
   public void realoadSelectedTreeItem() {
     treeController.reloadSelectedTreeItem();
+  }
+
+  @FXML
+  public void saveBuffer() {
+    Tab selectedTab = queryTabs.getSelectionModel().getSelectedItem();
+    if (selectedTab != null) {
+      tabData.get(selectedTab.getContent()).saveCurrentBuffer();
+    }
+  }
+
+  @FXML
+  public void openBuffer() {
+    Tab selectedTab = queryTabs.getSelectionModel().getSelectedItem();
+    if (selectedTab != null) {
+      tabData.get(selectedTab.getContent()).loadToBuffer();
+    }
   }
 }
