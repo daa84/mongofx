@@ -8,105 +8,113 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
 <?import mongofx.ui.control.NumberTextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.SplitPane?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="mongofx.ui.main.QueryTabController">
-	<top>
-		<BorderPane>
-			<top>
-				<HBox alignment="CENTER_LEFT" spacing="10" prefHeight="25">
-					<Label text="${controller.connectedServerName}">
-						<graphic>
-							<FontAwesomeIconView glyphName="SERVER"/>
-						</graphic>
-					</Label>
-					<Label text="${controller.connectedDBName}">
-						<graphic>
-							<FontAwesomeIconView glyphName="DATABASE"/>
-						</graphic>
-					</Label>
-				</HBox>
-			</top>
-			<center>
-				<CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased" />
-			</center>
-			<bottom>
-				<HBox alignment="CENTER_RIGHT" visible="${controller.showObjectListControls}">
-					<padding>
-						<Insets top="2" bottom="2" />
-					</padding>
-					<Button onAction="#resultScrollLeft">
-						<graphic>
-							<FontAwesomeIconView glyphName="ANGLE_LEFT" />
-						</graphic>
-					</Button>
-					<NumberTextField fx:id="skipResult" text="0" prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER"/>
-					<NumberTextField fx:id="limitResult" text="50" prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER"/>
-					<Button onAction="#resultScrollRight">
-						<graphic>
-							<FontAwesomeIconView glyphName="ANGLE_RIGHT" />
-						</graphic>
-						<HBox.margin>
-							<Insets right="10" />
-						</HBox.margin>
-					</Button>
-					
-					<fx:define>
-						<ToggleGroup fx:id="viewToggleGroup"/>
-					</fx:define>
-					<ToggleButton fx:id="viewAsTree" focusTraversable="false"
-								  toggleGroup="$viewToggleGroup" selected="true">
-						<tooltip>
-							<Tooltip text="View as Tree"/>
-						</tooltip>
-						<graphic>
-							<FontAwesomeIconView glyphName="TREE"/>
-						</graphic>
-					</ToggleButton>
-					<ToggleButton fx:id="viewAsText" focusTraversable="false"
-								  toggleGroup="$viewToggleGroup">
-						<tooltip>
-							<Tooltip text="View as Text"/>
-						</tooltip>
-						<graphic>
-							<FontAwesomeIconView glyphName="STICKY_NOTE"/>
-						</graphic>
-					</ToggleButton>
-				</HBox>
-			</bottom>
-		</BorderPane>
-	</top>
 	<center>
-		<StackPane>
-			<fx:include fx:id="queryResultText" source="Editor.fxml"
-						visible="false"/>
-			<TreeTableView fx:id="queryResultTree" showRoot="false">
-				<columnResizePolicy>
-					<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-				</columnResizePolicy>
-				<columns>
-					<TreeTableColumn text="Key" prefWidth="10"
-									 minWidth="5">
-						<cellValueFactory>
-							<TreeItemPropertyValueFactory
-                                property="key"/>
-						</cellValueFactory>
-					</TreeTableColumn>
-					<TreeTableColumn text="Value" prefWidth="150">
-						<cellValueFactory>
-							<TreeItemPropertyValueFactory
-                                property="displayValue"/>
-						</cellValueFactory>
-					</TreeTableColumn>
-					<TreeTableColumn text="Type" prefWidth="150">
-						<cellValueFactory>
-							<TreeItemPropertyValueFactory
-                                property="typeDescription"/>
-						</cellValueFactory>
-					</TreeTableColumn>
-				</columns>
-			</TreeTableView>
-		</StackPane>
+		<SplitPane dividerPositions="0.2" orientation="VERTICAL">
+			<BorderPane>
+				<top>
+					<HBox alignment="CENTER_LEFT" spacing="10" prefHeight="25">
+						<Label text="${controller.connectedServerName}">
+							<graphic>
+								<FontAwesomeIconView glyphName="SERVER" />
+							</graphic>
+						</Label>
+						<Label text="${controller.connectedDBName}">
+							<graphic>
+								<FontAwesomeIconView glyphName="DATABASE" />
+							</graphic>
+						</Label>
+					</HBox>
+				</top>
+				<center>
+					<CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased" />
+				</center>
+			</BorderPane>
+			<BorderPane>
+				<top>
+					<HBox alignment="CENTER_RIGHT" visible="${controller.showObjectListControls}">
+						<padding>
+							<Insets top="2" bottom="2" />
+						</padding>
+						<Button onAction="#resultScrollLeft">
+							<graphic>
+								<FontAwesomeIconView glyphName="ANGLE_LEFT" />
+							</graphic>
+						</Button>
+						<NumberTextField fx:id="skipResult" text="0"
+							prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER" />
+						<NumberTextField fx:id="limitResult" text="50"
+							prefWidth="50" styleClass="query-scroller" alignment="BASELINE_CENTER" />
+						<Button onAction="#resultScrollRight">
+							<graphic>
+								<FontAwesomeIconView glyphName="ANGLE_RIGHT" />
+							</graphic>
+							<HBox.margin>
+								<Insets right="10" />
+							</HBox.margin>
+						</Button>
+
+						<fx:define>
+							<ToggleGroup fx:id="viewToggleGroup" />
+						</fx:define>
+						<ToggleButton fx:id="viewAsTree" focusTraversable="false"
+							toggleGroup="$viewToggleGroup" selected="true">
+							<tooltip>
+								<Tooltip text="View as Tree" />
+							</tooltip>
+							<graphic>
+								<FontAwesomeIconView glyphName="TREE" />
+							</graphic>
+						</ToggleButton>
+						<ToggleButton fx:id="viewAsText" focusTraversable="false"
+							toggleGroup="$viewToggleGroup">
+							<tooltip>
+								<Tooltip text="View as Text" />
+							</tooltip>
+							<graphic>
+								<FontAwesomeIconView glyphName="STICKY_NOTE" />
+							</graphic>
+						</ToggleButton>
+					</HBox>
+				</top>
+				<center>
+					<StackPane>
+						<fx:include fx:id="queryResultText" source="Editor.fxml"
+							visible="false" />
+						<TreeTableView fx:id="queryResultTree" showRoot="false">
+							<columnResizePolicy>
+								<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+							</columnResizePolicy>
+							<columns>
+								<TreeTableColumn text="Key" prefWidth="10"
+									minWidth="5">
+									<cellValueFactory>
+										<TreeItemPropertyValueFactory
+											property="key" />
+									</cellValueFactory>
+								</TreeTableColumn>
+								<TreeTableColumn text="Value" prefWidth="150">
+									<cellValueFactory>
+										<TreeItemPropertyValueFactory
+											property="displayValue" />
+									</cellValueFactory>
+								</TreeTableColumn>
+								<TreeTableColumn text="Type" prefWidth="150">
+									<cellValueFactory>
+										<TreeItemPropertyValueFactory
+											property="typeDescription" />
+									</cellValueFactory>
+								</TreeTableColumn>
+							</columns>
+						</TreeTableView>
+					</StackPane>
+				</center>
+			</BorderPane>
+		</SplitPane>
 	</center>
 </BorderPane>
 
