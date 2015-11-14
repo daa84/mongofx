@@ -51,7 +51,7 @@ import mongofx.ui.main.AutocompletionEngine;
 
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
-    "db", "function", "var", "for", "if", "else", "return", "while"
+    "db", "function", "var", "for", "if", "else", "return", "while", "this", "true", "false"
   };
 
   private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";

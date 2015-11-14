@@ -18,11 +18,6 @@
 //
 package mongofx.ui.main;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.Optional;
 
 import javax.script.ScriptException;
@@ -44,8 +39,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 import mongofx.codearea.CodeAreaBuilder;
 import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
@@ -95,6 +88,8 @@ public class QueryTabController {
   @Inject
   private ResultTreeController resultTreeController;
 
+  private EditorFileController editorFileController;
+
   private final SimpleStringProperty connectedServerName = new SimpleStringProperty();
   private final SimpleStringProperty connectedDBName = new SimpleStringProperty();
 
@@ -104,6 +99,7 @@ public class QueryTabController {
 
   @FXML
   protected void initialize() {
+    editorFileController = new EditorFileController(uiBuilder, codeArea);
     EventStreams.changesOf(viewToggleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
   }
 
@@ -133,34 +129,11 @@ public class QueryTabController {
   }
 
   public void saveCurrentBuffer() {
-    FileChooser chooser = new FileChooser();
-    chooser.setSelectedExtensionFilter(new ExtensionFilter("Java Script", "*.js"));
-    chooser.setInitialFileName(mongoDatabase.getName() + ".js");
-    File selectedFile = chooser.showSaveDialog(uiBuilder.getPrimaryStage());
-    if (selectedFile != null) {
-      try(OutputStream out = Files.newOutputStream(selectedFile.toPath())) {
-        out.write(codeArea.getText().getBytes());
-      }
-      catch (IOException e) {
-        log.error("IOException:",e);
-      }
-    }
+    editorFileController.saveCurrentBuffer(mongoDatabase.getName() + ".js");
   }
 
   public void loadToBuffer() {
-    FileChooser chooser = new FileChooser();
-    chooser.setSelectedExtensionFilter(new ExtensionFilter("Java Script", "*.js"));
-    File selectedFile = chooser.showOpenDialog(uiBuilder.getPrimaryStage());
-    if (selectedFile != null) {
-      try(InputStream in = Files.newInputStream(selectedFile.toPath())) {
-        byte[] text = new byte[in.available()];
-        in.read(text);
-        codeArea.replaceText(new String(text));
-      }
-      catch (IOException e) {
-        log.error("IOException:",e);
-      }
-    }
+    editorFileController.loadToBuffer();
   }
 
   public void executeScript() {
@@ -320,5 +293,9 @@ public class QueryTabController {
 
   public SimpleBooleanProperty showObjectListControlsProperty() {
     return showObjectListControls;
+  }
+
+  public void saveCurrentBufferAs() {
+    editorFileController.saveCurrentBufferAs(mongoDatabase.getName() + ".js");
   }
 }

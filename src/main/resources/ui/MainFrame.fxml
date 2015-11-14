@@ -36,6 +36,14 @@
 					<FontAwesomeIconView glyphName="SAVE" />
 				</graphic>
 			</Button>
+			<Button focusTraversable="false" onAction="#saveBufferAs">
+				<tooltip>
+					<Tooltip text="Save As)"/>
+				</tooltip>
+				<graphic>
+					<FontAwesomeIconView glyphName="HDD_ALT" />
+				</graphic>
+			</Button>
 			<Button focusTraversable="false" onAction="#openBuffer">
 				<tooltip>
 					<Tooltip text="Save (Ctrl+O)"/>

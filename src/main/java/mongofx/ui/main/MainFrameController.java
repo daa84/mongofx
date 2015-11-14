@@ -151,4 +151,12 @@ public class MainFrameController {
       tabData.get(selectedTab.getContent()).loadToBuffer();
     }
   }
+
+  @FXML
+  public void saveBufferAs() {
+    Tab selectedTab = queryTabs.getSelectionModel().getSelectedItem();
+    if (selectedTab != null) {
+      tabData.get(selectedTab.getContent()).saveCurrentBufferAs();
+    }
+  }
 }
