@@ -164,4 +164,35 @@ public class Collection {
     getCollection().insertOne(JsApiUtils.documentFromMap(document));
     return new SimpleTextPresentation(1);
   }
+
+  public ObjectListPresentation mapReduce(String map, String reduce, Bindings options) {
+    BasicDBObjectBuilder command = new BasicDBObjectBuilder();
+    command.add("mapReduce", name);
+    command.add("map", map);
+    command.add("reduce", reduce);
+
+    putObject("query", options, command);
+    putObject("out", options, command);
+    putObject("scope", options, command);
+    putSimpleField("field", options, command);
+    putSimpleField("jsMode", options, command);
+    putSimpleField("finilize", options, command);
+    putSimpleField("verbose", options, command);
+
+    return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand((Bson)command.get()));
+  }
+
+  private void putSimpleField(String field, Bindings options, BasicDBObjectBuilder command) {
+    Object val = options.get(field);
+    if (val != null) {
+      command.add(field, val);
+    }
+  }
+
+  private void putObject(String field, Bindings options, BasicDBObjectBuilder command) {
+    Bindings obj = (Bindings)options.get(field);
+    if (obj != null) {
+      command.add(field, JsApiUtils.dbObjectFromMap(obj));
+    }
+  }
 }
