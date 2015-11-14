@@ -86,7 +86,10 @@ public class MainFrameController {
   @FXML
   public void treeViewClicked(MouseEvent ev) throws IOException {
     if (ev.getClickCount() == 2) {
-      openTab();
+      TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+      if (selectedItem != null && selectedItem.getValue().getValueType() == TreeValueType.COLLECTION) {
+        openTab();
+      }
     }
   }
 
