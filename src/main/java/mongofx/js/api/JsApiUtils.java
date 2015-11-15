@@ -20,8 +20,13 @@ package mongofx.js.api;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -33,6 +38,7 @@ import org.bson.Document;
 
 import com.google.common.base.Preconditions;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.ServerAddress;
 import com.mongodb.ServerCursor;
 import com.mongodb.client.MongoCursor;
@@ -135,6 +141,20 @@ public class JsApiUtils {
 
   public static Document convertBsonToDocument(BsonDocument in) {
     return Document.parse(in.toJson());
+  }
+
+  public static void putSimpleField(String field, Bindings options, BasicDBObjectBuilder command) {
+    Object val = options.get(field);
+    if (val != null) {
+      command.add(field, val);
+    }
+  }
+
+  public static void putObject(String field, Bindings options, BasicDBObjectBuilder command) {
+    Bindings obj = (Bindings)options.get(field);
+    if (obj != null) {
+      command.add(field, JsApiUtils.dbObjectFromMap(obj));
+    }
   }
 
   public static class SimpleIteratorMongoCursor implements MongoCursor<Document> {

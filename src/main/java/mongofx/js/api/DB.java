@@ -18,9 +18,16 @@
 //
 package mongofx.js.api;
 
+import static mongofx.js.api.JsApiUtils.dbObjectFromMap;
+import static mongofx.js.api.JsApiUtils.documentFromMap;
+import static mongofx.js.api.JsApiUtils.singletonIter;
+
 import java.util.HashMap;
 
 import javax.script.Bindings;
+import javax.script.SimpleBindings;
+
+import com.mongodb.BasicDBObject;
 
 import mongofx.service.MongoDatabase;
 
@@ -40,10 +47,32 @@ public class DB extends HashMap<String, Object> {
   }
 
   public ObjectListPresentation runCommand(Bindings cmd) {
-    return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand(JsApiUtils.documentFromMap(cmd)));
+    return singletonIter(mongoDatabase.getMongoDb().runCommand(documentFromMap(cmd)));
   }
 
   public SimpleTextPresentation getName() {
     return new SimpleTextPresentation(mongoDatabase.getMongoDb().getName());
+  }
+
+  public ObjectListPresentation serverStatus() {
+    return serverStatus(new SimpleBindings());
+  }
+
+  public ObjectListPresentation serverStatus(Bindings options) {
+    BasicDBObject command = dbObjectFromMap(options);
+    command.put("serverStatus", 1);
+    return singletonIter(mongoDatabase.getMongoDb().runCommand(command));
+  }
+
+  public ObjectListPresentation stats() {
+    return stats(null);
+  }
+
+  public ObjectListPresentation stats(Integer scale) {
+    BasicDBObject command = new BasicDBObject("dbStats", 1);
+    if (scale != null) {
+      command.put("scale", scale);
+    }
+    return singletonIter(mongoDatabase.getMongoDb().runCommand(command));
   }
 }

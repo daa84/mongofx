@@ -18,6 +18,12 @@
 //
 package mongofx.js.api;
 
+import static mongofx.js.api.JsApiUtils.buildOptions;
+import static mongofx.js.api.JsApiUtils.dbObjectFromMap;
+import static mongofx.js.api.JsApiUtils.putObject;
+import static mongofx.js.api.JsApiUtils.putSimpleField;
+import static mongofx.js.api.JsApiUtils.singletonIter;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,8 +108,8 @@ public class Collection {
   }
 
   public SimpleTextPresentation createIndex(Bindings index, Bindings options) {
-    return new SimpleTextPresentation(getCollection().createIndex(JsApiUtils.dbObjectFromMap(index),
-        JsApiUtils.buildOptions(new IndexOptions(), options)));
+    return new SimpleTextPresentation(getCollection().createIndex(dbObjectFromMap(index),
+        buildOptions(new IndexOptions(), options)));
   }
 
   public ObjectListPresentation reIndex() {
@@ -148,7 +154,7 @@ public class Collection {
       command.add("query", query);
     }
 
-    return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand((Bson)command.get()));
+    return singletonIter(mongoDatabase.getMongoDb().runCommand((Bson)command.get()));
   }
 
   @JsField("Updates an existing document or inserts a new document, depending on its document parameter.")
@@ -179,20 +185,6 @@ public class Collection {
     putSimpleField("finilize", options, command);
     putSimpleField("verbose", options, command);
 
-    return JsApiUtils.singletonIter(mongoDatabase.getMongoDb().runCommand((Bson)command.get()));
-  }
-
-  private void putSimpleField(String field, Bindings options, BasicDBObjectBuilder command) {
-    Object val = options.get(field);
-    if (val != null) {
-      command.add(field, val);
-    }
-  }
-
-  private void putObject(String field, Bindings options, BasicDBObjectBuilder command) {
-    Bindings obj = (Bindings)options.get(field);
-    if (obj != null) {
-      command.add(field, JsApiUtils.dbObjectFromMap(obj));
-    }
+    return singletonIter(mongoDatabase.getMongoDb().runCommand((Bson)command.get()));
   }
 }
