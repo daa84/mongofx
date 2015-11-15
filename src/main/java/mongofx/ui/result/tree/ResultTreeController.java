@@ -171,6 +171,12 @@ public class ResultTreeController {
     TreeItem<DocumentTreeValue> root = new TreeItem<>();
     root.getChildren().addAll(documents.stream().map(d -> new TreeItem<>(new DocumentTreeValue(null, d)))
         .peek(this::buildChilds).collect(Collectors.toList()));
+
+    // always exapnd first document
+    if (!documents.isEmpty()) {
+      root.getChildren().get(0).setExpanded(true);
+    }
+
     queryResultTree.setRoot(root);
   }
 
