@@ -35,8 +35,10 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.MongoNamespace;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.model.UpdateOptions;
 
 import mongofx.service.MongoDatabase;
@@ -186,5 +188,25 @@ public class Collection {
     putSimpleField("verbose", options, command);
 
     return singletonIter(mongoDatabase.getMongoDb().runCommand((Bson)command.get()));
+  }
+
+  public void renameCollection(String target) {
+    renameCollection(target, false);
+  }
+
+  public void renameCollection(String target, boolean dropTarget) {
+    getCollection().renameCollection(new MongoNamespace(mongoDatabase.getName(), target), new RenameCollectionOptions().dropTarget(dropTarget));
+  }
+
+  public ObjectListPresentation stats() {
+    return stats(null);
+  }
+
+  public ObjectListPresentation stats(Integer scale) {
+    BasicDBObject command = new BasicDBObject("collStats", name);
+    if (scale != null) {
+      command.put("scale", scale);
+    }
+    return singletonIter(mongoDatabase.getMongoDb().runCommand(command));
   }
 }
