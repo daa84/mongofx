@@ -10,6 +10,7 @@
 <?import mongofx.ui.control.NumberTextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.control.SplitPane?>
+<?import mongofx.ui.result.tree.ResultValueCellFactory?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
 	fx:controller="mongofx.ui.main.QueryTabController">
@@ -98,6 +99,9 @@
 									</cellValueFactory>
 								</TreeTableColumn>
 								<TreeTableColumn text="Value" prefWidth="150">
+									<cellFactory>
+										<ResultValueCellFactory />
+									</cellFactory>
 									<cellValueFactory>
 										<TreeItemPropertyValueFactory
 											property="displayValue" />
