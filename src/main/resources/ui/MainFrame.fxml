@@ -38,7 +38,7 @@
 			</Button>
 			<Button focusTraversable="false" onAction="#saveBufferAs">
 				<tooltip>
-					<Tooltip text="Save As)"/>
+					<Tooltip text="Save As"/>
 				</tooltip>
 				<graphic>
 					<FontAwesomeIconView glyphName="HDD_ALT" />

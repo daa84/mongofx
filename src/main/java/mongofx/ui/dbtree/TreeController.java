@@ -28,6 +28,7 @@ import org.bson.Document;
 
 import com.google.inject.Inject;
 import com.mongodb.MongoException;
+import com.mongodb.MongoNamespace;
 import com.mongodb.client.MongoCollection;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -145,13 +146,32 @@ public class TreeController {
   private void buildCollectionContextMenu() {
     MenuItem openShell = new MenuItem("Open Shell");
     openShell.setOnAction(this::onOpenShell);
+    MenuItem renameCollection = new MenuItem("Rename collection...");
+    renameCollection.setOnAction(this::onReanameCollection);
     MenuItem copyCollection = new MenuItem("Copy collection...");
     copyCollection.setOnAction(this::onCopyCollection);
     MenuItem removeAllDocs = new MenuItem("Remove All Documents...");
     removeAllDocs.setOnAction(this::onRemoveAllDocuments);
     MenuItem dropCollection = new MenuItem("Drop Collection...");
     dropCollection.setOnAction(this::onDropCollection);
-    collectionContextMenu = new ContextMenu(openShell, copyCollection, removeAllDocs, dropCollection);
+    collectionContextMenu = new ContextMenu(openShell, renameCollection, copyCollection, removeAllDocs, dropCollection);
+  }
+  
+  private void onReanameCollection(ActionEvent actionEvent) {
+	  TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+	  if (selectedItem == null) {
+		  return;
+	  }
+
+	  DbTreeValue value = selectedItem.getValue();
+	  TextInputDialog dialog = new TextInputDialog(value.getDisplayValue());
+	  dialog.setContentText("New collection name:");
+	  dialog.setHeaderText("Rename collection");
+	  dialog.showAndWait().ifPresent(targetCollection -> {
+	  	MongoCollection<Document> collection = value.getMongoDatabase().getMongoDb().getCollection(value.getDisplayValue());
+			collection.renameCollection(new MongoNamespace(value.getMongoDatabase().getName(), targetCollection));
+		  ((DynamicTreeItem)selectedItem.getParent()).reload();
+	  });
   }
 
   private void onCopyCollection(ActionEvent actionEvent) {
