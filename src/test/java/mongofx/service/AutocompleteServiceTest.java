@@ -31,7 +31,10 @@ import org.junit.Test;
 
 import mongofx.js.api.Collection;
 import mongofx.js.api.DB;
-import mongofx.service.TypeAutocompleteService.FieldDescription;
+import mongofx.service.suggest.Suggest;
+import mongofx.service.suggest.SuggestContext;
+import mongofx.service.suggest.TypeAutocompleteService;
+import mongofx.service.suggest.TypeAutocompleteService.FieldDescription;
 
 public class AutocompleteServiceTest {
 
@@ -75,7 +78,23 @@ public class AutocompleteServiceTest {
 
     Assert.assertEquals(1, result.size());
     Assert.assertEquals("find", result.get(0).getName());
-    Assert.assertEquals("nd", result.get(0).getInserPart());
+  }
+  
+  @Test
+  public void actionInsertTest() {
+  	TypeAutocompleteService service = new TypeAutocompleteService();
+    List<Suggest> result = service.find(Arrays.asList("db", "getCollection", "fi"), Collections.emptyMap());
+
+    Assert.assertEquals(1, result.size());
+    Assert.assertEquals("find", result.get(0).getName());
+    
+    result.get(0).apply(new SuggestContext("test", null) {
+    	@Override
+    	public void reaplace(int back, String text) {
+    		Assert.assertEquals("find", text);
+    		Assert.assertEquals(2, back);
+    	}
+    });
   }
 
   @Test

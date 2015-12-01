@@ -1,4 +1,4 @@
-db..mapReduce(
+db./*$collectionName*/.mapReduce(
 		function() { emit( this.f1,this.f2 ) },
 		function(key, values) { return Array.sum( values ) },
 		{

@@ -31,10 +31,10 @@ import com.google.inject.Inject;
 import mongofx.js.api.Collection;
 import mongofx.js.api.DB;
 import mongofx.service.MongoDatabase;
-import mongofx.service.Suggest;
-import mongofx.service.TemplateAutocompleteService;
-import mongofx.service.TypeAutocompleteService;
-import mongofx.service.TypeAutocompleteService.FieldDescription;
+import mongofx.service.suggest.Suggest;
+import mongofx.service.suggest.TemplateAutocompleteService;
+import mongofx.service.suggest.TypeAutocompleteService;
+import mongofx.service.suggest.TypeAutocompleteService.FieldDescription;
 
 public class AutocompletionEngine {
 

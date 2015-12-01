@@ -16,35 +16,10 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.service;
+package mongofx.service.suggest;
 
-import mongofx.service.TypeAutocompleteService.FieldDescription;
+@FunctionalInterface
+public interface SuggestAction {
 
-public class Suggest {
-  private final String name;
-  private final String inserPart;
-
-  public Suggest(String name, String inserPart) {
-    super();
-    this.name = name;
-    this.inserPart = inserPart;
-  }
-
-  public Suggest(FieldDescription e) {
-    name = e.name;
-    inserPart = name;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getInserPart() {
-    return inserPart;
-  }
-
-  @Override
-  public String toString() {
-    return name;
-  }
+	void insert(SuggestContext c, Suggest s);
 }

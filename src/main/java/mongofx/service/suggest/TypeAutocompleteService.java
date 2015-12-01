@@ -16,7 +16,7 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.service;
+package mongofx.service.suggest;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -32,6 +32,7 @@ import com.google.inject.Singleton;
 
 import mongofx.js.api.DB;
 import mongofx.js.api.JsIgnore;
+import mongofx.service.suggest.Suggest.BackReplaceInsertAction;
 
 @Singleton
 public class TypeAutocompleteService {
@@ -112,7 +113,7 @@ public class TypeAutocompleteService {
   private List<Suggest> find(NavigableMap<String, FieldDescription> root, String path) {
     NavigableMap<String, FieldDescription> tailMap = root.tailMap(path, true);
     return tailMap.entrySet().stream().filter(e -> e.getKey().startsWith(path)) //
-        .map(e -> new Suggest(e.getValue().name, e.getValue().name.substring(path.length())))
+        .map(e -> new Suggest(e.getValue().name, new BackReplaceInsertAction(path.length())))
         .collect(Collectors.toList());
   }
 

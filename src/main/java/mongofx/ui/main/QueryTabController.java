@@ -106,7 +106,7 @@ public class QueryTabController {
   public void setDb(MongoDbConnection mongoDbConnection, MongoDatabase mongoDatabase, String collectionName) {
     this.mongoDatabase = mongoDatabase;
     autocompleteService.setMongoDb(mongoDatabase);
-    CodeAreaBuilder builder = new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService);
+    CodeAreaBuilder builder = new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService, collectionName);
     if (collectionName != null) {
       builder.setText("db.getCollection('" + collectionName + "').find({})");
     } else {

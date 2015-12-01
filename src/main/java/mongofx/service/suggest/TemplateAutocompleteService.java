@@ -16,7 +16,7 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.service;
+package mongofx.service.suggest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,12 +25,16 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Singleton;
+
+import mongofx.service.suggest.Suggest.BackReplaceInsertAction;
 
 
 @Singleton
@@ -53,8 +57,9 @@ public class TemplateAutocompleteService {
   public List<Suggest> find(String value) {
     initialize();
 
-    return jsTemplates.tailMap(value, true).entrySet().stream().filter(v -> v.getKey().startsWith(value))
-        .map(v -> new Suggest(v.getKey() + "(T)", v.getValue().getText())).collect(Collectors.toList());
+    return jsTemplates.tailMap(value, true).entrySet().stream().filter(v -> v.getKey().startsWith(value)) //
+        .map(v -> new Suggest(v.getKey() + "(T)", new InsertTemplateAction(value.length(), v.getValue().getText()))) //
+        .collect(Collectors.toList());
   }
 
   private void loadJsTemplates(String path) {
@@ -81,6 +86,42 @@ public class TemplateAutocompleteService {
     jsTemplates.put(name, new InsertTemplate(text, 0));
   }
 
+  public static class InsertTemplateAction extends BackReplaceInsertAction {
+  	private Pattern VAR_PATTER = Pattern.compile("\\/\\*\\$[a-zA-Z]*\\*\\/"); 
+
+		public InsertTemplateAction(int back, String text) {
+			super(back, text);
+		}
+		
+		@Override
+		public void insert(SuggestContext c, Suggest s) {
+			c.reaplace(back, processVars(text, c));
+		}
+
+		String processVars(String text, SuggestContext c) {
+			if (text.isEmpty()) {
+				return text;
+			}
+			Matcher varMatcher = VAR_PATTER.matcher(text);
+			if (varMatcher.find()) {
+				StringBuffer sb = new StringBuffer();
+				do {
+					String varName = text.substring(varMatcher.start() + "/*$".length(), varMatcher.end() - "*/".length());
+					switch (varName) {
+					case "collectionName":
+						varMatcher.appendReplacement(sb, c.getCollectionName());
+						break;
+					default:
+						varMatcher.appendReplacement(sb, "");
+					}
+				} while (varMatcher.find());
+				varMatcher.appendTail(sb);
+				return sb.toString();
+			}
+			return text;
+		}  	
+  }
+  
   public static class InsertTemplate {
     private final String text;
     private final int cursorPos;

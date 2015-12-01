@@ -46,7 +46,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import mongofx.js.support.JsPathBuilder;
-import mongofx.service.Suggest;
+import mongofx.service.suggest.Suggest;
+import mongofx.service.suggest.SuggestContext;
 import mongofx.ui.main.AutocompletionEngine;
 
 public class CodeAreaBuilder {
@@ -128,6 +129,8 @@ public class CodeAreaBuilder {
   int oldCaretPosition = 0;
   String oldText = null;
 
+	private SuggestContext suggestContext;
+
   private void updateStyles(String newText) {
     int caretPosition = codeArea.getCaretPosition();
     if (newText != oldText // compare by object link not by text
@@ -138,8 +141,9 @@ public class CodeAreaBuilder {
     }
   }
 
-  public CodeAreaBuilder setupAutocomplete(AutocompletionEngine service) {
-    Popup popup = new Popup();
+  public CodeAreaBuilder setupAutocomplete(AutocompletionEngine service, String collectionName) {
+    this.suggestContext = new SuggestContext(collectionName, codeArea);
+		Popup popup = new Popup();
     popup.setAutoHide(true);
     popup.setHideOnEscape(true);
 
@@ -207,7 +211,7 @@ public class CodeAreaBuilder {
         .on(EventPattern.keyPressed(KeyCode.ENTER)).act(e -> {
           Suggest selectedItem = listView.getSelectionModel().getSelectedItem();
           if (selectedItem != null) {
-            codeArea.replaceText(codeArea.getSelection(), selectedItem.getInserPart());
+            selectedItem.apply(suggestContext);
           }
           popup.hide();
         });
