@@ -22,9 +22,9 @@ import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.util.Callback;
 
-public final class ResultValueCellFactory implements Callback<TreeTableColumn<?, ?>, TreeTableCell<?, ?>> {
-	@Override
-	public TreeTableCell<?, ?> call(TreeTableColumn<?, ?> param) {
-		return new ResultValueTreeTableCell();
-	}
+public final class ResultValueCellFactory implements Callback<TreeTableColumn<DocumentTreeValue, Object>, TreeTableCell<DocumentTreeValue, Object>> {
+  @Override
+  public TreeTableCell<DocumentTreeValue, Object> call(TreeTableColumn<DocumentTreeValue, Object> param) {
+    return new ResultValueTreeTableCell();
+  }
 }

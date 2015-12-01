@@ -36,6 +36,10 @@ public class DocumentTreeValue {
     this.value = value;
   }
 
+  public boolean isTopLevelDoc() {
+    return key == null;
+  }
+
   public Document getDocument() {
     return (Document)value;
   }
@@ -51,8 +55,11 @@ public class DocumentTreeValue {
     return String.valueOf(value);
   }
 
-  public String getDisplayValue() {
-    return toString();
+  public Object getDisplayValue() {
+    if (isTopLevel()) {
+      return null;
+    }
+    return value;
   }
 
   public String getKey() {
