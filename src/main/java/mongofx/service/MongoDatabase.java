@@ -20,6 +20,7 @@ package mongofx.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -27,6 +28,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
+
+import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 
@@ -90,12 +93,15 @@ public class MongoDatabase {
   public void dropIndex(String collectionName, String indexName) {
     mongoDb.getCollection(collectionName).dropIndex(indexName);
   }
+  
+  private Function<String, ObjectId> toObjectId = id -> new ObjectId(id);
 
   public Optional<Object> eval(String query) throws ScriptException {
     ScriptEngineManager engineManager = new ScriptEngineManager();
     ScriptEngine engine = engineManager.getEngineByName("nashorn");
     SimpleBindings bindings = new SimpleBindings();
     bindings.put("db", new DB(this));
+    bindings.put("ObjectId", toObjectId);
     Object result = engine.eval(query, bindings);
     if (result instanceof ObjectListPresentation || result instanceof TextPresentation) {
       return Optional.of(result);

@@ -83,16 +83,6 @@ public class MainFrameController {
     treeController.addDbConnect(mongoService.connect(connectionSettings));
   }
 
-  @FXML
-  public void treeViewClicked(MouseEvent ev) throws IOException {
-    if (ev.getClickCount() == 2) {
-      TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
-      if (selectedItem != null && selectedItem.getValue().getValueType() == TreeValueType.COLLECTION) {
-        openTab();
-      }
-    }
-  }
-
   public void openTab() {
     TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
     if (selectedItem != null) {

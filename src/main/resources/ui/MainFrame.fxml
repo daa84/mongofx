@@ -55,7 +55,7 @@
 		</ToolBar>
 	</top>
 	<left>
-		<TreeView fx:id="treeView" showRoot="false" onMouseClicked="#treeViewClicked">
+		<TreeView fx:id="treeView" showRoot="false">
 		</TreeView>
 	</left>
 	<center>

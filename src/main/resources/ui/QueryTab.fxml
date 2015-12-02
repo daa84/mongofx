@@ -19,6 +19,9 @@
 			<BorderPane>
 				<top>
 					<HBox alignment="CENTER_LEFT" spacing="10" prefHeight="25">
+						<padding>
+							<Insets left="5" />
+						</padding>
 						<Label text="${controller.connectedServerName}">
 							<graphic>
 								<FontAwesomeIconView glyphName="SERVER" />

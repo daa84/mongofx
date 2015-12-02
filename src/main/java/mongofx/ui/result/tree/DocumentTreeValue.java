@@ -57,7 +57,7 @@ public class DocumentTreeValue {
 
   public Object getDisplayValue() {
     if (isTopLevel()) {
-      return null;
+      return String.format("{%d fields}", getDocument().size());
     }
     return value;
   }

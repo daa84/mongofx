@@ -43,9 +43,11 @@ public class ResultValueTreeTableCell extends TreeTableCell<DocumentTreeValue, O
     if (item == null) {
       super.setText(null);
       super.setGraphic(null);
+      super.setTooltip(null);
     } else if (item instanceof Node) {
       super.setText(null);
       super.setGraphic((Node) item);
+      super.setTooltip(null);
     } else {
       setupDisplayValue(item);
     }
@@ -53,13 +55,15 @@ public class ResultValueTreeTableCell extends TreeTableCell<DocumentTreeValue, O
 
   private void setupDisplayValue(Object value) {
     if (value instanceof Document) {
+    	final Document document = (Document) value;
+    	
       super.setGraphic(null);
-      super.setText("{}");
-      super.setTooltip(new Tooltip(DocumentUtils.formatJson((Document)value)));
+			super.setText(String.format("{%d fields}", document.size()));
+      super.setTooltip(new Tooltip(DocumentUtils.formatJson(document)));
     }
     else if (value instanceof List) {
       super.setGraphic(null);
-      super.setText("[]");
+      super.setText(String.format("[%d]", ((List<?>) value).size()));
       super.setTooltip(null);
     }
     else {

@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import mongofx.ui.main.MainFrameController;
 import org.bson.Document;
 
 import com.google.inject.Inject;
@@ -43,11 +42,14 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 import mongofx.service.Executor;
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
 import mongofx.service.MongoService.MongoDbConnection;
 import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
+import mongofx.ui.main.MainFrameController;
 
 public class TreeController {
 
@@ -302,13 +304,28 @@ public class TreeController {
   private boolean removeFromRoot(TreeItem<DbTreeValue> selectedItem) {
     return treeView.getRoot().getChildren().remove(selectedItem);
   }
+  
 
   private class TreeDbCell extends TreeCell<DbTreeValue> {
+  	public void treeViewClicked(MouseEvent ev) {
+  		if (ev.getClickCount() == 2) {
+  			// don't process click on triangle
+  			if (ev.getPickResult().getIntersectedNode() instanceof Text) {
+  				TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+  				if (selectedItem != null && selectedItem.getValue().getValueType() == TreeValueType.COLLECTION) {
+  					mainFrameController.openTab();
+  					ev.consume();
+  				}
+  			}
+  		}
+  	}
+    
     @Override
     protected void updateItem(DbTreeValue item, boolean empty) {
       super.updateItem(item, empty);
 
       setupGraphic();
+      setOnMouseClicked(this::treeViewClicked);
 
       if (!empty) {
         setText(item.toString());
