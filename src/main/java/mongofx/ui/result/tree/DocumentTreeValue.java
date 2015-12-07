@@ -36,24 +36,28 @@ public class DocumentTreeValue {
     this.value = value;
   }
 
-  public boolean isTopLevelDoc() {
-    return key == null;
-  }
-
   public Document getDocument() {
     return (Document)value;
   }
 
   @Override
   public String toString() {
-    if (value instanceof Document) {
+    if (isDocument()) {
       return "";
     }
-    if (value instanceof List) {
+    if (isList()) {
       return "[]";
     }
     return String.valueOf(value);
   }
+
+	public boolean isDocument() {
+		return value instanceof Document;
+	}
+
+	public boolean isList() {
+		return value instanceof List;
+	}
 
   public Object getDisplayValue() {
     if (isTopLevel()) {
@@ -63,7 +67,7 @@ public class DocumentTreeValue {
   }
 
   public String getKey() {
-    if (isTopLevel() && value instanceof Document) {
+    if (isTopLevel() && isDocument()) {
       Object id = ((Document)value).get("_id");
       if (id != null) {
         if (id instanceof ObjectId) {

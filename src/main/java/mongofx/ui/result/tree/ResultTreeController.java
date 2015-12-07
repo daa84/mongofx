@@ -76,14 +76,59 @@ public class ResultTreeController {
     insertDocument.setOnAction(this::insertDocument);
     MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
+    MenuItem copyPath = new MenuItem("Copy path");
+    copyPath.setOnAction(this::copyPath);
     MenuItem copyValue = new MenuItem("Copy value");
     copyValue.setOnAction(this::copyValue);
     MenuItem copyJson = new MenuItem("Copy JSON");
     copyJson.setOnAction(this::copyJson);
-    childContextMenu = new ContextMenu(insertDocument, editDocument, new SeparatorMenuItem(), copyJson, copyValue);
+    childContextMenu = new ContextMenu(insertDocument, editDocument, new SeparatorMenuItem(), copyPath, copyJson, copyValue);
   }
 
-  private void copyValue(ActionEvent actionEvent) {
+  private void copyPath(ActionEvent actionEvent) {
+  	TreeItem<DocumentTreeValue> selectedItem = queryResultTree.getSelectionModel().getSelectedItem();
+    if (selectedItem == null) {
+      return;
+    }
+    
+    StringBuilder path = new StringBuilder();
+    do {
+    	DocumentTreeValue value = selectedItem.getValue();
+    	if (value == null || value.isTopLevel()) {
+    		break;
+    	}
+    	
+    	if (isParentList(selectedItem)) {
+    		continue;
+    	}
+    	
+    	if (path.length() > 0) {
+    		path.insert(0, '.');
+    	}
+			path.insert(0, value.getKey());
+    } while((selectedItem = selectedItem.getParent()) != null);
+    
+    setToClipboard(path);
+  }
+  
+  private boolean isParentList(TreeItem<DocumentTreeValue> selectedItem) {
+		TreeItem<DocumentTreeValue> parent = selectedItem.getParent();
+		if (parent == null) {
+			return false;
+		}
+		DocumentTreeValue value = parent.getValue();
+		if (value == null) {
+			return false;
+		}
+		
+		if (value.isTopLevel()) {
+			return false;
+		}
+		
+		return value.isList();
+	}
+
+	private void copyValue(ActionEvent actionEvent) {
     TreeItem<DocumentTreeValue> selectedItem = queryResultTree.getSelectionModel().getSelectedItem();
     if (selectedItem == null) {
       return;
