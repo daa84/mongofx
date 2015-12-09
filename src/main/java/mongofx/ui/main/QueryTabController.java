@@ -20,8 +20,6 @@ package mongofx.ui.main;
 
 import java.util.Optional;
 
-import javax.script.ScriptException;
-
 import org.fxmisc.richtext.CodeArea;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -31,6 +29,7 @@ import com.google.inject.Inject;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
@@ -42,6 +41,7 @@ import javafx.scene.input.KeyEvent;
 import mongofx.codearea.CodeAreaBuilder;
 import mongofx.js.api.ObjectListPresentation;
 import mongofx.js.api.TextPresentation;
+import mongofx.service.Executor;
 import mongofx.service.MongoDatabase;
 import mongofx.service.MongoService.MongoDbConnection;
 import mongofx.ui.result.tree.DocumentTreeValue;
@@ -49,253 +49,353 @@ import mongofx.ui.result.tree.ResultTreeController;
 
 public class QueryTabController {
 
-  private static final Logger log = LoggerFactory.getLogger(QueryTabController.class);
+	private static final Logger log = LoggerFactory.getLogger(QueryTabController.class);
 
-  @FXML
-  private CodeArea codeArea;
+	@Inject
+	private Executor executor;
 
-  @Inject
-  private UIBuilder uiBuilder;
+	@FXML
+	private CodeArea codeArea;
 
-  @FXML
-  private TreeTableView<DocumentTreeValue> queryResultTree;
+	@Inject
+	private UIBuilder uiBuilder;
 
-  @FXML
-  private EditorController queryResultTextController;
-  @FXML
-  private Node queryResultText;
+	@FXML
+	private TreeTableView<DocumentTreeValue> queryResultTree;
 
-  private MongoDatabase mongoDatabase;
+	@FXML
+	private EditorController queryResultTextController;
+	@FXML
+	private Node queryResultText;
 
-  @FXML
-  private TextField limitResult;
+	private MongoDatabase mongoDatabase;
 
-  @FXML
-  private TextField skipResult;
+	@FXML
+	private TextField limitResult;
 
-  @FXML
-  private ToggleButton viewAsTree;
+	@FXML
+	private TextField skipResult;
 
-  @FXML
-  private ToggleButton viewAsText;
+	@FXML
+	private ToggleButton viewAsTree;
 
-  @FXML
-  private ToggleGroup viewToggleGroup;
+	@FXML
+	private ToggleButton viewAsText;
 
-  @Inject
-  private AutocompletionEngine autocompleteService;
+	@FXML
+	private ToggleGroup viewToggleGroup;
 
-  @Inject
-  private ResultTreeController resultTreeController;
+	@Inject
+	private AutocompletionEngine autocompleteService;
 
-  private EditorFileController editorFileController;
+	@Inject
+	private ResultTreeController resultTreeController;
 
-  private final SimpleStringProperty connectedServerName = new SimpleStringProperty();
-  private final SimpleStringProperty connectedDBName = new SimpleStringProperty();
+	private EditorFileController editorFileController;
 
-  private final SimpleBooleanProperty showObjectListControls = new SimpleBooleanProperty();
+	private final SimpleStringProperty connectedServerName = new SimpleStringProperty();
+	private final SimpleStringProperty connectedDBName = new SimpleStringProperty();
 
-  private QueryResultHolder queryResult;
+	private final SimpleBooleanProperty showObjectListControls = new SimpleBooleanProperty();
+	private final SimpleBooleanProperty showExecTime = new SimpleBooleanProperty();
+	private final SimpleBooleanProperty showProgress = new SimpleBooleanProperty();
+	private final SimpleStringProperty lastExecTime = new SimpleStringProperty();
 
-  @FXML
-  protected void initialize() {
-    editorFileController = new EditorFileController(uiBuilder, codeArea);
-    EventStreams.changesOf(viewToggleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
-  }
+	private QueryResultHolder queryResult;
 
-  public void setDb(MongoDbConnection mongoDbConnection, MongoDatabase mongoDatabase, String collectionName) {
-    this.mongoDatabase = mongoDatabase;
-    autocompleteService.setMongoDb(mongoDatabase);
-    CodeAreaBuilder builder = new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup().setupAutocomplete(autocompleteService, collectionName);
-    if (collectionName != null) {
-      builder.setText("db.getCollection('" + collectionName + "').find({})");
-    } else {
-      builder.setText("db");
-    }
+	private Task<QueryResultHolder> currentTask;
 
-    resultTreeController.initialize(queryResultTree, mongoDatabase);
+	@FXML
+	protected void initialize() {
+		editorFileController = new EditorFileController(uiBuilder, codeArea);
+		EventStreams.changesOf(viewToggleGroup.selectedToggleProperty()).subscribe(e -> updateResultListView());
+	}
 
-    queryResultTextController.disableEdit();
+	public void setDb(MongoDbConnection mongoDbConnection, MongoDatabase mongoDatabase, String collectionName) {
+		this.mongoDatabase = mongoDatabase;
+		autocompleteService.setMongoDb(mongoDatabase);
+		CodeAreaBuilder builder = new CodeAreaBuilder(codeArea, uiBuilder.getPrimaryStage()).setup()
+				.setupAutocomplete(autocompleteService, collectionName);
+		if (collectionName != null) {
+			builder.setText("db.getCollection('" + collectionName + "').find({})");
+		} else {
+			builder.setText("db");
+		}
 
-    setConnectedServerName(mongoDbConnection.getConnectionSettings().getHost());
-    setConnectedDBName(mongoDatabase.getName());
-  }
+		resultTreeController.initialize(queryResultTree, mongoDatabase);
 
-  @FXML
-  public void codeAreaOnKeyReleased(KeyEvent ev) {
-    if (ev.getCode() == KeyCode.F5) {
-      executeScript();
-    }
-  }
+		queryResultTextController.disableEdit();
 
-  public void saveCurrentBuffer() {
-    editorFileController.saveCurrentBuffer(mongoDatabase.getName() + ".js");
-  }
+		setConnectedServerName(mongoDbConnection.getConnectionSettings().getHost());
+		setConnectedDBName(mongoDatabase.getName());
+	}
 
-  public void loadToBuffer() {
-    editorFileController.loadToBuffer();
-  }
+	@FXML
+	public void codeAreaOnKeyReleased(KeyEvent ev) {
+		if (ev.getCode() == KeyCode.F5) {
+			executeScript();
+		}
+	}
 
-  public void executeScript() {
-    try {
-      Optional<Object> documents = mongoDatabase.eval(codeArea.getText());
+	public void saveCurrentBuffer() {
+		editorFileController.saveCurrentBuffer(mongoDatabase.getName() + ".js");
+	}
 
-      if (documents.isPresent()) {
-        Object result = documents.get();
-        if (result instanceof TextPresentation) {
-          queryResult = new QueryResultHolder((TextPresentation) result);
-        } else {
-          queryResult = new QueryResultHolder((ObjectListPresentation) result);
-        }
-      } else {
-        queryResult = new QueryResultHolder();
-      }
+	public void loadToBuffer() {
+		editorFileController.loadToBuffer();
+	}
 
-      buildResultView();
-    }
-    catch (ScriptException e) {
-      showOnlyText(e.getMessage());
-      log.error("Error execute script", e);
-    }
-    catch (Exception e) {
-      showOnlyText(e.getMessage());
-      log.error("Error execute script", e);
-    }
-  }
+	public void executeScript() {
+		if (currentTask != null) {
+			log.warn("Task already running");
+			return;
+		}
+		
+		final String script = codeArea.getText();
+		startProgress();
 
-  private void buildResultView() {
-    if (!queryResult.isEmpty()) {
-      if (queryResult.isTextOnlyPresentation()) {
-        showOnlyText(queryResult.getTextPresentationString());
-      }
-      else {
-        setViewModeVisible(true);
-        updateResultListView();
-      }
-    }
-    else {
-      showOnlyText("Empty result");
-    }
-  }
+		currentTask = new Task<QueryResultHolder>() {
+			private float scriptEvalTime;
+			private float dataLoadTime;
+			private long startEvalTime;
 
-  private void showOnlyText(String text) {
-    setViewModeVisible(false);
-    if (text == null) {
-      text = "Empty result";
-    }
-    queryResultTextController.replaceText(text);
-    showText();
-  }
+			@Override
+			protected QueryResultHolder call() throws Exception {
+				startEvalTime = System.currentTimeMillis();
+				Optional<Object> documents = mongoDatabase.eval(script);
+				scriptEvalTime = (System.currentTimeMillis() - startEvalTime) / 1000f;
+				
+				if (documents.isPresent()) {
+					Object result = documents.get();
+					if (result instanceof TextPresentation) {
+						return new QueryResultHolder((TextPresentation) result);
+					}
+					return new QueryResultHolder((ObjectListPresentation) result);
+				}
+				return new QueryResultHolder();
+			}
+			
+			@Override
+			protected void failed() {
+				setLastExecTime(String.format("%.3f sec.", (System.currentTimeMillis() - startEvalTime) / 1000f));
+				Throwable e = getException();
+				showOnlyText(e.getMessage());
+				log.error("Error execute script", e);
+			}
 
-  private void updateResultListView() {
-    queryResult.getSkip().ifPresent(skip -> skipResult.setText(String.valueOf(skip)));
-    queryResult.getLimit().ifPresent(limit -> limitResult.setText(String.valueOf(limit)));
+			@Override
+			protected void succeeded() {
+				queryResult = getValue();
+				if (!queryResult.isEmpty()) {
+					long startEvalTime = System.currentTimeMillis();
+					buildResultView();
+					dataLoadTime = (System.currentTimeMillis() - startEvalTime) / 1000f;
+				} else {
+					buildResultView();
+				}
+				setLastExecTime(
+						String.format("%.3f sec. (%.3f+%.3f)", scriptEvalTime + dataLoadTime, scriptEvalTime, dataLoadTime));
+			}
 
-    if (viewAsTree.isSelected()) {
-      resultTreeController.buildTreeFromDocuments(queryResult.getDocuments(getSkip(), getLimit()), queryResult.getCollectionName());
-      showTree();
-    } else {
-      queryResultTextController.replaceText(queryResult.getListPresentationString(getSkip(), getLimit()));
-      queryResultTextController.selectRange(0);
-      showText();
-    }
-  }
+			@Override
+			protected void done() {
+				stopProgress();
+				currentTask = null;
+			}
+		};
 
-  private void showText() {
-    resultTreeController.hide();
-    queryResultText.setVisible(true);
-  }
+		executor.executeMany(currentTask);
+	}
 
-  private void showTree() {
-    resultTreeController.show();
-    queryResultTextController.clear();
-    queryResultText.setVisible(false);
-  }
+	private void stopProgress() {
+		setShowProgress(false);
+		showExecTime();
+	}
 
-  private void setViewModeVisible(boolean b) {
-    setShowObjectListControls(b);
-  }
+	private void showExecTime() {
+		setShowExecTime(true);
+	}
 
-  public void startTab() {
-    String text = codeArea.getText();
-    int startIdx = text.indexOf("{");
-    if (startIdx < 0) {
-      startIdx = text.length() - 1;
-    }
-    startIdx++;
-    codeArea.selectRange(startIdx, startIdx);
-    codeArea.requestFocus();
-    executeScript();
-  }
+	private void startProgress() {
+		setShowExecTime(false);
+		setShowProgress(true);
+	}
+	
+	@FXML
+	public void stopEval() {
+		if (currentTask != null) {
+			currentTask.cancel();
+		}
+	}
 
-  public SimpleStringProperty connectedServerNameProperty() {
-    return this.connectedServerName;
-  }
+	private void buildResultView() {
+		if (!queryResult.isEmpty()) {
+			if (queryResult.isTextOnlyPresentation()) {
+				showOnlyText(queryResult.getTextPresentationString());
+			} else {
+				setViewModeVisible(true);
+				updateResultListView();
+			}
+		} else {
+			showOnlyText("Empty result");
+		}
+	}
 
-  public String getConnectedServerName() {
-    return this.connectedServerNameProperty().get();
-  }
+	private void showOnlyText(String text) {
+		setViewModeVisible(false);
+		if (text == null) {
+			text = "Empty result";
+		}
+		queryResultTextController.replaceText(text);
+		showText();
+	}
 
-  public void setConnectedServerName(final String connectedServerName) {
-    this.connectedServerNameProperty().set(connectedServerName);
-  }
+	private void updateResultListView() {
+		queryResult.getSkip().ifPresent(skip -> skipResult.setText(String.valueOf(skip)));
+		queryResult.getLimit().ifPresent(limit -> limitResult.setText(String.valueOf(limit)));
 
-  public SimpleStringProperty connectedDBNameProperty() {
-    return this.connectedDBName;
-  }
+		if (viewAsTree.isSelected()) {
+			resultTreeController.buildTreeFromDocuments(queryResult.getDocuments(getSkip(), getLimit()),
+					queryResult.getCollectionName());
+			showTree();
+		} else {
+			queryResultTextController.replaceText(queryResult.getListPresentationString(getSkip(), getLimit()));
+			queryResultTextController.selectRange(0);
+			showText();
+		}
+	}
 
-  public String getConnectedDBName() {
-    return this.connectedDBNameProperty().get();
-  }
+	private void showText() {
+		resultTreeController.hide();
+		queryResultText.setVisible(true);
+	}
 
-  public void setConnectedDBName(final String connectedDBName) {
-    this.connectedDBNameProperty().set(connectedDBName);
-  }
+	private void showTree() {
+		resultTreeController.show();
+		queryResultTextController.clear();
+		queryResultText.setVisible(false);
+	}
 
-  @FXML
-  public void resultScrollLeft() {
-    int offset = getSkip() - getLimit();
-    if (offset < 0) {
-      offset = 0;
-    }
-    if (offset == getSkip()) {
-      return;
-    }
-    skipResult.setText(String.valueOf(offset));
-    updateResultListView();
-  }
+	private void setViewModeVisible(boolean b) {
+		setShowObjectListControls(b);
+	}
 
-  private int getSkip() {
-    return Integer.parseInt(skipResult.getText());
-  }
+	public void startTab() {
+		String text = codeArea.getText();
+		int startIdx = text.indexOf("{");
+		if (startIdx < 0) {
+			startIdx = text.length() - 1;
+		}
+		startIdx++;
+		codeArea.selectRange(startIdx, startIdx);
+		codeArea.requestFocus();
+		executeScript();
+	}
 
-  private int getLimit() {
-    return Integer.parseInt(limitResult.getText());
-  }
+	public SimpleStringProperty connectedServerNameProperty() {
+		return this.connectedServerName;
+	}
 
-  @FXML
-  public void resultScrollRight() {
-    int offset = getSkip();
-    if (offset >= Integer.MAX_VALUE - getLimit()) {
-      return;
-    }
-    skipResult.setText(String.valueOf(offset + getLimit()));
-    updateResultListView();
-  }
+	public String getConnectedServerName() {
+		return this.connectedServerNameProperty().get();
+	}
 
-  public boolean getShowObjectListControls() {
-    return showObjectListControls.get();
-  }
+	public void setConnectedServerName(final String connectedServerName) {
+		this.connectedServerNameProperty().set(connectedServerName);
+	}
 
-  public void setShowObjectListControls(boolean showObjectListControls) {
-    this.showObjectListControls.set(showObjectListControls);
-  }
+	public SimpleStringProperty connectedDBNameProperty() {
+		return this.connectedDBName;
+	}
 
-  public SimpleBooleanProperty showObjectListControlsProperty() {
-    return showObjectListControls;
-  }
+	public String getConnectedDBName() {
+		return this.connectedDBNameProperty().get();
+	}
 
-  public void saveCurrentBufferAs() {
-    editorFileController.saveCurrentBufferAs(mongoDatabase.getName() + ".js");
-  }
+	public void setConnectedDBName(final String connectedDBName) {
+		this.connectedDBNameProperty().set(connectedDBName);
+	}
+
+	@FXML
+	public void resultScrollLeft() {
+		int offset = getSkip() - getLimit();
+		if (offset < 0) {
+			offset = 0;
+		}
+		if (offset == getSkip()) {
+			return;
+		}
+		skipResult.setText(String.valueOf(offset));
+		updateResultListView();
+	}
+
+	private int getSkip() {
+		return Integer.parseInt(skipResult.getText());
+	}
+
+	private int getLimit() {
+		return Integer.parseInt(limitResult.getText());
+	}
+
+	@FXML
+	public void resultScrollRight() {
+		int offset = getSkip();
+		if (offset >= Integer.MAX_VALUE - getLimit()) {
+			return;
+		}
+		skipResult.setText(String.valueOf(offset + getLimit()));
+		updateResultListView();
+	}
+
+	public void saveCurrentBufferAs() {
+		editorFileController.saveCurrentBufferAs(mongoDatabase.getName() + ".js");
+	}
+
+	public boolean getShowObjectListControls() {
+		return showObjectListControls.get();
+	}
+
+	public void setShowObjectListControls(boolean showObjectListControls) {
+		this.showObjectListControls.set(showObjectListControls);
+	}
+
+	public SimpleBooleanProperty showObjectListControlsProperty() {
+		return showObjectListControls;
+	}
+
+	public final SimpleBooleanProperty showExecTimeProperty() {
+		return this.showExecTime;
+	}
+
+	public final boolean isShowExecTime() {
+		return this.showExecTimeProperty().get();
+	}
+
+	public final void setShowExecTime(final boolean showExecTime) {
+		this.showExecTimeProperty().set(showExecTime);
+	}
+
+	public final SimpleBooleanProperty showProgressProperty() {
+		return this.showProgress;
+	}
+
+	public final boolean isShowProgress() {
+		return this.showProgressProperty().get();
+	}
+
+	public final void setShowProgress(final boolean showProgress) {
+		this.showProgressProperty().set(showProgress);
+	}
+
+	public final SimpleStringProperty lastExecTimeProperty() {
+		return this.lastExecTime;
+	}
+
+	public final java.lang.String getLastExecTime() {
+		return this.lastExecTimeProperty().get();
+	}
+
+	public final void setLastExecTime(final java.lang.String lastExecTime) {
+		this.lastExecTimeProperty().set(lastExecTime);
+	}
 }

@@ -71,7 +71,7 @@ public class MainFrameController {
   protected void initialize() {
     treeController.initialize(treeView, this);
     EventStreams.simpleChangesOf(queryTabs.getTabs())
-    .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent())));
+    .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent()).stopEval()));
 
     Builder<KeyEvent> mainEvents = EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.S, KeyCombination.CONTROL_DOWN)).act(a -> saveBuffer())//
         .on(EventPattern.keyPressed(KeyCode.O, KeyCombination.CONTROL_DOWN)).act(a -> openBuffer());

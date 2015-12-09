@@ -20,18 +20,35 @@ package mongofx.service;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.google.inject.Singleton;
 
 @Singleton
 public class Executor {
   private ExecutorService executor = Executors.newSingleThreadExecutor();
+  
+  private ExecutorService multiThreadExecutor = new ThreadPoolExecutor(5, 5,
+      0L, TimeUnit.MILLISECONDS,
+      new LinkedBlockingQueue<Runnable>(20), r -> {
+      	Thread t = new Thread(r, "Script eval thread pool");
+      	t.setDaemon(true);
+      	t.setPriority(Thread.NORM_PRIORITY);
+				return t;
+      });
 
   public void execute(Runnable r) {
     executor.execute(r);
   }
+  
+  public void executeMany(Runnable r) {
+  	multiThreadExecutor.execute(r);
+  }
 
   public void stop() {
     executor.shutdownNow();
+    multiThreadExecutor.shutdownNow();
   }
 }
