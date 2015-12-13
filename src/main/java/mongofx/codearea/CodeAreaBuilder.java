@@ -104,7 +104,7 @@ public class CodeAreaBuilder {
     });
 
     Builder<KeyEvent> onKeyTyped = EventHandlerHelper.startWith(e -> {
-      String character = e.getCharacter();
+      final String character = e.getCharacter();
       if ("{".equals(character)) {
         charRight(e, codeArea, "}");
       }
@@ -115,10 +115,18 @@ public class CodeAreaBuilder {
         charRight(e, codeArea, ")");
       }
       else if ("\"".equals(character)) {
-        charRight(e, codeArea, "\"");
+        final int caretPosition = codeArea.getCaretPosition();
+        final String text = codeArea.getText();
+        if (!isLeftCharOpen(text, caretPosition, '"') && !isRightCharOpen(text, caretPosition, '"')) {
+          charRight(e, codeArea, "\"");
+        }
       }
       else if ("'".equals(character)) {
-        charRight(e, codeArea, "'");
+        final int caretPosition = codeArea.getCaretPosition();
+        final String text = codeArea.getText();
+        if (!isLeftCharOpen(text, caretPosition, '\'') && !isRightCharOpen(text, caretPosition, '\'')) {
+          charRight(e, codeArea, "'");
+        }
       }
     });
 
@@ -218,6 +226,52 @@ public class CodeAreaBuilder {
     EventHandlerHelper.install(listView.onKeyPressedProperty(), popupKeyEvents.create());
 
     return listView;
+  }
+
+  static boolean isLeftCharOpen(String in, int pos, char ch) {
+    if (in.length() == 0) {
+      return false;
+    }
+
+    if (pos > in.length()) {
+      throw new IllegalStateException("pos must be > in.length");
+    }
+
+    boolean open = false;
+    for (int i = 0; i < pos; i++) {
+      if (in.charAt(i) == ch) {
+        if (open) {
+          open = !(i == 0 || in.charAt(i - 1) != '\\');
+        }
+        else {
+          open = true;
+        }
+      }
+    }
+    return open;
+  }
+
+  static boolean isRightCharOpen(String in, int pos, char ch) {
+    if (in.length() == 0 || pos == in.length()) {
+      return false;
+    }
+
+    if (pos > in.length()) {
+      throw new IllegalStateException("pos must be > in.length");
+    }
+
+    boolean open = false;
+    for (int i = pos; i < in.length(); i++) {
+      if (in.charAt(i) == ch) {
+        if (open) {
+          open = !(i == 0 || in.charAt(i - 1) != '\\');
+        }
+        else {
+          open = true;
+        }
+      }
+    }
+    return open;
   }
 
   private static void charRight(KeyEvent e, CodeArea codeArea, String ch) {
