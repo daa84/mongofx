@@ -33,6 +33,8 @@ import com.mongodb.client.MongoCollection;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.event.ActionEvent;
+import javafx.event.EventTarget;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -43,7 +45,6 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.text.Text;
 import mongofx.service.Executor;
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
@@ -158,22 +159,22 @@ public class TreeController {
     dropCollection.setOnAction(this::onDropCollection);
     collectionContextMenu = new ContextMenu(openShell, renameCollection, copyCollection, removeAllDocs, dropCollection);
   }
-  
-  private void onReanameCollection(ActionEvent actionEvent) {
-	  TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
-	  if (selectedItem == null) {
-		  return;
-	  }
 
-	  DbTreeValue value = selectedItem.getValue();
-	  TextInputDialog dialog = new TextInputDialog(value.getDisplayValue());
-	  dialog.setContentText("New collection name:");
-	  dialog.setHeaderText("Rename collection");
-	  dialog.showAndWait().ifPresent(targetCollection -> {
-	  	MongoCollection<Document> collection = value.getMongoDatabase().getMongoDb().getCollection(value.getDisplayValue());
-			collection.renameCollection(new MongoNamespace(value.getMongoDatabase().getName(), targetCollection));
-		  ((DynamicTreeItem)selectedItem.getParent()).reload();
-	  });
+  private void onReanameCollection(ActionEvent actionEvent) {
+    TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+    if (selectedItem == null) {
+      return;
+    }
+
+    DbTreeValue value = selectedItem.getValue();
+    TextInputDialog dialog = new TextInputDialog(value.getDisplayValue());
+    dialog.setContentText("New collection name:");
+    dialog.setHeaderText("Rename collection");
+    dialog.showAndWait().ifPresent(targetCollection -> {
+      MongoCollection<Document> collection = value.getMongoDatabase().getMongoDb().getCollection(value.getDisplayValue());
+      collection.renameCollection(new MongoNamespace(value.getMongoDatabase().getName(), targetCollection));
+      ((DynamicTreeItem)selectedItem.getParent()).reload();
+    });
   }
 
   private void onCopyCollection(ActionEvent actionEvent) {
@@ -216,7 +217,7 @@ public class TreeController {
     dialog.setContentText("Enter Name:");
     dialog.setHeaderText("Create new db");
     dialog.showAndWait().ifPresent(r -> selectedItem.getChildren()
-      .add(createDbItem(selectedItem.getValue().getMongoConnection().createMongoDB(dialog.getResult()))));
+        .add(createDbItem(selectedItem.getValue().getMongoConnection().createMongoDB(dialog.getResult()))));
   }
 
   public void onDisconnectDb(ActionEvent ev) {
@@ -304,22 +305,23 @@ public class TreeController {
   private boolean removeFromRoot(TreeItem<DbTreeValue> selectedItem) {
     return treeView.getRoot().getChildren().remove(selectedItem);
   }
-  
+
 
   private class TreeDbCell extends TreeCell<DbTreeValue> {
-  	public void treeViewClicked(MouseEvent ev) {
-  		if (ev.getClickCount() == 2) {
-  			// don't process click on triangle
-  			if (ev.getPickResult().getIntersectedNode() instanceof Text) {
-  				TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
-  				if (selectedItem != null && selectedItem.getValue().getValueType() == TreeValueType.COLLECTION) {
-  					mainFrameController.openTab();
-  					ev.consume();
-  				}
-  			}
-  		}
-  	}
-    
+    public void treeViewClicked(MouseEvent ev) {
+      if (ev.getClickCount() == 2) {
+        // don't process click on triangle
+        EventTarget target = ev.getTarget();
+        if (target instanceof Node && !"arrow".equals(((Node)target).getStyleClass())) {
+          TreeItem<DbTreeValue> selectedItem = treeView.getSelectionModel().getSelectedItem();
+          if (selectedItem != null && selectedItem.getValue().getValueType() == TreeValueType.COLLECTION) {
+            mainFrameController.openTab();
+            ev.consume();
+          }
+        }
+      }
+    }
+
     @Override
     protected void updateItem(DbTreeValue item, boolean empty) {
       super.updateItem(item, empty);
