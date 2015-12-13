@@ -205,6 +205,18 @@ public class Collection {
     if (scale != null) {
       command.put("scale", scale);
     }
-    return singletonIter(mongoDatabase.getMongoDb().runCommand(command));
+    return mongoDatabase.runCommand(command);
+  }
+
+  public ObjectListPresentation validate() {
+    return validate(false);
+  }
+
+  public ObjectListPresentation validate(Boolean full) {
+    BasicDBObject command = new BasicDBObject("validate", name);
+    if (full != null) {
+      command.put("full", full);
+    }
+    return mongoDatabase.runCommand(command);
   }
 }
