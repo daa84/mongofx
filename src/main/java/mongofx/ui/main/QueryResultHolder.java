@@ -18,20 +18,21 @@
 //
 package mongofx.ui.main;
 
-import com.mongodb.client.MongoCursor;
-import mongofx.js.api.ObjectListPresentation;
-import mongofx.js.api.TextPresentation;
-import org.bson.Document;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.bson.Document;
+
+import com.mongodb.client.MongoCursor;
+
+import mongofx.js.api.ObjectListPresentation;
+
 public class QueryResultHolder {
   private final ObjectListPresentation objectListResult;
-  private final TextPresentation textResult;
+  private final String textResult;
 
   // cache
   private int cacheSkip = 0;
@@ -43,7 +44,7 @@ public class QueryResultHolder {
     textResult = null;
   }
 
-  public QueryResultHolder(TextPresentation textResult) {
+  public QueryResultHolder(String textResult) {
     objectListResult = null;
     this.textResult = textResult;
   }

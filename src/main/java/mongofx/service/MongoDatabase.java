@@ -29,13 +29,14 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 
 import mongofx.js.api.DB;
+import mongofx.js.api.JsApiUtils;
 import mongofx.js.api.ObjectListPresentation;
-import mongofx.js.api.TextPresentation;
 
 /**
  * @author daa
@@ -93,8 +94,8 @@ public class MongoDatabase {
   public void dropIndex(String collectionName, String indexName) {
     mongoDb.getCollection(collectionName).dropIndex(indexName);
   }
-  
-  private Function<String, ObjectId> toObjectId = id -> new ObjectId(id);
+
+  private final Function<String, ObjectId> toObjectId = id -> new ObjectId(id);
 
   public Optional<Object> eval(String query) throws ScriptException {
     ScriptEngineManager engineManager = new ScriptEngineManager();
@@ -103,9 +104,13 @@ public class MongoDatabase {
     bindings.put("db", new DB(this));
     bindings.put("ObjectId", toObjectId);
     Object result = engine.eval(query, bindings);
-    if (result instanceof ObjectListPresentation || result instanceof TextPresentation) {
+    if (result != null) {
       return Optional.of(result);
     }
     return Optional.empty();
+  }
+
+  public ObjectListPresentation runCommand(Bson command) {
+    return JsApiUtils.singletonIter(mongoDb.runCommand(command));
   }
 }

@@ -122,8 +122,8 @@ public class FindResultIterable implements ObjectListPresentation, Iterable<Bind
     return mongoDatabase.getMongoDb().getCollection(collectionName);
   }
 
-  public TextPresentation count() {
-    return new SimpleTextPresentation(getCollection().count(findQuery));
+  public long count() {
+    return getCollection().count(findQuery);
   }
 
   public ObjectListPresentation explain() {

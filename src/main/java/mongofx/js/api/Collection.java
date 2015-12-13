@@ -68,15 +68,15 @@ public class Collection {
     getCollection().insertOne(JsApiUtils.documentFromMap(item));
   }
 
-  public SimpleTextPresentation remove(Bindings item) {
-    return new SimpleTextPresentation(getCollection().deleteMany(JsApiUtils.dbObjectFromMap(item)).getDeletedCount());
+  public long remove(Bindings item) {
+    return getCollection().deleteMany(JsApiUtils.dbObjectFromMap(item)).getDeletedCount();
   }
 
-  public SimpleTextPresentation update(Bindings filter, Bindings update) {
+  public long update(Bindings filter, Bindings update) {
     return update(filter, update, null);
   }
 
-  public SimpleTextPresentation update(Bindings filter, Bindings update, Bindings options) {
+  public long update(Bindings filter, Bindings update, Bindings options) {
     Boolean multi = false;
     if (options != null) {
       options = new SimpleBindings(options);
@@ -87,13 +87,11 @@ public class Collection {
     }
 
     if (multi) {
-      return new SimpleTextPresentation(
-          getCollection().updateMany(JsApiUtils.dbObjectFromMap(filter), JsApiUtils.dbObjectFromMap(update),
-              JsApiUtils.buildOptions(new UpdateOptions(), options)).getModifiedCount());
+      return getCollection().updateMany(JsApiUtils.dbObjectFromMap(filter), JsApiUtils.dbObjectFromMap(update),
+          JsApiUtils.buildOptions(new UpdateOptions(), options)).getModifiedCount();
     }
-    return new SimpleTextPresentation(
-        getCollection().updateOne(JsApiUtils.dbObjectFromMap(filter), JsApiUtils.dbObjectFromMap(update),
-            JsApiUtils.buildOptions(new UpdateOptions(), options)).getModifiedCount());
+    return getCollection().updateOne(JsApiUtils.dbObjectFromMap(filter), JsApiUtils.dbObjectFromMap(update),
+        JsApiUtils.buildOptions(new UpdateOptions(), options)).getModifiedCount();
   }
 
   @JsField("Provides access to the aggregation pipeline.")
@@ -101,7 +99,7 @@ public class Collection {
     return new AggregateResultIterable(mongoDatabase, name, JsApiUtils.dbObjectFromList(pipeline));
   }
 
-  public SimpleTextPresentation createIndex(Bindings index) {
+  public String createIndex(Bindings index) {
     return createIndex(index, null);
   }
 
@@ -109,9 +107,9 @@ public class Collection {
     return JsApiUtils.iter(getCollection().listIndexes());
   }
 
-  public SimpleTextPresentation createIndex(Bindings index, Bindings options) {
-    return new SimpleTextPresentation(getCollection().createIndex(dbObjectFromMap(index),
-        buildOptions(new IndexOptions(), options)));
+  public String createIndex(Bindings index, Bindings options) {
+    return getCollection().createIndex(dbObjectFromMap(index),
+        buildOptions(new IndexOptions(), options));
   }
 
   public ObjectListPresentation reIndex() {
@@ -135,13 +133,13 @@ public class Collection {
   }
 
   @JsField("Wraps count to return a count of the number of documents in a collection or matching a query.")
-  public SimpleTextPresentation count() {
-    return new SimpleTextPresentation(getCollection().count());
+  public long count() {
+    return getCollection().count();
   }
 
   @JsField("Wraps count to return a count of the number of documents in a collection or matching a query.")
-  public SimpleTextPresentation count(Bindings find) {
-    return new SimpleTextPresentation(getCollection().count(JsApiUtils.dbObjectFromMap(find)));
+  public long count(Bindings find) {
+    return getCollection().count(JsApiUtils.dbObjectFromMap(find));
   }
 
   public ObjectListPresentation distinct(String key) {
@@ -160,17 +158,17 @@ public class Collection {
   }
 
   @JsField("Updates an existing document or inserts a new document, depending on its document parameter.")
-  public SimpleTextPresentation save(Bindings document) {
+  public long save(Bindings document) {
     Object id = document.get("_id");
 
     if (id != null) {
       Document toUpdate = new Document(document);
-      return new SimpleTextPresentation(
-          getCollection().replaceOne(new BasicDBObject("_id", id), toUpdate, new UpdateOptions().upsert(true)).getModifiedCount());
+      return getCollection().replaceOne(new BasicDBObject("_id", id), toUpdate, new UpdateOptions().upsert(true))
+          .getModifiedCount();
     }
 
     getCollection().insertOne(JsApiUtils.documentFromMap(document));
-    return new SimpleTextPresentation(1);
+    return 1l;
   }
 
   public ObjectListPresentation mapReduce(String map, String reduce, Bindings options) {
