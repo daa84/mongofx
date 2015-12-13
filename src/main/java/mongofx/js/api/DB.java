@@ -39,7 +39,7 @@ public class DB extends HashMap<String, Object> {
   public DB(mongofx.service.MongoDatabase mongoDatabase) {
     super();
     this.mongoDatabase = mongoDatabase;
-    mongoDatabase.listCollections().stream().forEach(n -> put(n, new Collection(mongoDatabase, n)));
+    mongoDatabase.getCachedCollections().stream().forEach(n -> put(n, new Collection(mongoDatabase, n)));
   }
 
   public Collection getCollection(String name) {
