@@ -106,19 +106,19 @@ public class CodeAreaBuilder {
     Builder<KeyEvent> onKeyTyped = EventHandlerHelper.startWith(e -> {
       String character = e.getCharacter();
       if ("{".equals(character)) {
-        charRight(codeArea, "}");
+        charRight(e, codeArea, "}");
       }
       else if ("[".equals(character)) {
-        charRight(codeArea, "]");
+        charRight(e, codeArea, "]");
       }
       else if ("(".equals(character)) {
-        charRight(codeArea, ")");
+        charRight(e, codeArea, ")");
       }
       else if ("\"".equals(character)) {
-        charRight(codeArea, "\"");
+        charRight(e, codeArea, "\"");
       }
       else if ("'".equals(character)) {
-        charRight(codeArea, "'");
+        charRight(e, codeArea, "'");
       }
     });
 
@@ -129,7 +129,7 @@ public class CodeAreaBuilder {
   int oldCaretPosition = 0;
   String oldText = null;
 
-	private SuggestContext suggestContext;
+  private SuggestContext suggestContext;
 
   private void updateStyles(String newText) {
     int caretPosition = codeArea.getCaretPosition();
@@ -143,7 +143,7 @@ public class CodeAreaBuilder {
 
   public CodeAreaBuilder setupAutocomplete(AutocompletionEngine service, String collectionName) {
     this.suggestContext = new SuggestContext(collectionName, codeArea);
-		Popup popup = new Popup();
+    Popup popup = new Popup();
     popup.setAutoHide(true);
     popup.setHideOnEscape(true);
 
@@ -220,10 +220,12 @@ public class CodeAreaBuilder {
     return listView;
   }
 
-  private static void charRight(CodeArea codeArea, String ch) {
+  private static void charRight(KeyEvent e, CodeArea codeArea, String ch) {
     IndexRange selection = codeArea.getSelection();
-    codeArea.replaceSelection(ch);
-    codeArea.selectRange(selection.getStart(), selection.getStart());
+    codeArea.replaceSelection(e.getCharacter() + ch);
+    int cursorPosition = selection.getStart() + 1;
+    codeArea.selectRange(cursorPosition, cursorPosition);
+    e.consume();
   }
 
   private StyleSpans<Collection<String>> computeHighlighting(String text, int caretPosition) {
