@@ -42,12 +42,16 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import mongofx.service.MongoDatabase;
 import mongofx.ui.main.DocumentUtils;
 import mongofx.ui.main.UIBuilder;
 
 public class ResultTreeController {
   private static final Logger log = LoggerFactory.getLogger(ResultTreeController.class);
+
+  private static KeyCombination copyValueKeyCombination = KeyCombination.keyCombination("Ctrl+C");
 
   @Inject
   private UIBuilder uiBuilder;
@@ -76,9 +80,10 @@ public class ResultTreeController {
     insertDocument.setOnAction(this::insertDocument);
     MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
-    MenuItem copyPath = new MenuItem("Copy path");
+    MenuItem copyPath = new MenuItem("Copy Path");
     copyPath.setOnAction(this::copyPath);
-    MenuItem copyValue = new MenuItem("Copy value");
+    MenuItem copyValue = new MenuItem("Copy Value");
+    copyValue.setAccelerator(copyValueKeyCombination);
     copyValue.setOnAction(this::copyValue);
     MenuItem copyJson = new MenuItem("Copy JSON");
     copyJson.setOnAction(this::copyJson);
@@ -86,49 +91,53 @@ public class ResultTreeController {
   }
 
   private void copyPath(ActionEvent actionEvent) {
-  	TreeItem<DocumentTreeValue> selectedItem = queryResultTree.getSelectionModel().getSelectedItem();
+    TreeItem<DocumentTreeValue> selectedItem = queryResultTree.getSelectionModel().getSelectedItem();
     if (selectedItem == null) {
       return;
     }
-    
+
     StringBuilder path = new StringBuilder();
     do {
-    	DocumentTreeValue value = selectedItem.getValue();
-    	if (value == null || value.isTopLevel()) {
-    		break;
-    	}
-    	
-    	if (isParentList(selectedItem)) {
-    		continue;
-    	}
-    	
-    	if (path.length() > 0) {
-    		path.insert(0, '.');
-    	}
-			path.insert(0, value.getKey());
+      DocumentTreeValue value = selectedItem.getValue();
+      if (value == null || value.isTopLevel()) {
+        break;
+      }
+
+      if (isParentList(selectedItem)) {
+        continue;
+      }
+
+      if (path.length() > 0) {
+        path.insert(0, '.');
+      }
+      path.insert(0, value.getKey());
     } while((selectedItem = selectedItem.getParent()) != null);
-    
+
     setToClipboard(path);
   }
-  
-  private boolean isParentList(TreeItem<DocumentTreeValue> selectedItem) {
-		TreeItem<DocumentTreeValue> parent = selectedItem.getParent();
-		if (parent == null) {
-			return false;
-		}
-		DocumentTreeValue value = parent.getValue();
-		if (value == null) {
-			return false;
-		}
-		
-		if (value.isTopLevel()) {
-			return false;
-		}
-		
-		return value.isList();
-	}
 
-	private void copyValue(ActionEvent actionEvent) {
+  private boolean isParentList(TreeItem<DocumentTreeValue> selectedItem) {
+    TreeItem<DocumentTreeValue> parent = selectedItem.getParent();
+    if (parent == null) {
+      return false;
+    }
+    DocumentTreeValue value = parent.getValue();
+    if (value == null) {
+      return false;
+    }
+
+    if (value.isTopLevel()) {
+      return false;
+    }
+
+    return value.isList();
+  }
+
+  private void copyValue(ActionEvent actionEvent) {
+    copyValue();
+  }
+
+  private void copyValue() {
     TreeItem<DocumentTreeValue> selectedItem = queryResultTree.getSelectionModel().getSelectedItem();
     if (selectedItem == null) {
       return;
@@ -207,7 +216,14 @@ public class ResultTreeController {
     this.queryResultTree = queryResultTree;
     this.mongoDatabase = mongoDatabase;
     queryResultTree.setRowFactory(ttv -> new ResultRow());
+    queryResultTree.setOnKeyPressed(this::onKeyPressed);
     buildRootContextMenu();
+  }
+
+  private void onKeyPressed(KeyEvent ev) {
+    if (copyValueKeyCombination.match(ev)) {
+      copyValue();
+    }
   }
 
   public void buildTreeFromDocuments(List<Document> documents, String collectionName) {
