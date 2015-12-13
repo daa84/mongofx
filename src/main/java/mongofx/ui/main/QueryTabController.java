@@ -39,6 +39,7 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import mongofx.codearea.CodeAreaBuilder;
+import mongofx.javafx.FocusFixer;
 import mongofx.js.api.ObjectListPresentation;
 import mongofx.service.Executor;
 import mongofx.service.MongoDatabase;
@@ -287,7 +288,7 @@ public class QueryTabController {
     }
     startIdx++;
     codeArea.selectRange(startIdx, startIdx);
-    codeArea.requestFocus();
+    FocusFixer.requestFocus(codeArea);
     executeScript();
   }
 
