@@ -25,6 +25,18 @@
 					<vendor>Andrey Dubravin</vendor>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.antlr</groupId>
+				<artifactId>antlr4-maven-plugin</artifactId>
+				<version>4.5</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>antlr4</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -68,6 +80,11 @@
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx</artifactId>
 			<version>8.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.antlr</groupId>
+			<artifactId>antlr4</artifactId>
+			<version>4.5.1-1</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
