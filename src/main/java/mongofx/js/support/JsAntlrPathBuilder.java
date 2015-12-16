@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 import mongofx.js.antlr4.parser.ECMAScriptBaseVisitor;
@@ -61,7 +62,7 @@ public class JsAntlrPathBuilder {
           return null;
         }
         markFinded(ctx.getStart());
-        path.add(ctx.getText());
+        addPath(ctx);
 
         return super.visitIdentifierName(ctx);
       }
@@ -81,14 +82,33 @@ public class JsAntlrPathBuilder {
           return null;
         }
         markFinded(ctx.getStart());
-        path.add(ctx.getText());
+        addPath(ctx);
         return super.visitIdentifierExpression(ctx);
       }
 
-      private void markFinded(Token start) {
-        int startIndex = start.getStartIndex();
-        int stopIndex = start.getStopIndex();
-        if (position >= startIndex && position <= stopIndex) {
+      private void addPath(ParserRuleContext ctx) {
+        if (ctx.exception == null) {
+          if (findedPath) {
+            Token start = ctx.getStart();
+            int partLength = position + 1 - Math.min(start.getStartIndex(), start.getStopIndex());
+            if (partLength > 0) {
+              path.add(ctx.getText().substring(0, partLength));
+            } else {
+              path.add("");
+            }
+          } else {
+            path.add(ctx.getText());
+          }
+        }
+        else {
+          path.add(ctx.getText());
+        }
+      }
+
+      private void markFinded(Token token) {
+        int start = Math.min(token.getStartIndex(), token.getStopIndex());
+        int stop = Math.max(token.getStartIndex(), token.getStopIndex());
+        if (position >= start && position <= stop) {
           findedPath = true;
         }
       }
