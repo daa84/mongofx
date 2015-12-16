@@ -25,16 +25,12 @@ import java.util.Optional;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import mongofx.js.antlr4.parser.ECMAScriptBaseVisitor;
 import mongofx.js.antlr4.parser.ECMAScriptLexer;
 import mongofx.js.antlr4.parser.ECMAScriptParser;
 
 public class JsAntlrPathBuilder {
-  private static final Logger log = LoggerFactory.getLogger(JsAntlrPathBuilder.class);
-
   public static Optional<List<String>> buildPath(String jsCode, int position) {
     ECMAScriptLexer lexer = new ECMAScriptLexer(new ANTLRInputStream(jsCode));
     ECMAScriptParser parser = new ECMAScriptParser(new CommonTokenStream(lexer));
@@ -69,6 +65,15 @@ public class JsAntlrPathBuilder {
 
         return super.visitIdentifierName(ctx);
       }
+
+      @Override
+      public Void visitArguments(mongofx.js.antlr4.parser.ECMAScriptParser.ArgumentsContext ctx) {
+        // TODO: here stack needed
+        if (dotExpression > 0) {
+          return null;
+        }
+        return super.visitArguments(ctx);
+      };
 
       @Override
       public Void visitIdentifierExpression(mongofx.js.antlr4.parser.ECMAScriptParser.IdentifierExpressionContext ctx) {

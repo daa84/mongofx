@@ -7,18 +7,31 @@ import java.util.List;
 import org.junit.Test;
 
 public class JsAntlrPathBuilderTest {
-  //  @Test
-  //  public void test() {
-  //    String code = "function xx() {" //
-  //        + "callFunction();" //
-  //        + "db . getCollection(\"collection\").count";
-  //
-  //    List<String> path = JsAntlrPathBuilder.buildPath(code, code.length()).get();
-  //    Assert.assertEquals(3, path.size());
-  //    Assert.assertEquals("db", path.get(0));
-  //    Assert.assertEquals("getCollection", path.get(1));
-  //    Assert.assertEquals("count", path.get(2));
-  //  }
+  @Test
+  public void functionComplexArgumentsTest() {
+    String code = "function xx() {" //
+        + "callFunction();" //
+        + "db . getCollection(x.name).count";
+
+    List<String> path = JsAntlrPathBuilder.buildPath(code, code.length() - 1).get();
+    assertEquals(3, path.size());
+    assertEquals("db", path.get(0));
+    assertEquals("getCollection", path.get(1));
+    assertEquals("count", path.get(2));
+  }
+
+  @Test
+  public void functionCallTest() {
+    String code = "function xx() {" //
+        + "callFunction();" //
+        + "db . getCollection(\"collection\").count";
+
+    List<String> path = JsAntlrPathBuilder.buildPath(code, code.length() - 1).get();
+    assertEquals(3, path.size());
+    assertEquals("db", path.get(0));
+    assertEquals("getCollection", path.get(1));
+    assertEquals("count", path.get(2));
+  }
 
   @Test
   public void simplePathTest() {
