@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import mongofx.js.support.JsAntlrPathBuilder;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.PopupAlignment;
@@ -45,7 +46,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import mongofx.js.support.JsPathBuilder;
 import mongofx.service.suggest.Suggest;
 import mongofx.service.suggest.SuggestContext;
 import mongofx.ui.main.AutocompletionEngine;
@@ -202,8 +202,7 @@ public class CodeAreaBuilder {
 
   private List<Suggest> buildAutocompleteFromPosition(AutocompletionEngine service) {
     int cursorPos = codeArea.getSelection().getStart();
-    String headText = codeArea.getText(0, cursorPos);
-    Optional<List<String>> paths = JsPathBuilder.buildPath(headText);
+    Optional<List<String>> paths = JsAntlrPathBuilder.buildPath(codeArea.getText(), cursorPos);
     if (!paths.isPresent()) {
       return Collections.emptyList();
     }
