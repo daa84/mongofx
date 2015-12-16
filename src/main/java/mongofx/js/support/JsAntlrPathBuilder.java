@@ -18,18 +18,19 @@
 //
 package mongofx.js.support;
 
-import mongofx.js.antlr4.parser.ECMAScriptBaseListener;
-import mongofx.js.antlr4.parser.ECMAScriptLexer;
-import mongofx.js.antlr4.parser.ECMAScriptParser;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import mongofx.js.antlr4.parser.ECMAScriptBaseVisitor;
+import mongofx.js.antlr4.parser.ECMAScriptLexer;
+import mongofx.js.antlr4.parser.ECMAScriptParser;
 
 public class JsAntlrPathBuilder {
   private static final Logger log = LoggerFactory.getLogger(JsAntlrPathBuilder.class);
@@ -40,29 +41,53 @@ public class JsAntlrPathBuilder {
 
     List<String> path = new ArrayList<>();
 
-    parser.addParseListener(new ECMAScriptBaseListener() {
+    new ECMAScriptBaseVisitor<Void>() {
+      int dotExpression = 0;
+      boolean findedPath = false;
+
       @Override
-      public void exitMemberDotExpression(ECMAScriptParser.MemberDotExpressionContext ctx) {
+      public Void visitMemberDotExpression(mongofx.js.antlr4.parser.ECMAScriptParser.MemberDotExpressionContext ctx) {
+        dotExpression++;
+
+        super.visitMemberDotExpression(ctx);
+
+        dotExpression--;
+        if (dotExpression == 0 && !findedPath) {
+          path.clear();
+        }
+
+        return null;
       }
 
       @Override
-      public void enterMemberDotExpression(ECMAScriptParser.MemberDotExpressionContext ctx) {
+      public Void visitIdentifierName(mongofx.js.antlr4.parser.ECMAScriptParser.IdentifierNameContext ctx) {
+        if (findedPath || dotExpression == 0) {
+          return null;
+        }
+        markFinded(ctx.getStart());
+        path.add(ctx.getText());
+
+        return super.visitIdentifierName(ctx);
       }
 
       @Override
-      public void exitIdentifierName(ECMAScriptParser.IdentifierNameContext ctx) {
+      public Void visitIdentifierExpression(mongofx.js.antlr4.parser.ECMAScriptParser.IdentifierExpressionContext ctx) {
+        if (findedPath || dotExpression == 0) {
+          return null;
+        }
+        markFinded(ctx.getStart());
+        path.add(ctx.getText());
+        return super.visitIdentifierExpression(ctx);
       }
 
-      @Override
-      public void exitIdentifierExpression(ECMAScriptParser.IdentifierExpressionContext ctx) {
-        int startIndex = ctx.getStart().getStartIndex();
-        int stopIndex = ctx.getStart().getStopIndex();
+      private void markFinded(Token start) {
+        int startIndex = start.getStartIndex();
+        int stopIndex = start.getStopIndex();
         if (position >= startIndex && position <= stopIndex) {
-
+          findedPath = true;
         }
       }
-    });
-    parser.program();
+    }.visit(parser.program());
 
     if (path.isEmpty()) {
       return Optional.empty();
