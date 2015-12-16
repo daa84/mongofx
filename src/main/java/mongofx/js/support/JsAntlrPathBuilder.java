@@ -31,6 +31,7 @@ import org.antlr.v4.runtime.Token;
 import mongofx.js.antlr4.parser.ECMAScriptBaseVisitor;
 import mongofx.js.antlr4.parser.ECMAScriptLexer;
 import mongofx.js.antlr4.parser.ECMAScriptParser;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class JsAntlrPathBuilder {
   public static Optional<List<String>> buildPath(String jsCode, int position) {
@@ -109,6 +110,21 @@ public class JsAntlrPathBuilder {
       return super.visitIdentifierExpression(ctx);
     }
 
+    @Override
+    public Void visitTerminal(TerminalNode node) {
+      if (foundPath || dotExpression == 0) {
+        return null;
+      }
+
+      if (dotExpression > 0 && ".".equals(node.getText())) {
+        if (markFound(node.getSymbol())) {
+          path.add("");
+          return null;
+        }
+      }
+      return super.visitTerminal(node);
+    }
+
     private void addPath(ParserRuleContext ctx) {
       if (ctx.exception == null) {
         if (foundPath) {
@@ -128,12 +144,13 @@ public class JsAntlrPathBuilder {
       }
     }
 
-    private void markFound(Token token) {
+    private boolean markFound(Token token) {
       int start = Math.min(token.getStartIndex(), token.getStopIndex());
       int stop = Math.max(token.getStartIndex(), token.getStopIndex());
       if (position >= start && position <= stop) {
         foundPath = true;
       }
+      return foundPath;
     }
   }
 }
