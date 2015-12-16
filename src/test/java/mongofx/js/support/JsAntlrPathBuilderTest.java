@@ -9,6 +9,13 @@ import org.junit.Test;
 public class JsAntlrPathBuilderTest {
 
   @Test
+  public void rootElementTest() {
+    List<String> path = JsAntlrPathBuilder.buildPath("db", "db".length()).get();
+    assertEquals(1, path.size());
+    assertEquals("db", path.get(0));
+  }
+
+  @Test
   public void simpleMiddlePartTest() {
     List<String> path = JsAntlrPathBuilder.buildPath("db.get", "db.".length()).get();
     assertEquals(2, path.size());

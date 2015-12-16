@@ -102,10 +102,19 @@ public class JsAntlrPathBuilder {
 
     @Override
     public Void visitIdentifierExpression(ECMAScriptParser.IdentifierExpressionContext ctx) {
-      if (foundPath || dotExpression == 0) {
+      if (foundPath) {
         return null;
       }
-      markFound(ctx.getStart());
+
+      if (markFound(ctx.getStart())) {
+        addPath(ctx);
+        return null;
+      }
+
+      if (dotExpression == 0) {
+        return null;
+      }
+
       addPath(ctx);
       return super.visitIdentifierExpression(ctx);
     }
