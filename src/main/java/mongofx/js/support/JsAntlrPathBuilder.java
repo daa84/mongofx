@@ -18,10 +18,7 @@
 //
 package mongofx.js.support;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -43,38 +40,42 @@ public class JsAntlrPathBuilder {
     ECMAScriptLexer lexer = new ECMAScriptLexer(new ANTLRInputStream(jsCode));
     ECMAScriptParser parser = new ECMAScriptParser(new CommonTokenStream(lexer));
 
-    List<String> path = new ArrayList<>();
-
-    new ScriptVisitor(path, position).visit(parser.program());
-
-    if (path.isEmpty()) {
-      return Optional.empty();
-    }
-    return Optional.of(path);
+    ScriptVisitor scriptVisitor = new ScriptVisitor(position);
+    scriptVisitor.visit(parser.program());
+    return scriptVisitor.getPath();
   }
 
   private static class ScriptVisitor extends ECMAScriptBaseVisitor<Void> {
-    private final List<String> path;
+    private Stack<DotPath> stack = new Stack<>();
+
     private final int position;
-    int dotExpression;
     boolean foundPath;
 
-    public ScriptVisitor(List<String> path, int position) {
-      this.path = path;
+    public ScriptVisitor(int position) {
       this.position = position;
-      dotExpression = 0;
       foundPath = false;
+    }
+
+    public Optional<List<String>> getPath() {
+      if (foundPath) {
+        return Optional.of(stack.lastElement().path);
+      }
+      return Optional.empty();
     }
 
     @Override
     public Void visitMemberDotExpression(ECMAScriptParser.MemberDotExpressionContext ctx) {
-      dotExpression++;
+      if (stack.isEmpty()) {
+        stack.add(new DotPath());
+      }
+      stack.lastElement().levelDown();
 
       super.visitMemberDotExpression(ctx);
 
-      dotExpression--;
-      if (dotExpression == 0 && !foundPath) {
-        path.clear();
+      DotPath dotPath = stack.lastElement();
+      dotPath.levelUp();
+      if (dotPath.isTopLevel() && !foundPath) {
+        stack.pop();
       }
 
       return null;
@@ -82,7 +83,7 @@ public class JsAntlrPathBuilder {
 
     @Override
     public Void visitIdentifierName(ECMAScriptParser.IdentifierNameContext ctx) {
-      if (foundPath || dotExpression == 0) {
+      if (foundPath || stack.isEmpty()) {
         return null;
       }
       markFound(ctx.getStart());
@@ -93,8 +94,8 @@ public class JsAntlrPathBuilder {
 
     @Override
     public Void visitArguments(ECMAScriptParser.ArgumentsContext ctx) {
-      // TODO: here stack needed
-      if (dotExpression > 0) {
+      // function context must be processed here
+      if (!stack.isEmpty()) {
         return null;
       }
       return super.visitArguments(ctx);
@@ -107,11 +108,12 @@ public class JsAntlrPathBuilder {
       }
 
       if (markFound(ctx.getStart())) {
-        addPath(ctx);
-        return null;
+        if (stack.isEmpty()) {
+          stack.add(new DotPath());
+        }
       }
 
-      if (dotExpression == 0) {
+      if (stack.isEmpty()) {
         return null;
       }
 
@@ -121,13 +123,13 @@ public class JsAntlrPathBuilder {
 
     @Override
     public Void visitTerminal(TerminalNode node) {
-      if (foundPath || dotExpression == 0) {
+      if (foundPath || stack.isEmpty()) {
         return null;
       }
 
-      if (dotExpression > 0 && ".".equals(node.getText())) {
+      if (".".equals(node.getText())) {
         if (markFound(node.getSymbol())) {
-          path.add("");
+          stack.lastElement().addToPath("");
           return null;
         }
       }
@@ -140,16 +142,16 @@ public class JsAntlrPathBuilder {
           Token start = ctx.getStart();
           int partLength = position + 1 - Math.min(start.getStartIndex(), start.getStopIndex());
           if (partLength > 0) {
-            path.add(ctx.getText().substring(0, partLength));
+            stack.lastElement().addToPath(ctx.getText().substring(0, partLength));
           } else {
-            path.add("");
+            stack.lastElement().addToPath("");
           }
         } else {
-          path.add(ctx.getText());
+          stack.lastElement().addToPath(ctx.getText());
         }
       }
       else {
-        path.add(ctx.getText());
+        stack.lastElement().addToPath(ctx.getText());
       }
     }
 
@@ -160,6 +162,27 @@ public class JsAntlrPathBuilder {
         foundPath = true;
       }
       return foundPath;
+    }
+  }
+
+  private static class DotPath {
+    private final List<String> path = new ArrayList<>(3);
+    int level = 0;
+
+    public void levelDown() {
+      level++;
+    }
+
+    public void levelUp() {
+      level--;
+    }
+
+    public boolean isTopLevel() {
+      return level <= 0;
+    }
+
+    public void addToPath(String value) {
+      path.add(value);
     }
   }
 }
