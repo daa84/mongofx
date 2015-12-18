@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?language javascript?>
+
 <?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.HBox?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="mongofx.ui.main.MainFrameController" fx:id="mainFrame">
+			fx:controller="mongofx.ui.main.MainFrameController" fx:id="mainFrame">
 	<top>
 		<ToolBar>
 			<Button focusTraversable="false" onAction="#showConnectionSettings">
@@ -28,28 +32,36 @@
 					<FontAwesomeIconView glyphName="PLAY" />
 				</graphic>
 			</Button>
-			<Button focusTraversable="false" onAction="#saveBuffer">
-				<tooltip>
-					<Tooltip text="Save (Ctrl+S)"/>
-				</tooltip>
+			<Pane HBox.hgrow="ALWAYS" />
+			<fx:define>
+				<ContextMenu fx:id="mainMenu">
+					<items>
+						<MenuItem text="Open" accelerator="Ctrl+O" onAction="#openBuffer">
+							<graphic>
+								<FontAwesomeIconView glyphName="FOLDER_OPEN" />
+							</graphic>
+						</MenuItem>
+						<MenuItem text="Save" accelerator="Ctrl+S" onAction="#saveBuffer">
+							<graphic>
+								<FontAwesomeIconView glyphName="SAVE" />
+							</graphic>
+						</MenuItem>
+						<MenuItem text="Save As" onAction="#saveBufferAs">
+							<graphic>
+								<FontAwesomeIconView glyphName="HDD_ALT" />
+							</graphic>
+						</MenuItem>
+					</items>
+				</ContextMenu>
+			</fx:define>
+			<fx:script>
+				function openMainMenu() {
+					mainMenu.show(mainMenuButton, javafx.geometry.Side.BOTTOM, 0, 0);
+				}
+			</fx:script>
+			<Button fx:id="mainMenuButton" onAction="openMainMenu()">
 				<graphic>
-					<FontAwesomeIconView glyphName="SAVE" />
-				</graphic>
-			</Button>
-			<Button focusTraversable="false" onAction="#saveBufferAs">
-				<tooltip>
-					<Tooltip text="Save As"/>
-				</tooltip>
-				<graphic>
-					<FontAwesomeIconView glyphName="HDD_ALT" />
-				</graphic>
-			</Button>
-			<Button focusTraversable="false" onAction="#openBuffer">
-				<tooltip>
-					<Tooltip text="Save (Ctrl+O)"/>
-				</tooltip>
-				<graphic>
-					<FontAwesomeIconView glyphName="FOLDER_OPEN" />
+					<FontAwesomeIconView glyphName="BARS" />
 				</graphic>
 			</Button>
 		</ToolBar>
@@ -59,6 +71,6 @@
 		</TreeView>
 	</left>
 	<center>
-		<TabPane fx:id="queryTabs"></TabPane>
+		<TabPane fx:id="queryTabs"/>
 	</center>
 </BorderPane>
