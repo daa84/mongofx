@@ -52,7 +52,6 @@
 						<HBox GridPane.columnIndex="0" spacing="5" alignment="CENTER" visible="${controller.showExecTime}"
 							managed="${controller.showExecTime}">
 							<Label text="${controller.lastExecTime}">
-								<tooltip><Tooltip text="total time sec. (mongo query time + retrive result time)" /> </tooltip>
 								<graphic>
 									<FontAwesomeIconView glyphName="CLOCK_ALT" />
 								</graphic>

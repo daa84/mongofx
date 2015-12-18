@@ -152,6 +152,9 @@ public class QueryTabController {
     }
 
     final String script = codeArea.getText();
+    final int skip = getSkip();
+    final int limit = getLimit();
+
     startProgress();
 
     currentTask = new Task<QueryResultHolder>() {
@@ -168,11 +171,20 @@ public class QueryTabController {
         if (documents.isPresent()) {
           Object result = documents.get();
           if (result instanceof ObjectListPresentation) {
-            return new QueryResultHolder((ObjectListPresentation) result);
+            return processListResult((ObjectListPresentation) result);
           }
           return new QueryResultHolder(String.valueOf(result));
         }
         return new QueryResultHolder();
+      }
+
+      private QueryResultHolder processListResult(ObjectListPresentation result) {
+        QueryResultHolder queryResultHolder = new QueryResultHolder(result);
+        // preload cache in background
+        dataLoadTime = System.currentTimeMillis();
+        queryResultHolder.getDocuments(queryResultHolder.getSkip().orElse(skip), queryResultHolder.getLimit().orElse(limit));
+        dataLoadTime = (System.currentTimeMillis() - dataLoadTime) / 1000f;
+        return queryResultHolder;
       }
 
       @Override
@@ -186,15 +198,9 @@ public class QueryTabController {
       @Override
       protected void succeeded() {
         queryResult = getValue();
-        if (!queryResult.isEmpty()) {
-          long startEvalTime = System.currentTimeMillis();
-          buildResultView();
-          dataLoadTime = (System.currentTimeMillis() - startEvalTime) / 1000f;
-        } else {
-          buildResultView();
-        }
+        buildResultView();
         setLastExecTime(
-            String.format("%.3f sec. (%.3f+%.3f)", scriptEvalTime + dataLoadTime, scriptEvalTime, dataLoadTime));
+            String.format("%.3f sec.", scriptEvalTime + dataLoadTime));
       }
 
       @Override
