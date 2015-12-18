@@ -26,7 +26,10 @@ import java.util.HashMap;
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
+import org.bson.conversions.Bson;
+
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 
 import mongofx.service.MongoDatabase;
 
@@ -81,5 +84,80 @@ public class DB extends HashMap<String, Object> {
 
   public String version() {
     return mongoDatabase.getMongoDb().runCommand(new BasicDBObject("buildInfo", 1)).getString("version");
+  }
+
+  //  db.changeUserPassword()   Changes an existing user’s password.
+  //  db.grantRolesToUser()   Grants a role and its privileges to a user.
+  //  db.revokeRolesFromUser()  Removes a role from a user.
+
+  @JsField("Deletes all users associated with a database")
+  public ObjectListPresentation dropAllUsers() {
+    return dropAllUsers(null);
+  }
+
+  @JsField("Deletes all users associated with a database")
+  public ObjectListPresentation dropAllUsers(Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("dropAllUsersFromDatabase", 1);
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Removes a single user")
+  public ObjectListPresentation dropUser(String userName) {
+    return dropUser(userName, null);
+  }
+
+  @JsField("Removes a single user")
+  public ObjectListPresentation dropUser(String userName, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("dropUser", userName);
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Returns information about all users associated with a database")
+  public ObjectListPresentation getUsers() {
+    return mongoDatabase.runCommand(new BasicDBObject("usersInfo", 1));
+  }
+
+  @JsField("Returns information about the specified user")
+  public ObjectListPresentation getUser(String userName) {
+    BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
+    builder.push("usersInfo").add("user", userName).add("db", mongoDatabase.getName()).pop();
+    return mongoDatabase.runCommand((Bson)builder.get());
+  }
+
+  @JsField("Changes an existing user’s password")
+  public ObjectListPresentation updateUser(String userName, Bindings user) {
+    return updateUser(userName, user, null);
+  }
+
+  @JsField("Changes an existing user’s password")
+  public ObjectListPresentation updateUser(String userName, Bindings user, Bindings writeConcern) {
+    BasicDBObject command = dbObjectFromMap(user);
+    command.put("updateUser", userName);
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Creates a new user")
+  public ObjectListPresentation createUser(Bindings user) {
+    return createUser(user, null);
+  }
+
+  @JsField("Creates a new user")
+  public ObjectListPresentation createUser(Bindings user, Bindings writeConcern) {
+    BasicDBObject command = dbObjectFromMap(user);
+    command.put("createUser", command.getString("user"));
+    command.remove("user");
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
   }
 }
