@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>MongoFX</groupId>
 	<artifactId>MongoFX</artifactId>
-	<version>0.3.0-SNAPSHOT</version>
+	<version>0.3.0</version>
 	<build>
 		<plugins>
 			<plugin>
@@ -17,7 +17,7 @@
 			<plugin>
 				<groupId>com.zenjava</groupId>
 				<artifactId>javafx-maven-plugin</artifactId>
-				<version>8.1.4</version>
+				<version>8.2.0</version>
 				<configuration>
 					<mainClass>mongofx.Main</mainClass>
 					<needShortcut>true</needShortcut>

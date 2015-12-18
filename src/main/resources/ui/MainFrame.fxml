@@ -56,7 +56,11 @@
 			</fx:define>
 			<fx:script>
 				function openMainMenu() {
-					mainMenu.show(mainMenuButton, javafx.geometry.Side.BOTTOM, 0, 0);
+					if (!mainMenu.isShowing()) {
+						mainMenu.show(mainMenuButton, javafx.geometry.Side.BOTTOM, 0, 0);
+					} else {
+						mainMenu.hide();
+					}
 				}
 			</fx:script>
 			<Button fx:id="mainMenuButton" onAction="openMainMenu()">
