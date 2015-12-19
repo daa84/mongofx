@@ -22,12 +22,14 @@ import static mongofx.js.api.JsApiUtils.dbObjectFromMap;
 import static mongofx.js.api.JsApiUtils.documentFromMap;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
 import org.bson.conversions.Bson;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 
@@ -86,9 +88,50 @@ public class DB extends HashMap<String, Object> {
     return mongoDatabase.getMongoDb().runCommand(new BasicDBObject("buildInfo", 1)).getString("version");
   }
 
-  //  db.changeUserPassword()   Changes an existing user’s password.
-  //  db.grantRolesToUser()   Grants a role and its privileges to a user.
-  //  db.revokeRolesFromUser()  Removes a role from a user.
+  @JsField("Changes an existing user’s password")
+  public ObjectListPresentation changeUserPassword(String userName, String newPassword) {
+    SimpleBindings simpleBindings = new SimpleBindings();
+    simpleBindings.put("pwd", newPassword);
+    return updateUser(userName, simpleBindings);
+  }
+
+  @JsField("Removes a role from a user")
+  public ObjectListPresentation revokeRolesFromUser(String user, List<Bindings> roles) {
+    return revokeRolesFromUser(user, roles, null);
+  }
+
+  @JsField("Removes a role from a user")
+  public ObjectListPresentation revokeRolesFromUser(String user, List<Bindings> roles, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("revokeRolesFromUser", user);
+
+    BasicDBList commandRoles = new BasicDBList();
+    commandRoles.addAll(roles);
+    command.put("roles", commandRoles);
+
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Grants a role and its privileges to a user")
+  public ObjectListPresentation grantRolesToUser(String user, List<Bindings> roles) {
+    return grantRolesToUser(user, roles, null);
+  }
+
+  @JsField("Grants a role and its privileges to a user")
+  public ObjectListPresentation grantRolesToUser(String user, List<Bindings> roles, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("grantRolesToUser", user);
+
+    BasicDBList commandRoles = new BasicDBList();
+    commandRoles.addAll(roles);
+    command.put("roles", commandRoles);
+
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
 
   @JsField("Deletes all users associated with a database")
   public ObjectListPresentation dropAllUsers() {
@@ -137,8 +180,8 @@ public class DB extends HashMap<String, Object> {
 
   @JsField("Changes an existing user’s password")
   public ObjectListPresentation updateUser(String userName, Bindings user, Bindings writeConcern) {
-    BasicDBObject command = dbObjectFromMap(user);
-    command.put("updateUser", userName);
+    BasicDBObject command = new BasicDBObject("updateUser", userName);
+    command.putAll(user);
     if (writeConcern != null) {
       command.put("writeConcern", dbObjectFromMap(writeConcern));
     }
@@ -152,8 +195,8 @@ public class DB extends HashMap<String, Object> {
 
   @JsField("Creates a new user")
   public ObjectListPresentation createUser(Bindings user, Bindings writeConcern) {
-    BasicDBObject command = dbObjectFromMap(user);
-    command.put("createUser", command.getString("user"));
+    BasicDBObject command = new BasicDBObject("createUser", user.get("user"));
+    command.putAll(user);
     command.remove("user");
     if (writeConcern != null) {
       command.put("writeConcern", dbObjectFromMap(writeConcern));
