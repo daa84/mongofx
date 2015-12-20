@@ -108,9 +108,18 @@ public class MainFrameController {
 
   @FXML
   public void runCommand() {
+    runCommand(false);
+  }
+
+  @FXML
+  public void runSelectedCommand() {
+    runCommand(true);
+  }
+
+  private void runCommand(boolean selected) {
     Tab selectedTab = queryTabs.getSelectionModel().getSelectedItem();
     if (selectedTab != null) {
-      tabData.get(selectedTab.getContent()).executeScript();
+      tabData.get(selectedTab.getContent()).executeScript(selected);
     }
   }
 

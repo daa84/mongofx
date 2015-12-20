@@ -133,7 +133,9 @@ public class QueryTabController {
   @FXML
   public void codeAreaOnKeyReleased(KeyEvent ev) {
     if (ev.getCode() == KeyCode.F5) {
-      executeScript();
+      executeScript(false);
+    } else if (ev.getCode() == KeyCode.ENTER && ev.isControlDown()) {
+      executeScript(true);
     }
   }
 
@@ -145,13 +147,13 @@ public class QueryTabController {
     editorFileController.loadToBuffer();
   }
 
-  public void executeScript() {
+  public void executeScript(boolean selected) {
     if (currentTask != null) {
       log.warn("Task already running");
       return;
     }
 
-    final String script = codeArea.getText();
+    final String script = getScript(selected);
     final int skip = getSkip();
     final int limit = getLimit();
 
@@ -211,6 +213,16 @@ public class QueryTabController {
     };
 
     executor.executeMany(currentTask);
+  }
+
+  private String getScript(boolean selected) {
+    String script;
+    if (selected) {
+      script = codeArea.getSelectedText();
+    } else {
+      script = codeArea.getText();
+    }
+    return script;
   }
 
   private void stopProgress() {
@@ -295,7 +307,7 @@ public class QueryTabController {
     startIdx++;
     codeArea.selectRange(startIdx, startIdx);
     FocusFixer.requestFocus(codeArea);
-    executeScript();
+    executeScript(false);
   }
 
   public SimpleStringProperty connectedServerNameProperty() {

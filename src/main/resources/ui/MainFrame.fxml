@@ -51,6 +51,11 @@
 								<FontAwesomeIconView glyphName="HDD_ALT" />
 							</graphic>
 						</MenuItem>
+						<MenuItem text="Run only selected" accelerator="Ctrl+Enter" onAction="#runSelectedCommand">
+							<graphic>
+								<FontAwesomeIconView glyphName="PLAY" />
+							</graphic>
+						</MenuItem>
 					</items>
 				</ContextMenu>
 			</fx:define>
