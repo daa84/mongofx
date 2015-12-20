@@ -27,6 +27,7 @@ import java.util.List;
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
+import org.bson.BSONObject;
 import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBList;
@@ -181,7 +182,7 @@ public class DB extends HashMap<String, Object> {
   @JsField("Changes an existing user’s password")
   public ObjectListPresentation updateUser(String userName, Bindings user, Bindings writeConcern) {
     BasicDBObject command = new BasicDBObject("updateUser", userName);
-    command.putAll(user);
+    command.putAll((BSONObject)dbObjectFromMap(user));
     if (writeConcern != null) {
       command.put("writeConcern", dbObjectFromMap(writeConcern));
     }
@@ -196,7 +197,7 @@ public class DB extends HashMap<String, Object> {
   @JsField("Creates a new user")
   public ObjectListPresentation createUser(Bindings user, Bindings writeConcern) {
     BasicDBObject command = new BasicDBObject("createUser", user.get("user"));
-    command.putAll(user);
+    command.putAll((BSONObject)dbObjectFromMap(user));
     command.remove("user");
     if (writeConcern != null) {
       command.put("writeConcern", dbObjectFromMap(writeConcern));

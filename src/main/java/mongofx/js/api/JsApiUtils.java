@@ -37,16 +37,45 @@ import org.bson.BsonDocument;
 import org.bson.Document;
 
 import com.google.common.base.Preconditions;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.ServerAddress;
 import com.mongodb.ServerCursor;
 import com.mongodb.client.MongoCursor;
 
+import jdk.nashorn.api.scripting.JSObject;
+
+@SuppressWarnings("restriction")
 public class JsApiUtils {
 
-  public static BasicDBObject dbObjectFromMap(Bindings from) {
-    return new BasicDBObject(from);
+  public static BasicDBObject dbObjectFromMap(Map<String, Object> from) {
+    BasicDBObject result = new BasicDBObject();
+    for (Entry<String, Object> entry : from.entrySet()) {
+      result.append(entry.getKey(), convert(entry.getValue()));
+    }
+    return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Object convert(Object from) {
+    if (from instanceof JSObject) {
+      if (((JSObject)from).isArray()) {
+        return convertArray((Bindings)from);
+      }
+    }
+    if (from instanceof Map) {
+      return dbObjectFromMap((Map<String, Object>)from);
+    }
+    return from;
+  }
+
+  private static BasicDBList convertArray(Bindings from) {
+    BasicDBList list = new BasicDBList();
+    for(int i = 0; i < from.size(); i++) {
+      list.add(from.get(String.valueOf(i)));
+    }
+    return list;
   }
 
   public static List<BasicDBObject> dbObjectFromList(List<Bindings> from) {
