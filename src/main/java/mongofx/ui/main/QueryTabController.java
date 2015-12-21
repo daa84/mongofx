@@ -20,6 +20,7 @@ package mongofx.ui.main;
 
 import java.util.Optional;
 
+import mongofx.service.ScriptService;
 import org.fxmisc.richtext.CodeArea;
 import org.reactfx.EventStreams;
 import org.slf4j.Logger;
@@ -90,6 +91,9 @@ public class QueryTabController {
 
   @Inject
   private ResultTreeController resultTreeController;
+
+  @Inject
+  private ScriptService scriptService;
 
   private EditorFileController editorFileController;
 
@@ -167,7 +171,7 @@ public class QueryTabController {
       @Override
       protected QueryResultHolder call() throws Exception {
         startEvalTime = System.currentTimeMillis();
-        Optional<Object> documents = mongoDatabase.eval(script);
+        Optional<Object> documents = scriptService.eval(mongoDatabase, script);
         scriptEvalTime = (System.currentTimeMillis() - startEvalTime) / 1000f;
 
         if (documents.isPresent()) {

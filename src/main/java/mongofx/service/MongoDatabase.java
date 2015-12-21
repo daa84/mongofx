@@ -95,21 +95,6 @@ public class MongoDatabase {
     mongoDb.getCollection(collectionName).dropIndex(indexName);
   }
 
-  private final Function<String, ObjectId> toObjectId = id -> new ObjectId(id);
-
-  public Optional<Object> eval(String query) throws ScriptException {
-    ScriptEngineManager engineManager = new ScriptEngineManager();
-    ScriptEngine engine = engineManager.getEngineByName("nashorn");
-    SimpleBindings bindings = new SimpleBindings();
-    bindings.put("db", new DB(this));
-    bindings.put("ObjectId", toObjectId);
-    Object result = engine.eval(query, bindings);
-    if (result != null) {
-      return Optional.of(result);
-    }
-    return Optional.empty();
-  }
-
   public ObjectListPresentation runCommand(Bson command) {
     return JsApiUtils.singletonIter(mongoDb.runCommand(command));
   }
