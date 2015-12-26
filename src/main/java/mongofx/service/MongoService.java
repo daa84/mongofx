@@ -20,6 +20,8 @@ package mongofx.service;
 
 import com.google.inject.Singleton;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientOptions.Builder;
 import com.mongodb.MongoClientURI;
 
 import mongofx.service.settings.ConnectionSettings;
@@ -40,7 +42,8 @@ public class MongoService {
       authString.append("@");
     }
     String uri = String.format("mongodb://%s%s", authString, connectionSettings.getHost());
-    MongoClient client = new MongoClient(new MongoClientURI(uri));
+    Builder options = MongoClientOptions.builder().serverSelectionTimeout(10000);
+    MongoClient client = new MongoClient(new MongoClientURI(uri, options));
     MongoConnection mongoConnection = new MongoConnection(client);
     return new MongoDbConnection(mongoConnection, connectionSettings);
   }

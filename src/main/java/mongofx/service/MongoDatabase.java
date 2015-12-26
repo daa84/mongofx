@@ -19,22 +19,13 @@
 package mongofx.service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.script.SimpleBindings;
-
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 
-import mongofx.js.api.DB;
 import mongofx.js.api.JsApiUtils;
 import mongofx.js.api.ObjectListPresentation;
 
