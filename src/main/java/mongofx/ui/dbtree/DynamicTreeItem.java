@@ -27,11 +27,11 @@ import org.slf4j.LoggerFactory;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TreeItem;
 import mongofx.service.Executor;
-import mongofx.ui.main.UIBuilder;
-import mongofx.ui.popup.PopupMessage;
 
 public class DynamicTreeItem extends TreeItem<DbTreeValue> {
   private static final Logger log = LoggerFactory.getLogger(DynamicTreeItem.class);
@@ -47,12 +47,9 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
 
   private LoadTask currentLoadTask;
 
-  private final UIBuilder uiBuilder;
-
-  public DynamicTreeItem(DbTreeValue value, Node graphic, Executor executor, UIBuilder uiBuilder,
+  public DynamicTreeItem(DbTreeValue value, Node graphic, Executor executor,
       Function<DbTreeValue, List<TreeItem<DbTreeValue>>> supplier) {
     super(value, graphic);
-    this.uiBuilder = uiBuilder;
     this.supplier = supplier;
     this.executor = executor;
 
@@ -137,13 +134,14 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
       if (onFiled != null) {
         onFiled.run();
       }
+      Alert alert = new Alert(AlertType.ERROR);
+      alert.setHeaderText("Can't connect to MongoDB");
       Throwable exception = getException();
       if (exception != null) {
-        log.warn("Error", exception);
-        PopupMessage.showErrorPopupMessage("Can't connect to MongoDB", exception.getMessage(), uiBuilder);
-      } else {
-        PopupMessage.showErrorPopupMessage("Can't connect to MongoDB", uiBuilder);
+        log.error("Error", exception);
+        alert.setContentText(exception.getMessage());
       }
+      alert.showAndWait();
     }
   };
 
