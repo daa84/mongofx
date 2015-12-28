@@ -7,79 +7,96 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.HBox?>
-<BorderPane xmlns:fx="http://javafx.com/fxml/1"
-			fx:controller="mongofx.ui.main.MainFrameController" fx:id="mainFrame">
-	<top>
-		<ToolBar>
-			<Button focusTraversable="false" onAction="#showConnectionSettings">
-				<graphic>
-					<FontAwesomeIconView glyphName="SERVER" />
-				</graphic>
-			</Button>
-			<Button focusTraversable="false" onAction="#realoadSelectedTreeItem">
-				<tooltip>
-					<Tooltip text="Reload"/>
-				</tooltip>
-				<graphic>
-					<FontAwesomeIconView glyphName="REFRESH" />
-				</graphic>
-			</Button>
-			<Button focusTraversable="false" onAction="#runCommand">
-				<tooltip>
-					<Tooltip text="Run (F5)"/>
-				</tooltip>
-				<graphic>
-					<FontAwesomeIconView glyphName="PLAY" />
-				</graphic>
-			</Button>
-			<Pane HBox.hgrow="ALWAYS" />
-			<fx:define>
-				<ContextMenu fx:id="mainMenu">
-					<items>
-						<MenuItem text="Open" accelerator="Ctrl+O" onAction="#openBuffer">
-							<graphic>
-								<FontAwesomeIconView glyphName="FOLDER_OPEN" />
-							</graphic>
-						</MenuItem>
-						<MenuItem text="Save" accelerator="Ctrl+S" onAction="#saveBuffer">
-							<graphic>
-								<FontAwesomeIconView glyphName="SAVE" />
-							</graphic>
-						</MenuItem>
-						<MenuItem text="Save As" onAction="#saveBufferAs">
-							<graphic>
-								<FontAwesomeIconView glyphName="HDD_ALT" />
-							</graphic>
-						</MenuItem>
-						<MenuItem text="Run only selected" accelerator="Ctrl+Enter" onAction="#runSelectedCommand">
-							<graphic>
-								<FontAwesomeIconView glyphName="PLAY" />
-							</graphic>
-						</MenuItem>
-					</items>
-				</ContextMenu>
-			</fx:define>
-			<fx:script>
-				function openMainMenu() {
-					if (!mainMenu.isShowing()) {
-						mainMenu.show(mainMenuButton, javafx.geometry.Side.BOTTOM, 0, 0);
-					} else {
-						mainMenu.hide();
-					}
-				}
-			</fx:script>
-			<Button fx:id="mainMenuButton" onAction="openMainMenu()">
-				<graphic>
-					<FontAwesomeIconView glyphName="BARS" />
-				</graphic>
-			</Button>
-		</ToolBar>
-	</top>
-	<left>
-		<TreeView fx:id="treeView" showRoot="false">
-		</TreeView>
-	</left>
-	<center>
-		<TabPane fx:id="queryTabs"/>
-	</center>
-</BorderPane>
+<?import org.fxmisc.richtext.CodeArea?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="mongofx.ui.main.MainFrameController" fx:id="mainFrame">
+    <BorderPane>
+        <top>
+            <ToolBar>
+                <Button focusTraversable="false" onAction="#showConnectionSettings">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="SERVER"/>
+                    </graphic>
+                </Button>
+                <Button focusTraversable="false" onAction="#reloadSelectedTreeItem">
+                    <tooltip>
+                        <Tooltip text="Reload"/>
+                    </tooltip>
+                    <graphic>
+                        <FontAwesomeIconView glyphName="REFRESH"/>
+                    </graphic>
+                </Button>
+                <Button focusTraversable="false" onAction="#runCommand">
+                    <tooltip>
+                        <Tooltip text="Run (F5)"/>
+                    </tooltip>
+                    <graphic>
+                        <FontAwesomeIconView glyphName="PLAY"/>
+                    </graphic>
+                </Button>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <fx:define>
+                    <ContextMenu fx:id="mainMenu">
+                        <items>
+                            <MenuItem text="Open" accelerator="Ctrl+O" onAction="#openBuffer">
+                                <graphic>
+                                    <FontAwesomeIconView glyphName="FOLDER_OPEN"/>
+                                </graphic>
+                            </MenuItem>
+                            <MenuItem text="Save" accelerator="Ctrl+S" onAction="#saveBuffer">
+                                <graphic>
+                                    <FontAwesomeIconView glyphName="SAVE"/>
+                                </graphic>
+                            </MenuItem>
+                            <MenuItem text="Save As" onAction="#saveBufferAs">
+                                <graphic>
+                                    <FontAwesomeIconView glyphName="HDD_ALT"/>
+                                </graphic>
+                            </MenuItem>
+                            <MenuItem text="Run only selected" accelerator="Ctrl+Enter" onAction="#runSelectedCommand">
+                                <graphic>
+                                    <FontAwesomeIconView glyphName="PLAY"/>
+                                </graphic>
+                            </MenuItem>
+                        </items>
+                    </ContextMenu>
+                </fx:define>
+                <fx:script>
+                    function openMainMenu() {
+                    if (!mainMenu.isShowing()) {
+                    mainMenu.show(mainMenuButton, javafx.geometry.Side.BOTTOM, 0, 0);
+                    } else {
+                    mainMenu.hide();
+                    }
+                    }
+                </fx:script>
+                <Button fx:id="mainMenuButton" onAction="openMainMenu()">
+                    <graphic>
+                        <FontAwesomeIconView glyphName="BARS"/>
+                    </graphic>
+                </Button>
+            </ToolBar>
+        </top>
+        <left>
+            <TreeView fx:id="treeView" showRoot="false">
+            </TreeView>
+        </left>
+        <center>
+            <TabPane fx:id="queryTabs"/>
+        </center>
+        <bottom>
+            <BorderPane>
+                <top>
+                    <CodeArea editable="false" fx:id="consoleLog" visible="${consoleButton.selected}" managed="${consoleButton.selected}"/>
+                </top>
+                <bottom>
+                    <ToolBar>
+                        <ToggleButton fx:id="consoleButton" text="Console"/>
+                    </ToolBar>
+                </bottom>
+            </BorderPane>
+        </bottom>
+    </BorderPane>
+</StackPane>

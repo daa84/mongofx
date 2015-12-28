@@ -18,18 +18,7 @@
 //
 package mongofx.ui.main;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.fxmisc.wellbehaved.event.EventHandlerHelper;
-import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.reactfx.EventStreams;
-
 import com.google.inject.Inject;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -40,15 +29,34 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import mongofx.service.MongoService;
 import mongofx.service.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
 import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
 import mongofx.ui.dbtree.TreeController;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.wellbehaved.event.EventHandlerHelper;
+import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.reactfx.EventStreams;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class MainFrameController {
+  @FXML
+  public CodeArea consoleLog;
+
   @Inject
   private UIBuilder uiBuilder;
+
+  @Inject
+  private ConsoleController consoleController;
 
   @Inject
   private TreeController treeController;
@@ -65,13 +73,14 @@ public class MainFrameController {
   private final Map<Node, QueryTabController> tabData = new HashMap<>();
 
   @FXML
-  private BorderPane mainFrame;
+  private StackPane mainFrame;
 
   @FXML
   protected void initialize() {
     treeController.initialize(treeView, this);
+    consoleController.initialize(consoleLog);
     EventStreams.simpleChangesOf(queryTabs.getTabs())
-    .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent()).stopEval()));
+      .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent()).stopEval()));
 
     Builder<KeyEvent> mainEvents = EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.S, KeyCombination.CONTROL_DOWN)).act(a -> saveBuffer())//
         .on(EventPattern.keyPressed(KeyCode.O, KeyCombination.CONTROL_DOWN)).act(a -> openBuffer());
@@ -130,7 +139,7 @@ public class MainFrameController {
 
 
   @FXML
-  public void realoadSelectedTreeItem() {
+  public void reloadSelectedTreeItem() {
     treeController.reloadSelectedTreeItem();
   }
 

@@ -25,6 +25,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import javafx.scene.layout.Pane;
 import org.fxmisc.richtext.CodeArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +117,7 @@ public class UIBuilder {
   public MainFrameController loadMainWindow() {
     URL url = getClass().getResource("/ui/MainFrame.fxml");
     final FXMLLoader loader = createLoader(url);
-    BorderPane root = load(url, loader);
+    Pane root = load(url, loader);
     MainFrameController mainFrameController = loader.getController();
 
     primaryStage.setTitle("MongoFX " + properteisService.getVersion());
@@ -125,15 +126,15 @@ public class UIBuilder {
     return mainFrameController;
   }
 
-  private Scene createScene(BorderPane root, double width, double height) {
+  private Scene createScene(Pane root, double width, double height) {
     Scene scene = new Scene(root, width, height);
     scene.getStylesheets().add(getClass().getResource("/ui/application.css").toExternalForm());
     scene.getStylesheets().add(getClass().getResource("/ui/editor.css").toExternalForm());
     return scene;
   }
 
-  private BorderPane load(URL url, final FXMLLoader loader) {
-    BorderPane root;
+  private <T extends Pane> T load(URL url, final FXMLLoader loader) {
+    T root;
     try (InputStream in = url.openStream()) {
       root = loader.load(in);
     }
