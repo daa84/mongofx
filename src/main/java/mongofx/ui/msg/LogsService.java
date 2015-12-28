@@ -16,11 +16,27 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.service;
+package mongofx.ui.msg;
 
 import com.google.inject.Singleton;
+import javafx.application.Platform;
+import org.apache.logging.log4j.core.LogEvent;
+
+import java.util.function.Consumer;
 
 @Singleton
 public class LogsService {
 
+  private Consumer<LogEvent> eventsConsumer;
+
+  public void register(Consumer<LogEvent> eventsConsumer) {
+    if (this.eventsConsumer != null) {
+      throw new IllegalStateException("Can't register code area two times");
+    }
+    this.eventsConsumer = eventsConsumer;
+  }
+
+  public void log(LogEvent event) {
+    Platform.runLater(() -> eventsConsumer.accept(event));
+  }
 }

@@ -16,7 +16,7 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.service;
+package mongofx.ui.msg;
 
 import mongofx.Main;
 import org.apache.logging.log4j.core.Filter;
@@ -68,8 +68,7 @@ public class MongoFXMessageAppender extends AbstractAppender {
   public void append(LogEvent event) {
     LogsService logsService = getLogsService();
     if (logsService != null) {
-      System.out.println("TEST");
-      System.out.println(event.getMessage().getFormattedMessage());
+      logsService.log(event);
     }
   }
 }

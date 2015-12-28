@@ -5,3 +5,7 @@
   -fx-border-radius: 5 5 5 5;
   -fx-background-radius: 5 5 5 5;  
 }
+
+.console-error {
+  -fx-fill: red;
+}
