@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.Label?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="mongofx.ui.popup.PopupMessageController" maxHeight="500"
+	maxWidth="500"
+	styleClass="popup">
+	<top>
+		<Label text="${controller.headerMessage}"/>
+	</top>
+	<center>
+		<Label text="${controller.message}"/>
+	</center>
+</BorderPane>
