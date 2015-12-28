@@ -22,6 +22,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import com.google.inject.name.Names;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -30,15 +31,24 @@ import mongofx.service.MongoService;
 import mongofx.service.settings.SettingsService;
 import mongofx.ui.main.MainFrameController;
 import mongofx.ui.main.UIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Properties;
 
 public class Main extends Application {
+  private static final Logger log = LoggerFactory.getLogger(Main.class);
+
+  private static final Injector injector = Guice.createInjector(new MainModule());
+
   private MongoService mongoService;
   private Executor executorService;
 
   @Override
   public void start(Stage primaryStage) {
     try {
-      Injector injector = Guice.createInjector(new MainModule());
       SettingsService settings = injector.getInstance(SettingsService.class);
       settings.load();
       mongoService = injector.getInstance(MongoService.class);
@@ -66,10 +76,24 @@ public class Main extends Application {
     executorService.stop();
   }
 
+  public static <T> T getInstance(Class<T> clazz) {
+    if (injector == null) {
+      return null;
+    }
+    return injector.getInstance(clazz);
+  }
+
   public static class MainModule extends AbstractModule {
 
     @Override
     protected void configure() {
+      try {
+        Properties properties = new Properties();
+        properties.load(Main.class.getResourceAsStream("/app.properties"));
+        Names.bindProperties(binder(), properties);
+      } catch (IOException e) {
+        log.error("Error load properties file", e);
+      }
     }
 
   }

@@ -4,10 +4,14 @@
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%-5p: %c - %m%n%ex" />
 		</Console>
+		<MongoFXMessage name="MongoFXMessage">
+			<PatternLayout pattern="%-5p: %c - %m%n%ex" />
+		</MongoFXMessage>
 	</Appenders>
 	<Loggers>
 		<Root level="debug">
 			<AppenderRef ref="Console" />
+			<AppenderRef ref="MongoFXMessage"/>
 		</Root>
 	</Loggers>
 </Configuration>

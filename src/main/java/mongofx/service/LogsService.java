@@ -18,30 +18,9 @@
 //
 package mongofx.service;
 
-import java.io.IOException;
-import java.util.Properties;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Singleton;
 
 @Singleton
-public class PropertiesService {
-  private static final Logger log = LoggerFactory.getLogger(PropertiesService.class);
+public class LogsService {
 
-  private static final Properties properties = new Properties();
-
-  static {
-    try {
-      properties.load(PropertiesService.class.getResourceAsStream("/app.properties"));
-    }
-    catch (IOException e) {
-      log.error("IOException:",e);
-    }
-  }
-
-  public String getVersion() {
-    return properties.getProperty("mongofx.version");
-  }
 }

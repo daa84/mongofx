@@ -25,6 +25,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import com.google.inject.name.Named;
 import javafx.scene.layout.Pane;
 import org.fxmisc.richtext.CodeArea;
 import org.slf4j.Logger;
@@ -45,7 +46,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import mongofx.service.MongoService.MongoDbConnection;
-import mongofx.service.PropertiesService;
 import mongofx.service.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
 import mongofx.ui.settings.ConnectionSettingsController;
@@ -57,7 +57,8 @@ public class UIBuilder {
   private static final Logger log = LoggerFactory.getLogger(UIBuilder.class);
 
   @Inject
-  private PropertiesService properteisService;
+  @Named("mongofx.version")
+  private String appVersion;
 
   private Injector injector;
   private Stage primaryStage;
@@ -120,7 +121,7 @@ public class UIBuilder {
     Pane root = load(url, loader);
     MainFrameController mainFrameController = loader.getController();
 
-    primaryStage.setTitle("MongoFX " + properteisService.getVersion());
+    primaryStage.setTitle("MongoFX " + appVersion);
     primaryStage.setScene(createScene(root, 800, 600));
     primaryStage.show();
     return mainFrameController;
