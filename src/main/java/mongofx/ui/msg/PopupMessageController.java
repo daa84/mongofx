@@ -16,17 +16,24 @@
 //
 // Copyright (c) Andrey Dubravin, 2015
 //
-package mongofx.ui.popup;
+package mongofx.ui.msg;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 
 public class PopupMessageController {
 
   @FXML
-  private BorderPane pa;
+  public BorderPane messagePane;
+
+  @FXML
+  private Pane pane;
 
   private final StringProperty headerMessage = new SimpleStringProperty();
   private final StringProperty message = new SimpleStringProperty();
@@ -56,4 +63,14 @@ public class PopupMessageController {
   }
 
 
+  public void showAt(Node origin) {
+    // TODO: close
+    // TODO: relayout
+    pane.setVisible(true);
+    Bounds originBounds = origin.localToScene(origin.getBoundsInLocal());
+    Point2D target = pane.sceneToLocal(originBounds.getMinX(), originBounds.getMinY());
+    messagePane.setMaxWidth(pane.getWidth() - originBounds.getMinX() - 5);
+    messagePane.layout();
+    messagePane.relocate(target.getX(), target.getY() - messagePane.getLayoutBounds().getHeight() - 5);
+  }
 }

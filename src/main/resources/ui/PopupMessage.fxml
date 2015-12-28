@@ -3,14 +3,16 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.control.Label?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="mongofx.ui.popup.PopupMessageController" maxHeight="500"
-	maxWidth="500"
-	styleClass="popup">
-	<top>
-		<Label text="${controller.headerMessage}"/>
-	</top>
-	<center>
-		<Label text="${controller.message}"/>
-	</center>
-</BorderPane>
+<?import javafx.scene.layout.Pane?>
+<Pane xmlns:fx="http://javafx.com/fxml/1"
+      fx:id="pane"
+      fx:controller="mongofx.ui.msg.PopupMessageController" pickOnBounds="false">
+    <BorderPane fx:id="messagePane" styleClass="popup-message">
+        <top>
+            <Label text="${controller.headerMessage}"/>
+        </top>
+        <center>
+            <Label text="${controller.message}" wrapText="true"/>
+        </center>
+    </BorderPane>
+</Pane>

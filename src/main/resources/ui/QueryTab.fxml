@@ -1,24 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView?>
-<?import javafx.scene.control.cell.TreeItemPropertyValueFactory?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import org.fxmisc.richtext.CodeArea?>
-<?import javafx.scene.control.Button?>
+<?import de.jensd.fx.glyphs.fontawesome.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.TreeItemPropertyValueFactory?>
+<?import javafx.scene.layout.*?>
 <?import mongofx.ui.control.NumberTextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.control.SplitPane?>
 <?import mongofx.ui.result.tree.ResultValueCellFactory?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Tooltip?>
-
+<?import org.fxmisc.richtext.CodeArea?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="mongofx.ui.main.QueryTabController">
+			fx:controller="mongofx.ui.main.QueryTabController">
 	<center>
 		<SplitPane dividerPositions="0.2" orientation="VERTICAL">
 			<BorderPane>

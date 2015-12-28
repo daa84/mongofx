@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import mongofx.ui.msg.PopupService;
 import org.bson.Document;
 
 import com.google.inject.Inject;
@@ -56,6 +57,9 @@ public class TreeController {
 
   @Inject
   private Executor executor;
+
+  @Inject
+  private PopupService popupService;
 
   private TreeView<DbTreeValue> treeView;
   private MainFrameController mainFrameController;
@@ -92,7 +96,7 @@ public class TreeController {
 
   private TreeItem<DbTreeValue> createDbItem(MongoDatabase d) {
     return new DynamicTreeItem(new DbTreeValue(d, d.getName(), TreeValueType.DATABASE),
-        new FontAwesomeIconView(FontAwesomeIcon.DATABASE), executor, this::buildDbChilds);
+        new FontAwesomeIconView(FontAwesomeIcon.DATABASE), executor, popupService, this::buildDbChilds);
   }
 
   private List<TreeItem<DbTreeValue>> buildDbChilds(DbTreeValue value) {
@@ -106,7 +110,7 @@ public class TreeController {
   private void buildCollectionDetail(MongoDatabase db, TreeItem<DbTreeValue> ti) {
     DbTreeValue indexCategory = new DbTreeValue(db, "Indexes", TreeValueType.CATEGORY);
     indexCategory.setCollectionName(ti.getValue().getDisplayValue());
-    ti.getChildren().add(new DynamicTreeItem(indexCategory, new FontAwesomeIconView(FontAwesomeIcon.FOLDER), executor,
+    ti.getChildren().add(new DynamicTreeItem(indexCategory, new FontAwesomeIconView(FontAwesomeIcon.FOLDER), executor, popupService,
         this::buildIndexes));
   }
 
@@ -296,7 +300,7 @@ public class TreeController {
     DbTreeValue connectTreeValue =
         new DbTreeValue(mongoDbConnection, mongoDbConnection.getConnectionSettings().getHost());
     DynamicTreeItem item = new DynamicTreeItem(connectTreeValue, new FontAwesomeIconView(FontAwesomeIcon.SERVER),
-        executor, tv -> buildDbList(tv.getHostConnect().getMongoConnection()));
+        executor, popupService, tv -> buildDbList(tv.getHostConnect().getMongoConnection()));
     item.setOnFiled(() -> removeFromRoot(item));
     item.setExpanded(true);
     treeView.getRoot().getChildren().add(item);
