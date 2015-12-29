@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import mongofx.ui.msg.PopupPane?>
 
-<?import javafx.scene.layout.Pane?>
-<Pane xmlns:fx="http://javafx.com/fxml/1"
-      fx:id="pane"
-      fx:controller="mongofx.ui.msg.PopupMessageController" pickOnBounds="false">
-    <BorderPane fx:id="messagePane" styleClass="popup-message">
+<PopupPane xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="pane"
+           fx:controller="mongofx.ui.msg.PopupMessageController" pickOnBounds="false">
+    <BorderPane fx:id="messagePane" styleClass="popup-message" onMouseClicked="#mouseClicked">
         <top>
-            <Label text="${controller.headerMessage}"/>
+            <Label styleClass="popup-header" text="${controller.headerMessage}"/>
         </top>
         <center>
-            <Label text="${controller.message}" wrapText="true"/>
+            <Label fx:id="test" text="${controller.message}" wrapText="true"/>
         </center>
     </BorderPane>
-</Pane>
+</PopupPane>
