@@ -31,9 +31,21 @@ public class PopupService {
     this.origin = origin;
   }
 
-  public void show(String headerMessage, String message) {
+  public void showInfo(String headerMessage) {
+    popupMessageController.setHeaderMessage("");
+    popupMessageController.setMessage(headerMessage);
+    popupMessageController.showInfoAt(origin);
+  }
+
+  public void showInfo(String headerMessage, String message) {
     popupMessageController.setHeaderMessage(headerMessage);
     popupMessageController.setMessage(message);
-    popupMessageController.showAt(origin);
+    popupMessageController.showInfoAt(origin);
+  }
+
+  public void showError(String headerMessage, String message) {
+    popupMessageController.setHeaderMessage(headerMessage);
+    popupMessageController.setMessage(message);
+    popupMessageController.showErrorAt(origin);
   }
 }

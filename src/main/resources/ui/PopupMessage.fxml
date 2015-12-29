@@ -6,13 +6,16 @@
 
 <PopupPane xmlns:fx="http://javafx.com/fxml/1"
            fx:id="pane"
-           fx:controller="mongofx.ui.msg.PopupMessageController" pickOnBounds="false">
+           fx:controller="mongofx.ui.msg.PopupMessageController"
+           pickOnBounds="false"
+           visible="false"
+           managed="false">
     <BorderPane fx:id="messagePane" styleClass="popup-message" onMouseClicked="#mouseClicked">
         <top>
             <Label styleClass="popup-header" text="${controller.headerMessage}"/>
         </top>
         <center>
-            <Label fx:id="test" text="${controller.message}" wrapText="true"/>
+            <Label text="${controller.message}" wrapText="true"/>
         </center>
     </BorderPane>
 </PopupPane>

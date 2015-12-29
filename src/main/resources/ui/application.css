@@ -23,3 +23,9 @@
 .popup-header {
   -fx-font-weight: bold;
 }
+
+.popup-info {}
+
+.popup-error {
+  -fx-background-color: #FFD2C1;
+}

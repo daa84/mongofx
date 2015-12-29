@@ -32,7 +32,7 @@ public class Executor {
   
   private ExecutorService multiThreadExecutor = new ThreadPoolExecutor(5, 5,
       0L, TimeUnit.MILLISECONDS,
-      new LinkedBlockingQueue<Runnable>(20), r -> {
+      new LinkedBlockingQueue<>(20), r -> {
       	Thread t = new Thread(r, "Script eval thread pool");
       	t.setDaemon(true);
       	t.setPriority(Thread.NORM_PRIORITY);

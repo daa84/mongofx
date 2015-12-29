@@ -72,10 +72,7 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
 
   @Override
   public boolean isLeaf() {
-    if (loaded) {
-      return super.getChildren().isEmpty();
-    }
-    return false;
+    return loaded && super.getChildren().isEmpty();
   }
 
   @Override
@@ -129,7 +126,7 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
       List<TreeItem<DbTreeValue>> result = getValue();
       value.setCount(result.size());
       children.setAll(result);
-    };
+    }
 
     @Override
     protected void failed() {
@@ -140,12 +137,12 @@ public class DynamicTreeItem extends TreeItem<DbTreeValue> {
       Throwable exception = getException();
       if (exception != null) {
         log.warn("Error", exception);
-        popupService.show("Can't connect to MongoDB", exception.getMessage());
+        popupService.showError("Can't connect to MongoDB", exception.getMessage());
       }
       else {
-        popupService.show("Can't connect to MongoDB", "");
+        popupService.showError("Can't connect to MongoDB", "");
       }
     }
-  };
+  }
 
 }

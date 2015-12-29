@@ -18,6 +18,7 @@
 //
 package mongofx.ui.msg;
 
+import javafx.animation.FadeTransition;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.Event;
@@ -28,12 +29,15 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.util.Duration;
 
 public class PopupMessageController {
 
+  public static final String POPUP_INFO_STYLE = "popup-info";
+  public static final String POPUP_ERROR_STYLE = "popup-error";
+
   @FXML
   public BorderPane messagePane;
-  public Label test;
 
   @FXML
   private PopupPane pane;
@@ -65,14 +69,38 @@ public class PopupMessageController {
     this.messageProperty().set(message);
   }
 
-  public void showAt(Node origin) {
+  public void showInfoAt(Node origin) {
+    if (!messagePane.getStyleClass().contains(POPUP_INFO_STYLE)) {
+      messagePane.getStyleClass().add(POPUP_INFO_STYLE);
+    }
+    messagePane.getStyleClass().remove(POPUP_ERROR_STYLE);
+
+    showAt(origin);
+  }
+
+  public void showErrorAt(Node origin) {
+    if (!messagePane.getStyleClass().contains(POPUP_ERROR_STYLE)) {
+      messagePane.getStyleClass().add(POPUP_ERROR_STYLE);
+    }
+    messagePane.getStyleClass().remove(POPUP_INFO_STYLE);
+
+    showAt(origin);
+  }
+
+  private void showAt(Node origin) {
     // TODO: close
     pane.setAnchor(origin);
     pane.setVisible(true);
+    pane.setManaged(true);
+    FadeTransition fade = new FadeTransition(Duration.millis(500), pane);
+    fade.setFromValue(0);
+    fade.setToValue(1);
+    fade.play();
   }
 
   @FXML
   public void mouseClicked(Event event) {
     pane.setVisible(false);
+    pane.setManaged(false);
   }
 }

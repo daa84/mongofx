@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import mongofx.ui.msg.PopupService;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,9 @@ public class ResultTreeController {
 
   @Inject
   private UIBuilder uiBuilder;
+
+  @Inject
+  private PopupService popupService;
 
   private TreeTableView<DocumentTreeValue> queryResultTree;
   private ContextMenu topLevelContextMenu;
@@ -314,9 +318,7 @@ public class ResultTreeController {
         alert.show();
       }
       else {
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setHeaderText("Document updated");
-        alert.show();
+        popupService.showInfo("Document updated");
       }
     }
     catch (Exception ex) {

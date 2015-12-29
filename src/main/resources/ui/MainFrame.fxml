@@ -99,5 +99,5 @@
             </BorderPane>
         </bottom>
     </BorderPane>
-    <fx:include source="PopupMessage.fxml" visible="false" fx:id="popupMessage"/>
+    <fx:include source="PopupMessage.fxml" fx:id="popupMessage"/>
 </StackPane>
