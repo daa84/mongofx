@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="WARN" packages="mongofx.ui.msg">
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%-5p: %c - %m%n%ex" />
 		</Console>
 		<MongoFXMessage name="MongoFXMessage">
-			<PatternLayout pattern="%-5p: %c - %m%n%ex" />
+			<PatternLayout pattern="%d: %m%ex{short.message}%n" />
 		</MongoFXMessage>
 	</Appenders>
 	<Loggers>

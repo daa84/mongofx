@@ -93,7 +93,7 @@
                 </top>
                 <bottom>
                     <ToolBar>
-                        <ToggleButton fx:id="consoleButton" text="Console"/>
+                        <ToggleButton fx:id="consoleButton" text="Log"/>
                     </ToolBar>
                 </bottom>
             </BorderPane>

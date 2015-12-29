@@ -21,18 +21,16 @@ package mongofx.ui.dbtree;
 import java.util.List;
 import java.util.function.Function;
 
-import mongofx.ui.msg.PopupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TreeItem;
 import mongofx.service.Executor;
+import mongofx.ui.msg.PopupService;
 
 public class DynamicTreeItem extends TreeItem<DbTreeValue> {
   private static final Logger log = LoggerFactory.getLogger(DynamicTreeItem.class);

@@ -19,6 +19,7 @@
 package mongofx.ui.msg;
 
 import com.google.inject.Singleton;
+
 import javafx.scene.Node;
 
 @Singleton
@@ -31,16 +32,18 @@ public class PopupService {
     this.origin = origin;
   }
 
-  public void showInfo(String headerMessage) {
-    popupMessageController.setHeaderMessage("");
-    popupMessageController.setMessage(headerMessage);
-    popupMessageController.showInfoAt(origin);
+  public void showInfo(String message) {
+    showInfo("", message);
   }
 
   public void showInfo(String headerMessage, String message) {
     popupMessageController.setHeaderMessage(headerMessage);
     popupMessageController.setMessage(message);
     popupMessageController.showInfoAt(origin);
+  }
+
+  public void showError(String message) {
+    showError("", message);
   }
 
   public void showError(String headerMessage, String message) {

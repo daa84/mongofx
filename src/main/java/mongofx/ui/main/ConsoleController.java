@@ -19,16 +19,19 @@
 package mongofx.ui.main;
 
 
-import com.google.inject.Inject;
-import mongofx.ui.msg.LogsService;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.ReadOnlyStyledDocument;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import com.google.inject.Inject;
+
+import mongofx.ui.msg.LogsService;
+import mongofx.ui.msg.PopupService;
 
 public class ConsoleController {
   private CodeArea codeArea;
@@ -36,21 +39,37 @@ public class ConsoleController {
   @Inject
   private LogsService logsService;
 
+  @Inject
+  private PopupService popupService;
+
   public void initialize(CodeArea codeArea) {
     this.codeArea = codeArea;
     logsService.register(this::accept);
   }
 
-  private void accept(LogEvent logEvent) {
+  private void accept(LogEvent logEvent, String message) {
     Level level = logEvent.getLevel();
 
-    List<String> style = Collections.EMPTY_LIST;
+    List<String> style = Collections.emptyList();
     if (level == Level.ERROR || level == Level.WARN) {
       style = Collections.singletonList("console-error");
     }
 
     ReadOnlyStyledDocument<Collection<String>> document =
-        ReadOnlyStyledDocument.fromString(logEvent.getMessage().getFormattedMessage() + "\n", style);
+        ReadOnlyStyledDocument.fromString(message, style);
     codeArea.insert(codeArea.getLength(), document);
+
+    if (level == Level.ERROR) {
+      showPopup(logEvent);
+    }
+  }
+
+  private void showPopup(LogEvent logEvent) {
+    Throwable thrown = logEvent.getThrown();
+    if (thrown != null) {
+      popupService.showError(logEvent.getMessage().getFormattedMessage(), thrown.getMessage());
+    } else {
+      popupService.showError(logEvent.getMessage().getFormattedMessage());
+    }
   }
 }

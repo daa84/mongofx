@@ -18,25 +18,35 @@
 //
 package mongofx.ui.msg;
 
-import com.google.inject.Singleton;
-import javafx.application.Platform;
 import org.apache.logging.log4j.core.LogEvent;
 
-import java.util.function.Consumer;
+import com.google.inject.Singleton;
+
+import javafx.application.Platform;
 
 @Singleton
 public class LogsService {
 
-  private Consumer<LogEvent> eventsConsumer;
+  private LogsConsumer eventsConsumer;
 
-  public void register(Consumer<LogEvent> eventsConsumer) {
+  public void register(LogsConsumer eventsConsumer) {
     if (this.eventsConsumer != null) {
       throw new IllegalStateException("Can't register code area two times");
     }
     this.eventsConsumer = eventsConsumer;
   }
 
-  public void log(LogEvent event) {
-    Platform.runLater(() -> eventsConsumer.accept(event));
+  public void log(LogEvent event, String message) {
+    if (!Platform.isFxApplicationThread()) {
+      Platform.runLater(() -> eventsConsumer.accept(event, message));
+    }
+    else {
+      eventsConsumer.accept(event, message);
+    }
+  }
+
+  @FunctionalInterface
+  public interface LogsConsumer {
+    void accept(LogEvent event, String message);
   }
 }

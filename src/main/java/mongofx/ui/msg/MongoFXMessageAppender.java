@@ -18,7 +18,8 @@
 //
 package mongofx.ui.msg;
 
-import mongofx.Main;
+import java.io.Serializable;
+
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -29,7 +30,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
-import java.io.Serializable;
+import mongofx.Main;
 
 @Plugin(name = "MongoFXMessage", category = "Core", elementType = "appender")
 public class MongoFXMessageAppender extends AbstractAppender {
@@ -42,9 +43,9 @@ public class MongoFXMessageAppender extends AbstractAppender {
 
   @PluginFactory
   public static MongoFXMessageAppender createAppender(@PluginAttribute("name") String name,
-                                            @PluginAttribute("ignoreExceptions") boolean ignoreExceptions,
-                                            @PluginElement("Layout") Layout layout,
-                                            @PluginElement("Filters") Filter filter) {
+      @PluginAttribute("ignoreExceptions") boolean ignoreExceptions,
+      @PluginElement("Layout") Layout<? extends Serializable> layout,
+      @PluginElement("Filters") Filter filter) {
 
     if (name == null) {
       LOGGER.error("No name provided for StubAppender");
@@ -68,7 +69,7 @@ public class MongoFXMessageAppender extends AbstractAppender {
   public void append(LogEvent event) {
     LogsService logsService = getLogsService();
     if (logsService != null) {
-      logsService.log(event);
+      logsService.log(event, new String(getLayout().toByteArray(event)));
     }
   }
 }
