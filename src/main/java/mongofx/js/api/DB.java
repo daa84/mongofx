@@ -205,6 +205,10 @@ public class DB extends HashMap<String, Object> {
     return mongoDatabase.runCommand(command);
   }
 
+  public ObjectListPresentation getCollectionInfos() {
+    return JsApiUtils.iter(mongoDatabase.getMongoDb().listCollections());
+  }
+
   @JsIgnore
   @Override
   public String toString() {

@@ -18,11 +18,17 @@
 //
 package mongofx;
 
+import java.io.IOException;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
 import com.google.inject.name.Names;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -31,12 +37,6 @@ import mongofx.service.MongoService;
 import mongofx.service.settings.SettingsService;
 import mongofx.ui.main.MainFrameController;
 import mongofx.ui.main.UIBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Properties;
 
 public class Main extends Application {
   private static final Logger log = LoggerFactory.getLogger(Main.class);
