@@ -29,3 +29,26 @@
 .popup-error {
   -fx-background-color: #FFD2C1;
 }
+
+.log-title-label {
+  -fx-font-style: italic;
+  -fx-font-weight: bold;
+}
+
+.log-open-button {
+  -fx-border-radius: 5 1 5 1;
+  -fx-background-radius: 5 1 5 1;
+  -fx-padding: 3 5 3 5;
+}
+
+.close-button {
+  -fx-background-color: transparent, transparent, transparent, transparent;
+}
+
+.close-button:hover{
+  -fx-background-color: transparent, rgba(0,0,0,.1), rgba(0,0,0,.1), transparent;
+}
+
+.close-button:armed {
+  -fx-background-color: transparent, rgba(0,0,0,.1), rgba(0,0,0,.1), transparent;
+}

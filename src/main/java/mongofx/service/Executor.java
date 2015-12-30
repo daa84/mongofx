@@ -18,11 +18,7 @@
 //
 package mongofx.service;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import com.google.inject.Singleton;
 
@@ -39,6 +35,8 @@ public class Executor {
 				return t;
       });
 
+  private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
   public void execute(Runnable r) {
     executor.execute(r);
   }
@@ -50,5 +48,9 @@ public class Executor {
   public void stop() {
     executor.shutdownNow();
     multiThreadExecutor.shutdownNow();
+  }
+
+  public ScheduledFuture<?> shedule(Runnable c, long time, TimeUnit unit) {
+    return scheduler.schedule(c, time, unit);
   }
 }

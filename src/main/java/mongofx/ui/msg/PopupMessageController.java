@@ -18,7 +18,9 @@
 //
 package mongofx.ui.msg;
 
+import com.google.inject.Inject;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.event.Event;
@@ -26,6 +28,12 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
+import mongofx.service.Executor;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class PopupMessageController {
 
@@ -37,6 +45,11 @@ public class PopupMessageController {
 
   @FXML
   private PopupPane pane;
+
+  @Inject
+  private Executor executor;
+
+  private ScheduledFuture<?> hideTimer;
 
   private final StringProperty headerMessage = new SimpleStringProperty();
   private final StringProperty message = new SimpleStringProperty();
@@ -84,19 +97,31 @@ public class PopupMessageController {
   }
 
   private void showAt(Node origin) {
-    // TODO: close
     pane.setAnchor(origin);
-    pane.setVisible(true);
-    pane.setManaged(true);
+    setVisible(true);
     FadeTransition fade = new FadeTransition(Duration.millis(500), pane);
     fade.setFromValue(0);
     fade.setToValue(1);
     fade.play();
+    cancelHideTimer();
+    hideTimer = executor.shedule(() -> Platform.runLater(() -> setVisible(false)), 10, TimeUnit.SECONDS);
+  }
+
+  private void cancelHideTimer() {
+    if (hideTimer != null) {
+      hideTimer.cancel(false);
+      hideTimer = null;
+    }
   }
 
   @FXML
   public void mouseClicked(Event event) {
-    pane.setVisible(false);
-    pane.setManaged(false);
+    cancelHideTimer();
+    setVisible(false);
+  }
+
+  private void setVisible(boolean value) {
+    pane.setVisible(value);
+    pane.setManaged(value);
   }
 }

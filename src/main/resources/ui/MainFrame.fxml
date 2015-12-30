@@ -10,6 +10,8 @@
 <?import org.fxmisc.richtext.CodeArea?>
 <?import javafx.scene.layout.StackPane?>
 
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.geometry.Insets?>
 <StackPane xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="mongofx.ui.main.MainFrameController" fx:id="mainFrame">
     <BorderPane>
@@ -87,13 +89,30 @@
             <TabPane fx:id="queryTabs"/>
         </center>
         <bottom>
+            <fx:script>
+                function close_log() {
+                    consoleButton.selected = false;
+                }
+            </fx:script>
             <BorderPane>
                 <top>
-                    <CodeArea editable="false" fx:id="consoleLog" visible="${consoleButton.selected}" managed="${consoleButton.selected}"/>
+                    <AnchorPane visible="${consoleButton.selected}" managed="${consoleButton.selected}">
+                        <Label AnchorPane.leftAnchor="1" text="Log" styleClass="log-title-label"/>
+                        <Button styleClass="close-button" AnchorPane.rightAnchor="10" focusTraversable="false" onAction="close_log()">
+                            <padding><Insets left="2" right="2"/></padding>
+                            <graphic>
+                                <FontAwesomeIconView glyphName="CLOSE"/>
+                            </graphic>
+                        </Button>
+                    </AnchorPane>
                 </top>
+                <center>
+                    <CodeArea editable="false" fx:id="consoleLog" visible="${consoleButton.selected}" managed="${consoleButton.selected}"/>
+                </center>
                 <bottom>
                     <ToolBar>
-                        <ToggleButton fx:id="consoleButton" text="Log"/>
+                        <padding><Insets top="1" bottom="1"/></padding>
+                        <ToggleButton fx:id="consoleButton" text="Log" styleClass="log-open-button"/>
                     </ToolBar>
                 </bottom>
             </BorderPane>

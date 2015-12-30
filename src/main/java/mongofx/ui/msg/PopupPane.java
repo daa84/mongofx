@@ -24,6 +24,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 
 import java.util.List;
 
@@ -47,9 +48,11 @@ public class PopupPane extends Pane {
         if (anchor != null) {
           Bounds originBounds = anchor.localToScene(anchor.getBoundsInLocal());
           Point2D target = sceneToLocal(originBounds.getMinX(), originBounds.getMinY());
-          double nodeWidth = getWidth() - originBounds.getMinX() - 5;
+
+          double nodeWidth = Math.min(node.prefWidth(Region.USE_COMPUTED_SIZE), getWidth() - originBounds.getMinX() - 5 - 5);
+
           node.resize(nodeWidth, node.prefHeight(nodeWidth));
-          node.relocate(target.getX(), target.getY() - node.getLayoutBounds().getHeight() - 5);
+          node.relocate(target.getX() + 5, target.getY() - node.getLayoutBounds().getHeight() - 5);
         } else {
           node.autosize();
         }
