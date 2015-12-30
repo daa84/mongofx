@@ -33,7 +33,7 @@ public class PopupService {
   }
 
   public void showInfo(String message) {
-    showInfo("", message);
+    showInfo(message, "");
   }
 
   public void showInfo(String headerMessage, String message) {
@@ -43,7 +43,7 @@ public class PopupService {
   }
 
   public void showError(String message) {
-    showError("", message);
+    showError(message, "");
   }
 
   public void showError(String headerMessage, String message) {

@@ -12,7 +12,7 @@
 			fx:controller="mongofx.ui.main.QueryTabController">
 	<center>
 		<SplitPane dividerPositions="0.2" orientation="VERTICAL">
-			<BorderPane>
+			<BorderPane SplitPane.resizableWithParent="false">
 				<top>
 					<HBox alignment="CENTER_LEFT" spacing="10" prefHeight="25">
 						<padding>

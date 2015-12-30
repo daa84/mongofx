@@ -204,4 +204,10 @@ public class DB extends HashMap<String, Object> {
     }
     return mongoDatabase.runCommand(command);
   }
+
+  @JsIgnore
+  @Override
+  public String toString() {
+    return mongoDatabase.getName();
+  }
 }
