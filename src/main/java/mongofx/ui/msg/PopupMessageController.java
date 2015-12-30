@@ -30,8 +30,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
 import mongofx.service.Executor;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -104,7 +102,7 @@ public class PopupMessageController {
     fade.setToValue(1);
     fade.play();
     cancelHideTimer();
-    hideTimer = executor.shedule(() -> Platform.runLater(() -> setVisible(false)), 10, TimeUnit.SECONDS);
+    hideTimer = executor.schedule(() -> Platform.runLater(() -> setVisible(false)), 10, TimeUnit.SECONDS);
   }
 
   private void cancelHideTimer() {

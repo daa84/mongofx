@@ -48,9 +48,10 @@ public class Executor {
   public void stop() {
     executor.shutdownNow();
     multiThreadExecutor.shutdownNow();
+    scheduler.shutdownNow();
   }
 
-  public ScheduledFuture<?> shedule(Runnable c, long time, TimeUnit unit) {
+  public ScheduledFuture<?> schedule(Runnable c, long time, TimeUnit unit) {
     return scheduler.schedule(c, time, unit);
   }
 }
