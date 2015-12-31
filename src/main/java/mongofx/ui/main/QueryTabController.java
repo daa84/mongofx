@@ -198,7 +198,7 @@ public class QueryTabController {
         setLastExecTime(String.format("%.3f sec.", (System.currentTimeMillis() - startEvalTime) / 1000f));
         Throwable e = getException();
         showOnlyText(e.getMessage());
-        log.error("Error execute script", e);
+        log.warn("Error execute script", e);
       }
 
       @Override
