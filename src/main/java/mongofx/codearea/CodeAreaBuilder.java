@@ -50,6 +50,8 @@ import mongofx.service.suggest.Suggest;
 import mongofx.service.suggest.SuggestContext;
 import mongofx.ui.main.AutocompletionEngine;
 
+import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
+
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
     "db", "function", "var", "for", "if", "else", "return", "while", "this", "true", "false"
@@ -130,8 +132,51 @@ public class CodeAreaBuilder {
       }
     });
 
+    Builder<KeyEvent> onKeyPressed = EventHandlerHelper.on(keyPressed(KeyCode.TAB)).act((e) -> {
+      codeArea.replaceSelection("    ");
+    }).on(keyPressed(KeyCode.ENTER)).act((e) -> {
+      if (leftCharIs('{') && rightCharIs('}')) {
+        codeArea.replaceSelection("\n\n");
+        int caretPosition = codeArea.getCaretPosition() - 1;
+        if (caretPosition >= 0) {
+          codeArea.selectRange(caretPosition, caretPosition);
+        }
+      } else {
+        codeArea.replaceSelection("\n");
+      }
+    });
+
     EventHandlerHelper.install(codeArea.onKeyTypedProperty(), onKeyTyped.create());
+    EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
     return this;
+  }
+
+  private boolean rightCharIs(char c) {
+    String text = codeArea.getText();
+    for (int i = codeArea.getCaretPosition(); i < text.length(); i++) {
+      char testC = text.charAt(i);
+      if (testC == c) {
+        return true;
+      }
+      if (testC != ' ') {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  private boolean leftCharIs(char c) {
+    String text = codeArea.getText();
+    for (int i = codeArea.getCaretPosition() - 1; i >= 0; i--) {
+      char testC = text.charAt(i);
+      if (testC == c) {
+        return true;
+      }
+      if (testC != ' ') {
+        return false;
+      }
+    }
+    return false;
   }
 
   int oldCaretPosition = 0;
@@ -162,7 +207,7 @@ public class CodeAreaBuilder {
     codeArea.setPopupAnchorOffset(new Point2D(1, 1));
 
     Builder<KeyEvent> onKey =
-        EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN)).act(ae -> {
+        EventHandlerHelper.on(keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN)).act(ae -> {
           if (popup.isShowing()) {
             popup.hide();
           }
@@ -214,8 +259,8 @@ public class CodeAreaBuilder {
     ListView<Suggest> listView = new ListView<>();
 
     Builder<KeyEvent> popupKeyEvents =
-        EventHandlerHelper.on(EventPattern.keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//
-        .on(EventPattern.keyPressed(KeyCode.ENTER)).act(e -> {
+        EventHandlerHelper.on(keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//
+        .on(keyPressed(KeyCode.ENTER)).act(e -> {
           Suggest selectedItem = listView.getSelectionModel().getSelectedItem();
           if (selectedItem != null) {
             selectedItem.apply(suggestContext);
