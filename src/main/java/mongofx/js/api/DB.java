@@ -213,6 +213,82 @@ public class DB extends HashMap<String, Object> {
     return new DB(mongoDatabase.getSiblingDB(name));
   }
 
+//      db.grantPrivilegesToRole() 	Assigns privileges to a user-defined role.
+//      db.revokePrivilegesFromRole() 	Removes the specified privileges from a user-defined role.
+//      db.grantRolesToRole() 	Specifies roles from which a user-defined role inherits privileges.
+//      db.revokeRolesFromRole() 	Removes inherited roles from a role.
+
+  @JsField("Returns information for the specified role")
+  public ObjectListPresentation getRole(String roleName) {
+    BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
+    builder.push("rolesInfo").add("role", roleName).add("db", mongoDatabase.getName()).pop();
+    return mongoDatabase.runCommand((Bson)builder.get());
+  }
+
+  @JsField("Returns information for all the user-defined roles in a database")
+  public ObjectListPresentation getRoles() {
+    return mongoDatabase.runCommand(new BasicDBObject("rolesInfo", 1));
+  }
+
+  @JsField("Deletes all user-defined roles associated with a database")
+  public ObjectListPresentation dropAllRoles() {
+    return dropAllRoles(null);
+  }
+
+  @JsField("Deletes all user-defined roles associated with a database")
+  public ObjectListPresentation dropAllRoles(Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("dropAllRolesFromDatabase", 1);
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Deletes a user-defined role")
+  public ObjectListPresentation dropRole(String roleName) {
+    return dropRole(roleName, null);
+  }
+
+  @JsField("Deletes a user-defined role")
+  public ObjectListPresentation dropRole(String roleName, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("dropRole", roleName);
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Updates a user-defined role")
+  public ObjectListPresentation updateRole(String roleName, Bindings role) {
+    return updateRole(roleName, role, null);
+  }
+
+  @JsField("Updates a user-defined role")
+  public ObjectListPresentation updateRole(String roleName, Bindings role, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("updateRole", roleName);
+    command.putAll((BSONObject)dbObjectFromMap(role));
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Creates a role and specifies its privileges")
+  public ObjectListPresentation createRole(Bindings role) {
+    return createRole(role, null);
+  }
+
+  @JsField("Creates a role and specifies its privileges")
+  public ObjectListPresentation createRole(Bindings role, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("createRole", role.get("role"));
+    command.putAll((BSONObject) dbObjectFromMap(role));
+    command.remove("role");
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
   @JsIgnore
   @Override
   public String toString() {
