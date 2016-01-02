@@ -46,7 +46,7 @@ import mongofx.service.MongoService;
 import mongofx.service.settings.ConnectionSettings;
 import mongofx.ui.dbtree.DbTreeValue;
 import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
-import mongofx.ui.dbtree.TreeController;
+import mongofx.ui.dbtree.DBTreeController;
 import mongofx.ui.msg.PopupMessageController;
 import mongofx.ui.msg.PopupService;
 
@@ -71,7 +71,7 @@ public class MainFrameController {
   private ConsoleController consoleController;
 
   @Inject
-  private TreeController treeController;
+  private DBTreeController DBTreeController;
 
   @Inject
   private MongoService mongoService;
@@ -89,7 +89,7 @@ public class MainFrameController {
 
   @FXML
   protected void initialize() {
-    treeController.initialize(treeView, this);
+    DBTreeController.initialize(treeView, this);
     consoleController.initialize(consoleLog);
     EventStreams.simpleChangesOf(queryTabs.getTabs())
     .subscribe(e -> e.getRemoved().stream().forEach(t -> tabData.remove(t.getContent()).stopEval()));
@@ -101,7 +101,7 @@ public class MainFrameController {
   }
 
   public void addConnectionSettings(ConnectionSettings connectionSettings) {
-    treeController.addDbConnect(mongoService.connect(connectionSettings));
+    DBTreeController.addDbConnect(mongoService.connect(connectionSettings));
   }
 
   public void openTab() {
@@ -153,7 +153,7 @@ public class MainFrameController {
 
   @FXML
   public void reloadSelectedTreeItem() {
-    treeController.reloadSelectedTreeItem();
+    DBTreeController.reloadSelectedTreeItem();
   }
 
   @FXML

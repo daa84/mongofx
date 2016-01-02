@@ -18,6 +18,7 @@
 //
 package mongofx.ui.dbtree;
 
+import mongofx.service.CollectionDetails;
 import mongofx.service.MongoConnection;
 import mongofx.service.MongoDatabase;
 import mongofx.service.MongoService.MongoDbConnection;
@@ -28,6 +29,7 @@ public class DbTreeValue {
   private final String displayValue;
   private Integer count;
   private String collectionName;
+  private CollectionDetails collectionDetails;
   private final TreeValueType valueType;
 
   public enum TreeValueType {
@@ -36,7 +38,15 @@ public class DbTreeValue {
     INDEX,
     DATABASE,
     CONNECTION
-  };
+  }
+
+  public DbTreeValue(MongoDatabase db, CollectionDetails collectionDetails, TreeValueType type) {
+    super();
+    mongoDatabase = db;
+    this.collectionDetails = collectionDetails;
+    valueType = type;
+    displayValue = collectionDetails.getName();
+  }
 
   public DbTreeValue(MongoDatabase mongoDatabase, String displayValue, TreeValueType type) {
     super();
@@ -86,6 +96,10 @@ public class DbTreeValue {
 
   public Integer getCount() {
     return count;
+  }
+
+  public CollectionDetails getCollectionDetails() {
+    return collectionDetails;
   }
 
   @Override

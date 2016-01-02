@@ -1,4 +1,3 @@
-/* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
 @import "/styles/glyphs.css";
 
 .query-scroller {
@@ -51,4 +50,8 @@
 
 .close-button:armed {
   -fx-background-color: transparent, rgba(0,0,0,.1), rgba(0,0,0,.1), transparent;
+}
+
+.db-collection-tooltip {
+  -fx-font-size: 14;
 }

@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javafx.scene.control.*;
+import mongofx.ui.main.UIBuilder;
 import mongofx.ui.msg.PopupService;
 import org.bson.Document;
 
@@ -36,15 +38,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
 import javafx.event.ActionEvent;
 import javafx.event.EventTarget;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
 import mongofx.service.Executor;
 import mongofx.service.MongoConnection;
@@ -53,13 +47,16 @@ import mongofx.service.MongoService.MongoDbConnection;
 import mongofx.ui.dbtree.DbTreeValue.TreeValueType;
 import mongofx.ui.main.MainFrameController;
 
-public class TreeController {
+public class DBTreeController {
 
   @Inject
   private Executor executor;
 
   @Inject
   private PopupService popupService;
+
+  @Inject
+  private UIBuilder uiBuilder;
 
   private TreeView<DbTreeValue> treeView;
   private MainFrameController mainFrameController;
@@ -101,8 +98,8 @@ public class TreeController {
 
   private List<TreeItem<DbTreeValue>> buildDbChilds(DbTreeValue value) {
     MongoDatabase db = value.getMongoDatabase();
-    return db.listCollections().stream()
-        .map(cn -> new TreeItem<>(new DbTreeValue(db, cn, TreeValueType.COLLECTION),
+    return db.listCollectionDetails().stream()
+        .map(cd -> new TreeItem<>(new DbTreeValue(db, cd, TreeValueType.COLLECTION),
             new FontAwesomeIconView(FontAwesomeIcon.TABLE)))
         .peek(ti -> buildCollectionDetail(db, ti)).collect(Collectors.toList());
   }
@@ -336,10 +333,21 @@ public class TreeController {
       if (!empty) {
         setText(item.toString());
         setupContextMenu(item);
+        setupTooltip(item);
       }
       else {
         setText(null);
         setContextMenu(null);
+        setTooltip(null);
+      }
+    }
+
+    private void setupTooltip(DbTreeValue item) {
+      TreeValueType valueType = item.getValueType();
+      if (valueType == TreeValueType.COLLECTION) {
+        setTooltip(uiBuilder.loadDBCollectionInfoTooltip(item.getCollectionDetails()));
+      } else {
+        setTooltip(null);
       }
     }
 

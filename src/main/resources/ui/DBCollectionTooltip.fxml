@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.GridPane?>
+<Tooltip xmlns:fx="http://javafx.com/fxml/1" fx:controller="mongofx.ui.dbtree.DBCollectionTooltipController" contentDisplay="GRAPHIC_ONLY">
+    <graphic>
+        <GridPane styleClass="db-collection-tooltip">
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="0" text="Count:"/>
+            <Label GridPane.columnIndex="1" GridPane.rowIndex="0" text="${controller.details.count}"/>
+
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="1" text="Data size:"/>
+            <Label GridPane.columnIndex="1" GridPane.rowIndex="1" text="${controller.details.storageSizeHR}"/>
+
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="2" text="Index size:"/>
+            <Label GridPane.columnIndex="1" GridPane.rowIndex="2" text="${controller.details.totalIndexSizeHR}"/>
+
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="3" text="WiredTiger" visible="${controller.details.wiredTiger}" managed="${controller.details.wiredTiger}"/>
+        </GridPane>
+    </graphic>
+</Tooltip>

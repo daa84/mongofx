@@ -27,4 +27,31 @@ public class DocumentUtils {
   public static String formatJson(Document doc) {
     return doc.toJson(new JsonWriterSettings(JsonMode.SHELL, true));
   }
+
+  public static String bytesIntoHumanReadable(long bytes) {
+    final long kilobyte = 1024;
+    final long megabyte = kilobyte * 1024;
+    final long gigabyte = megabyte * 1024;
+    final long terabyte = gigabyte * 1024;
+
+    if ((bytes >= 0) && (bytes < kilobyte)) {
+      return bytes + " B";
+    }
+    if ((bytes >= kilobyte) && (bytes < megabyte)) {
+      return (bytes / kilobyte) + " KB";
+    }
+    if ((bytes >= megabyte) && (bytes < gigabyte)) {
+      return (bytes / megabyte) + " MB";
+    }
+    if ((bytes >= gigabyte) && (bytes < terabyte)) {
+      return (bytes / gigabyte) + " GB";
+    }
+    if (bytes >= terabyte) {
+      return (bytes / terabyte) + " TB";
+    }
+
+    return bytes + " Bytes";
+  }
+
+
 }

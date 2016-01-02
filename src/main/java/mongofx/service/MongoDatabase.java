@@ -19,9 +19,12 @@
 package mongofx.service;
 
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.mongodb.MongoClient;
+import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
@@ -36,9 +39,15 @@ import mongofx.js.api.ObjectListPresentation;
 public class MongoDatabase {
   private final com.mongodb.client.MongoDatabase mongoDb;
   private List<String> cachedCollectionNames;
+  private MongoClient client;
 
-  public MongoDatabase(com.mongodb.client.MongoDatabase mongoDb) {
-    this.mongoDb = mongoDb;
+  public MongoDatabase(MongoClient client, String name) {
+    this.client = client;
+    mongoDb = client.getDatabase(name);
+  }
+
+  public MongoDatabase getSiblingDB(String name) {
+    return new MongoDatabase(client, name);
   }
 
   public String getName() {
@@ -52,9 +61,29 @@ public class MongoDatabase {
     return listCollections();
   }
 
+  /**
+   * also reload cache
+   */
   public List<String> listCollections() {
     cachedCollectionNames = StreamSupport.stream(mongoDb.listCollectionNames().spliterator(), false).collect(Collectors.toList());
     return cachedCollectionNames;
+  }
+
+  /**
+   * also reload cache
+   */
+  public List<CollectionDetails> listCollectionDetails() {
+    return listCollections().stream().map(this::getCollectionDetail).collect(Collectors.toList());
+  }
+
+  private CollectionDetails getCollectionDetail(String collectionName) {
+    BasicDBObject command = new BasicDBObject("collStats", collectionName);
+    Document stats = mongoDb.runCommand(command);
+    return new CollectionDetails(collectionName,
+            stats.getInteger("count"),
+            stats.getInteger("storageSize"),
+            stats.getInteger("totalIndexSize"),
+            stats.containsKey("wiredTiger"));
   }
 
   public com.mongodb.client.MongoDatabase getMongoDb() {

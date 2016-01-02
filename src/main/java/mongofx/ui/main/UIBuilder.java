@@ -26,7 +26,10 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.google.inject.name.Named;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
+import mongofx.service.CollectionDetails;
+import mongofx.ui.dbtree.DBCollectionTooltipController;
 import org.fxmisc.richtext.CodeArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,7 +137,7 @@ public class UIBuilder {
     return scene;
   }
 
-  private <T extends Pane> T load(URL url, final FXMLLoader loader) {
+  private <T> T load(URL url, final FXMLLoader loader) {
     T root;
     try (InputStream in = url.openStream()) {
       root = loader.load(in);
@@ -205,5 +208,14 @@ public class UIBuilder {
       codeArea.requestFocus();
     });
     return codeArea;
+  }
+
+  public Tooltip loadDBCollectionInfoTooltip(CollectionDetails collectionDetails) {
+    URL url = getClass().getResource("/ui/DBCollectionTooltip.fxml");
+    final FXMLLoader loader = createLoader(url);
+    Tooltip root = load(url, loader);
+    DBCollectionTooltipController ctrl = loader.getController();
+    ctrl.initialize(collectionDetails);
+    return root;
   }
 }

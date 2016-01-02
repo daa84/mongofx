@@ -209,6 +209,10 @@ public class DB extends HashMap<String, Object> {
     return JsApiUtils.iter(mongoDatabase.getMongoDb().listCollections());
   }
 
+  public DB getSiblingDB(String name) {
+    return new DB(mongoDatabase.getSiblingDB(name));
+  }
+
   @JsIgnore
   @Override
   public String toString() {

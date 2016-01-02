@@ -6,4 +6,5 @@ settings.json
 .classpath
 /.settings/
 MongoUI.iml
+MongoFX.iml
 /.idea/

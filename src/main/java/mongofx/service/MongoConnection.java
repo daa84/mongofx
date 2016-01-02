@@ -38,7 +38,7 @@ public class MongoConnection {
   }
 
   public MongoDatabase createMongoDB(String name) {
-    return new MongoDatabase(client.getDatabase(name));
+    return new MongoDatabase(client, name);
   }
 
   public MongoClient getClient() {
