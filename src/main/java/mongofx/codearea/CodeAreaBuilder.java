@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import mongofx.js.support.JsAntlrPathBuilder;
+import mongofx.js.support.JsFormatter;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.PopupAlignment;
@@ -77,6 +78,7 @@ public class CodeAreaBuilder {
       );
 
   private static final BracketsMatcher BRACKETS_MATCHER;
+  private static final JsFormatter FORMATTER = new JsFormatter();
 
   static {
     HashMap<Character, Character> brackets = new HashMap<>();
@@ -134,7 +136,7 @@ public class CodeAreaBuilder {
 
     Builder<KeyEvent> onKeyPressed = EventHandlerHelper.on(keyPressed(KeyCode.TAB)).act((e) -> {
       codeArea.replaceSelection("    ");
-    }).on(keyPressed(KeyCode.ENTER)).act((e) -> {
+    }).on(keyPressed(KeyCode.ENTER)).act(e -> {
       if (leftCharIs('{') && rightCharIs('}') ||
           leftCharIs('[') && rightCharIs(']')) {
         codeArea.replaceSelection("\n\n");
@@ -145,11 +147,17 @@ public class CodeAreaBuilder {
       } else {
         codeArea.replaceSelection("\n");
       }
-    });
+    }).on(keyPressed(KeyCode.F, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN)).act(e -> formatCode());
 
     EventHandlerHelper.install(codeArea.onKeyTypedProperty(), onKeyTyped.create());
     EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
     return this;
+  }
+
+  private void formatCode() {
+    if (codeArea.isEditable()) {
+      codeArea.replaceText(FORMATTER.beautify(codeArea.getText()));
+    }
   }
 
   private boolean rightCharIs(char c) {

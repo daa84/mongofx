@@ -38,7 +38,11 @@ public class LogsService {
 
   public void log(LogEvent event, String message) {
     if (!Platform.isFxApplicationThread()) {
-      Platform.runLater(() -> eventsConsumer.accept(event, message));
+      try {
+        Platform.runLater(() -> eventsConsumer.accept(event, message));
+      } catch(IllegalStateException e) {
+        System.out.println("Can't log error, maybe in test mode");
+      }
     }
     else {
       eventsConsumer.accept(event, message);
