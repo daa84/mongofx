@@ -23,29 +23,38 @@ import org.fxmisc.richtext.CodeArea;
 import javafx.scene.control.IndexRange;
 
 public class SuggestContext {
-	private String collectionName;
-	private CodeArea codeArea;
+  private String collectionName;
+  private CodeArea codeArea;
 
-	public SuggestContext(String collectionName, CodeArea codeArea) {
-		super();
-		this.collectionName = collectionName;
-		this.codeArea = codeArea;
-	}
+  public SuggestContext(String collectionName, CodeArea codeArea) {
+    super();
+    this.collectionName = collectionName;
+    this.codeArea = codeArea;
+  }
 
-	public String getCollectionName() {
-		if (collectionName == null) {
-			collectionName = "";
-		}
-		return collectionName;
-	}
+  public String getCollectionName() {
+    if (collectionName == null) {
+      collectionName = "";
+    }
+    return collectionName;
+  }
 
-	public void insert(String text) {
-		codeArea.replaceText(codeArea.getSelection(), text);
-	}
-	
-	public void reaplace(int back, String text) {
-		IndexRange selection = codeArea.getSelection();
-		selection = new IndexRange(selection.getStart() - back, selection.getEnd());
-		codeArea.replaceText(selection, text);
-	}
+  public void insert(String text) {
+    codeArea.replaceText(codeArea.getSelection(), text);
+  }
+
+  public void replace(int back, String text) {
+    IndexRange selection = codeArea.getSelection();
+    selection = new IndexRange(selection.getStart() - back, selection.getEnd());
+    codeArea.replaceText(selection, text);
+  }
+
+  public void replaceAndSelect(int back, String text, int inTextPosition) {
+    IndexRange selection = codeArea.getSelection();
+    selection = new IndexRange(selection.getStart() - back, selection.getEnd());
+    codeArea.replaceText(selection, text);
+
+    int newPosition = selection.getStart() + inTextPosition;
+    codeArea.selectRange(newPosition, newPosition);
+  }
 }

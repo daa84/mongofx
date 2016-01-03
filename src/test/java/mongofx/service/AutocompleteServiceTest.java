@@ -90,7 +90,7 @@ public class AutocompleteServiceTest {
     
     result.get(0).apply(new SuggestContext("test", null) {
     	@Override
-    	public void reaplace(int back, String text) {
+    	public void replace(int back, String text) {
     		Assert.assertEquals("find", text);
     		Assert.assertEquals(2, back);
     	}

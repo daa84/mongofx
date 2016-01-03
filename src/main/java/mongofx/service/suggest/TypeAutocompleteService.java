@@ -20,12 +20,7 @@ package mongofx.service.suggest;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.inject.Singleton;
@@ -107,13 +102,13 @@ public class TypeAutocompleteService {
   }
 
   private List<Suggest> getRootFields() {
-    return jsRootFields.values().stream().map(e -> new Suggest(e)).collect(Collectors.toList());
+    return jsRootFields.values().stream().map(Suggest::new).collect(Collectors.toList());
   }
 
   private List<Suggest> find(NavigableMap<String, FieldDescription> root, String path) {
     NavigableMap<String, FieldDescription> tailMap = root.tailMap(path, true);
     return tailMap.entrySet().stream().filter(e -> e.getKey().startsWith(path)) //
-        .map(e -> new Suggest(e.getValue().name, new BackReplaceInsertAction(path.length())))
+        .map(e -> new Suggest(e.getValue().name, new FunctionSuggestAction(path.length(), e.getValue().methods)))
         .collect(Collectors.toList());
   }
 
@@ -126,11 +121,12 @@ public class TypeAutocompleteService {
     jsInfo.put(clazz, fieldsInfo);
 
     for (Method method : clazz.getDeclaredMethods()) {
-      Class<?> returnType = method.getReturnType();
       if (!Modifier.isPublic(method.getModifiers()) || method.getAnnotation(JsIgnore.class) != null) {
         continue;
       }
-      fieldsInfo.put(method.getName(), new FieldDescription(method.getName(), returnType));
+
+      Class<?> returnType = method.getReturnType();
+      fieldsInfo.computeIfAbsent(method.getName(), k -> new FieldDescription(method.getName(), returnType)).join(method);
       Package package1 = returnType.getPackage();
       if (package1 != null && "mongofx.js.api".equals(package1.getName())) {
         loadJsInfo(returnType);
@@ -140,11 +136,23 @@ public class TypeAutocompleteService {
 
   public static class FieldDescription {
     private final Class<?> fieldType;
-    final String name;
+    private final String name;
+    private List<Method> methods;
 
     public FieldDescription(String name, Class<?> returnType) {
       this.name = name;
-      fieldType = returnType;
+      this.fieldType = returnType;
+    }
+
+    private void join(Method method) {
+      if (method == null) {
+        return;
+      }
+
+      if (methods == null) {
+        methods = new ArrayList<>(1);
+      }
+      methods.add(method);
     }
 
     public Class<?> getFieldType() {

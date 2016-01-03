@@ -95,7 +95,7 @@ public class TemplateAutocompleteService {
 		
 		@Override
 		public void insert(SuggestContext c, Suggest s) {
-			c.reaplace(back, processVars(text, c));
+			c.replace(back, processVars(text, c));
 		}
 
 		String processVars(String text, SuggestContext c) {

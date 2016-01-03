@@ -25,7 +25,7 @@ public class Suggest {
 	private final SuggestAction action;
 
 	public static final SuggestAction SIMPLE_INSERT_ACTION = (c, s) -> c.insert(s.getName());
-	
+
 	public static class BackReplaceInsertAction implements SuggestAction {
 		protected int back;
 		protected String text;
@@ -45,9 +45,9 @@ public class Suggest {
 		@Override
 		public void insert(SuggestContext c, Suggest s) {
 			if (text != null) {
-				c.reaplace(back, text);
+				c.replace(back, text);
 			} else {
-				c.reaplace(back, s.getName());
+				c.replace(back, s.getName());
 			}
 		}
 		
@@ -60,7 +60,7 @@ public class Suggest {
 	}
 
 	public Suggest(FieldDescription e) {
-		name = e.name;
+		name = e.getName();
 		action = SIMPLE_INSERT_ACTION;
 	}
 

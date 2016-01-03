@@ -135,7 +135,8 @@ public class CodeAreaBuilder {
     Builder<KeyEvent> onKeyPressed = EventHandlerHelper.on(keyPressed(KeyCode.TAB)).act((e) -> {
       codeArea.replaceSelection("    ");
     }).on(keyPressed(KeyCode.ENTER)).act((e) -> {
-      if (leftCharIs('{') && rightCharIs('}')) {
+      if (leftCharIs('{') && rightCharIs('}') ||
+          leftCharIs('[') && rightCharIs(']')) {
         codeArea.replaceSelection("\n\n");
         int caretPosition = codeArea.getCaretPosition() - 1;
         if (caretPosition >= 0) {
