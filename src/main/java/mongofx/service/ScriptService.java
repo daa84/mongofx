@@ -2,6 +2,7 @@ package mongofx.service;
 
 import com.google.inject.Singleton;
 import mongofx.js.api.DB;
+import mongofx.js.api.RS;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +19,13 @@ public class ScriptService {
   private ScriptEngineManager engineManager = new ScriptEngineManager();
   private ScriptEngine engine = engineManager.getEngineByName("nashorn");
 
-  private final Function<String, ObjectId> toObjectId = id -> new ObjectId(id);
+  private final Function<String, ObjectId> toObjectId = ObjectId::new;
 
   public Optional<Object> eval(MongoDatabase db, String query) throws ScriptException {
     ScriptContext scriptContext = new SimpleScriptContext();
     Bindings bindings = scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
     bindings.put("db", new DB(db));
+    bindings.put("rs", new RS(db));
     bindings.put("ObjectId", toObjectId);
 
     StringWriter writer = new StringWriter();

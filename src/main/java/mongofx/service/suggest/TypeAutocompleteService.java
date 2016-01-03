@@ -27,6 +27,7 @@ import com.google.inject.Singleton;
 
 import mongofx.js.api.DB;
 import mongofx.js.api.JsIgnore;
+import mongofx.js.api.RS;
 import mongofx.service.suggest.Suggest.BackReplaceInsertAction;
 
 @Singleton
@@ -41,7 +42,9 @@ public class TypeAutocompleteService {
     }
 
     jsRootFields.put("db", new FieldDescription("db", DB.class));
+    jsRootFields.put("rs", new FieldDescription("rs", RS.class));
     loadJsInfo(DB.class);
+    loadJsInfo(RS.class);
 
     initialized = true;
   }
