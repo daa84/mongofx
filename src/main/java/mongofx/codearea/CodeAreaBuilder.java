@@ -260,16 +260,22 @@ public class CodeAreaBuilder {
 
     Builder<KeyEvent> popupKeyEvents =
         EventHandlerHelper.on(keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//
-        .on(keyPressed(KeyCode.ENTER)).act(e -> {
-          Suggest selectedItem = listView.getSelectionModel().getSelectedItem();
-          if (selectedItem != null) {
-            selectedItem.apply(suggestContext);
-          }
-          popup.hide();
-        });
+        .on(keyPressed(KeyCode.ENTER)).act(e -> applySelected(popup, listView));
     EventHandlerHelper.install(listView.onKeyPressedProperty(), popupKeyEvents.create());
 
+    listView.setOnMouseClicked(e -> {
+      if (e.getClickCount() == 2) applySelected(popup, listView);
+    });
+
     return listView;
+  }
+
+  private void applySelected(Popup popup, ListView<Suggest> listView) {
+    Suggest selectedItem = listView.getSelectionModel().getSelectedItem();
+    if (selectedItem != null) {
+      selectedItem.apply(suggestContext);
+    }
+    popup.hide();
   }
 
   static boolean isLeftCharOpen(String in, int pos, char ch) {
