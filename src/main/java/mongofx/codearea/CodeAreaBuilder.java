@@ -18,22 +18,14 @@
 //
 package mongofx.codearea;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javafx.collections.ObservableList;
 import mongofx.js.support.JsAntlrPathBuilder;
 import mongofx.js.support.JsFormatter;
-import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.LineNumberFactory;
-import org.fxmisc.richtext.PopupAlignment;
-import org.fxmisc.richtext.StyleSpans;
-import org.fxmisc.richtext.StyleSpansBuilder;
+import org.fxmisc.richtext.*;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
 import org.fxmisc.wellbehaved.event.EventPattern;
@@ -156,7 +148,31 @@ public class CodeAreaBuilder {
 
   private void formatCode() {
     if (codeArea.isEditable()) {
-      codeArea.replaceText(FORMATTER.beautify(codeArea.getText()));
+      String unformatted = codeArea.getText();
+      String formatted = FORMATTER.beautify(unformatted);
+      if (!Objects.equals(unformatted, formatted)) {
+        int currentParagraph = codeArea.getCurrentParagraph();
+
+        codeArea.replaceText(formatted);
+
+        if (currentParagraph < codeArea.getParagraphs().size()) {
+          selectParagraphEnd(currentParagraph);
+        }
+      }
+    }
+  }
+
+  private void selectParagraphEnd(int currentParagraph) {
+    int paragraphStartOffset = 0;
+    ObservableList<Paragraph<Collection<String>>> paragraphs = codeArea.getParagraphs();
+    for (int i = 0; i < paragraphs.size(); i++) {
+      Paragraph<Collection<String>> paragraph = paragraphs.get(i);
+      if (i == currentParagraph) {
+        int pos = paragraphStartOffset + paragraph.length();
+        codeArea.selectRange(pos, pos);
+        break;
+      }
+      paragraphStartOffset += paragraph.length() + 1 /*\n*/;
     }
   }
 
