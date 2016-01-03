@@ -18,6 +18,7 @@
 //
 package mongofx.js.api;
 
+import static mongofx.js.api.JsApiUtils.basicDbListFromList;
 import static mongofx.js.api.JsApiUtils.dbObjectFromMap;
 import static mongofx.js.api.JsApiUtils.documentFromMap;
 
@@ -104,10 +105,7 @@ public class DB extends HashMap<String, Object> {
   @JsField("Removes a role from a user")
   public ObjectListPresentation revokeRolesFromUser(String user, List<Bindings> roles, Bindings writeConcern) {
     BasicDBObject command = new BasicDBObject("revokeRolesFromUser", user);
-
-    BasicDBList commandRoles = new BasicDBList();
-    commandRoles.addAll(roles);
-    command.put("roles", commandRoles);
+    command.put("roles", basicDbListFromList(roles));
 
     if (writeConcern != null) {
       command.put("writeConcern", dbObjectFromMap(writeConcern));
@@ -123,10 +121,7 @@ public class DB extends HashMap<String, Object> {
   @JsField("Grants a role and its privileges to a user")
   public ObjectListPresentation grantRolesToUser(String user, List<Bindings> roles, Bindings writeConcern) {
     BasicDBObject command = new BasicDBObject("grantRolesToUser", user);
-
-    BasicDBList commandRoles = new BasicDBList();
-    commandRoles.addAll(roles);
-    command.put("roles", commandRoles);
+    command.put("roles", basicDbListFromList(roles));
 
     if (writeConcern != null) {
       command.put("writeConcern", dbObjectFromMap(writeConcern));
@@ -213,10 +208,67 @@ public class DB extends HashMap<String, Object> {
     return new DB(mongoDatabase.getSiblingDB(name));
   }
 
-//      db.grantPrivilegesToRole() 	Assigns privileges to a user-defined role.
-//      db.revokePrivilegesFromRole() 	Removes the specified privileges from a user-defined role.
-//      db.grantRolesToRole() 	Specifies roles from which a user-defined role inherits privileges.
-//      db.revokeRolesFromRole() 	Removes inherited roles from a role.
+  @JsField("Removes inherited roles from a role")
+  public ObjectListPresentation revokeRolesFromRole(String roleName, List<Bindings> roles) {
+    return revokeRolesFromRole(roleName, roles, null);
+  }
+
+  @JsField("Removes inherited roles from a role")
+  public ObjectListPresentation revokeRolesFromRole(String roleName, List<Bindings> roles, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("revokeRolesFromRole", roleName);
+    command.put("roles", basicDbListFromList(roles));
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Specifies roles from which a user-defined role inherits privileges")
+  public ObjectListPresentation grantRolesToRole(String roleName, List<Bindings> roles) {
+    return grantRolesToRole(roleName, roles, null);
+  }
+
+  @JsField("Specifies roles from which a user-defined role inherits privileges")
+  public ObjectListPresentation grantRolesToRole(String roleName, List<Bindings> roles, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("grantRolesToRole", roleName);
+    command.put("roles", basicDbListFromList(roles));
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Removes the specified privileges from a user-defined role")
+  public ObjectListPresentation revokePrivilegesFromRole(String role, List<Bindings> privileges) {
+    return revokeRolesFromUser(role, privileges, null);
+  }
+
+  @JsField("Removes the specified privileges from a user-defined role")
+  public ObjectListPresentation revokePrivilegesFromRole(String role, List<Bindings> privileges, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("revokePrivilegesFromRole", role);
+    command.put("privileges", basicDbListFromList(privileges));
+
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
+
+  @JsField("Assigns privileges to a user-defined role")
+  public ObjectListPresentation grantPrivilegesToRole(String role, List<Bindings> privileges) {
+    return grantRolesToUser(role, privileges, null);
+  }
+
+  @JsField("Assigns privileges to a user-defined role")
+  public ObjectListPresentation grantPrivilegesToRole(String role, List<Bindings> privileges, Bindings writeConcern) {
+    BasicDBObject command = new BasicDBObject("grantPrivilegesToRole", role);
+    command.put("privileges", basicDbListFromList(privileges));
+
+    if (writeConcern != null) {
+      command.put("writeConcern", dbObjectFromMap(writeConcern));
+    }
+    return mongoDatabase.runCommand(command);
+  }
 
   @JsField("Returns information for the specified role")
   public ObjectListPresentation getRole(String roleName) {

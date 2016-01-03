@@ -78,6 +78,10 @@ public class JsApiUtils {
     return list;
   }
 
+  public static BasicDBList basicDbListFromList(List<Bindings> from) {
+    return from.stream().map(JsApiUtils::dbObjectFromMap).collect(Collectors.toCollection(BasicDBList::new));
+  }
+
   public static List<BasicDBObject> dbObjectFromList(List<Bindings> from) {
     return from.stream().map(JsApiUtils::dbObjectFromMap).collect(Collectors.toList());
   }
