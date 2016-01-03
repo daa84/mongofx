@@ -89,11 +89,12 @@ public class AutocompleteServiceTest {
     Assert.assertEquals("find", result.get(0).getName());
     
     result.get(0).apply(new SuggestContext("test", null) {
-    	@Override
-    	public void replace(int back, String text) {
-    		Assert.assertEquals("find", text);
-    		Assert.assertEquals(2, back);
-    	}
+      @Override
+      public void replaceAndSelect(int back, String text, int inTextPosition) {
+        Assert.assertEquals("find()", text);
+        Assert.assertEquals(5, inTextPosition);
+        Assert.assertEquals(2, back);
+      }
     });
   }
 
