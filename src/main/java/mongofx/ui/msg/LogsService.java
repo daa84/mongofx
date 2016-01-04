@@ -37,6 +37,9 @@ public class LogsService {
   }
 
   public void log(LogEvent event, String message) {
+    if (eventsConsumer == null) {
+      return;
+    }
     if (!Platform.isFxApplicationThread()) {
       try {
         Platform.runLater(() -> eventsConsumer.accept(event, message));

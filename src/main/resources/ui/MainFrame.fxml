@@ -30,7 +30,7 @@
                         <FontAwesomeIconView glyphName="REFRESH"/>
                     </graphic>
                 </Button>
-                <Button focusTraversable="false" onAction="#runCommand">
+                <Button focusTraversable="false" onAction="#runCommand" disable="${!controller.codeBufferActive}">
                     <tooltip>
                         <Tooltip text="Run (F5)"/>
                     </tooltip>
@@ -42,24 +42,29 @@
                 <fx:define>
                     <ContextMenu fx:id="mainMenu">
                         <items>
-                            <MenuItem text="Open" accelerator="Ctrl+O" onAction="#openBuffer">
+                            <MenuItem text="Open" accelerator="Ctrl+O" onAction="#openBuffer" disable="${!controller.codeBufferActive}">
                                 <graphic>
                                     <FontAwesomeIconView glyphName="FOLDER_OPEN"/>
                                 </graphic>
                             </MenuItem>
-                            <MenuItem text="Save" accelerator="Ctrl+S" onAction="#saveBuffer">
+                            <MenuItem text="Save" accelerator="Ctrl+S" onAction="#saveBuffer" disable="${!controller.codeBufferActive}">
                                 <graphic>
                                     <FontAwesomeIconView glyphName="SAVE"/>
                                 </graphic>
                             </MenuItem>
-                            <MenuItem text="Save As" onAction="#saveBufferAs">
+                            <MenuItem text="Save As" onAction="#saveBufferAs" disable="${!controller.codeBufferActive}">
                                 <graphic>
                                     <FontAwesomeIconView glyphName="HDD_ALT"/>
                                 </graphic>
                             </MenuItem>
-                            <MenuItem text="Run only selected" accelerator="Ctrl+Enter" onAction="#runSelectedCommand">
+                            <MenuItem text="Run only selected" accelerator="Ctrl+Enter" onAction="#runSelectedCommand" disable="${!controller.codeBufferActive}">
                                 <graphic>
                                     <FontAwesomeIconView glyphName="PLAY"/>
+                                </graphic>
+                            </MenuItem>
+                            <MenuItem text="Format code" accelerator="Ctrl+Alt+F" onAction="#formatBuffer" disable="${!controller.codeBufferActive}">
+                                <graphic>
+                                    <FontAwesomeIconView glyphName="CODE"/>
                                 </graphic>
                             </MenuItem>
                         </items>

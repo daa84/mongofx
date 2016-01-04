@@ -18,16 +18,7 @@
 //
 package mongofx.ui.main;
 
-import java.util.Optional;
-
-import mongofx.service.ScriptService;
-import org.fxmisc.richtext.CodeArea;
-import org.reactfx.EventStreams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
@@ -40,13 +31,20 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import mongofx.codearea.CodeAreaBuilder;
+import mongofx.codearea.JsCodeArea;
 import mongofx.javafx.FocusFixer;
 import mongofx.js.api.ObjectListPresentation;
 import mongofx.service.Executor;
 import mongofx.service.MongoDatabase;
 import mongofx.service.MongoService.MongoDbConnection;
+import mongofx.service.ScriptService;
 import mongofx.ui.result.tree.DocumentTreeValue;
 import mongofx.ui.result.tree.ResultTreeController;
+import org.reactfx.EventStreams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public class QueryTabController {
 
@@ -56,7 +54,7 @@ public class QueryTabController {
   private Executor executor;
 
   @FXML
-  private CodeArea codeArea;
+  private JsCodeArea codeArea;
 
   @Inject
   private UIBuilder uiBuilder;
@@ -371,6 +369,10 @@ public class QueryTabController {
 
   public void saveCurrentBufferAs() {
     editorFileController.saveCurrentBufferAs(mongoDatabase.getName() + ".js");
+  }
+
+  public void formatCode() {
+    codeArea.formatCode();
   }
 
   public boolean getShowObjectListControls() {

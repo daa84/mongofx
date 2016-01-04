@@ -23,6 +23,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javafx.beans.binding.Binding;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.event.ActionEvent;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper;
 import org.fxmisc.wellbehaved.event.EventHandlerHelper.Builder;
@@ -87,8 +94,12 @@ public class MainFrameController {
   @FXML
   private StackPane mainFrame;
 
+  private BooleanProperty codeBufferActive = new SimpleBooleanProperty(false);
+
   @FXML
   protected void initialize() {
+    codeBufferActive.bind(Bindings.createBooleanBinding(() -> !queryTabs.getTabs().isEmpty(), queryTabs.getTabs()));
+
     DBTreeController.initialize(treeView, this);
     consoleController.initialize(consoleLog);
     EventStreams.simpleChangesOf(queryTabs.getTabs())
@@ -178,5 +189,21 @@ public class MainFrameController {
     if (selectedTab != null) {
       tabData.get(selectedTab.getContent()).saveCurrentBufferAs();
     }
+  }
+
+  @FXML
+  public void formatBuffer() {
+    Tab selectedTab = queryTabs.getSelectionModel().getSelectedItem();
+    if (selectedTab != null) {
+      tabData.get(selectedTab.getContent()).formatCode();
+    }
+  }
+
+  public Boolean getCodeBufferActive() {
+    return codeBufferActive.get();
+  }
+
+  public ObservableBooleanValue codeBufferActiveProperty() {
+    return codeBufferActive;
   }
 }

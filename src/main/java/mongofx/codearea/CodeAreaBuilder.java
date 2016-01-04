@@ -47,7 +47,7 @@ import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
 
 public class CodeAreaBuilder {
   private static final String[] KEYWORDS = new String[]{
-    "db", "function", "var", "for", "if", "else", "return", "while", "this", "true", "false"
+    "rs", "db", "function", "var", "for", "if", "else", "return", "while", "this", "true", "false"
   };
 
   private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
@@ -70,7 +70,6 @@ public class CodeAreaBuilder {
       );
 
   private static final BracketsMatcher BRACKETS_MATCHER;
-  private static final JsFormatter FORMATTER = new JsFormatter();
 
   static {
     HashMap<Character, Character> brackets = new HashMap<>();
@@ -80,10 +79,10 @@ public class CodeAreaBuilder {
     BRACKETS_MATCHER = new BracketsMatcher(brackets);
   }
 
-  private final CodeArea codeArea;
+  private final JsCodeArea codeArea;
   private final Stage primaryStage;
 
-  public CodeAreaBuilder(CodeArea codeArea, Stage primaryStage) {
+  public CodeAreaBuilder(JsCodeArea codeArea, Stage primaryStage) {
     this.codeArea = codeArea;
     this.primaryStage = primaryStage;
   }
@@ -139,41 +138,11 @@ public class CodeAreaBuilder {
       } else {
         codeArea.replaceSelection("\n");
       }
-    }).on(keyPressed(KeyCode.F, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN)).act(e -> formatCode());
+    }).on(keyPressed(KeyCode.F, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN)).act(e -> codeArea.formatCode());
 
     EventHandlerHelper.install(codeArea.onKeyTypedProperty(), onKeyTyped.create());
     EventHandlerHelper.install(codeArea.onKeyPressedProperty(), onKeyPressed.create());
     return this;
-  }
-
-  private void formatCode() {
-    if (codeArea.isEditable()) {
-      String unformatted = codeArea.getText();
-      String formatted = FORMATTER.beautify(unformatted);
-      if (!Objects.equals(unformatted, formatted)) {
-        int currentParagraph = codeArea.getCurrentParagraph();
-
-        codeArea.replaceText(formatted);
-
-        if (currentParagraph < codeArea.getParagraphs().size()) {
-          selectParagraphEnd(currentParagraph);
-        }
-      }
-    }
-  }
-
-  private void selectParagraphEnd(int currentParagraph) {
-    int paragraphStartOffset = 0;
-    ObservableList<Paragraph<Collection<String>>> paragraphs = codeArea.getParagraphs();
-    for (int i = 0; i < paragraphs.size(); i++) {
-      Paragraph<Collection<String>> paragraph = paragraphs.get(i);
-      if (i == currentParagraph) {
-        int pos = paragraphStartOffset + paragraph.length();
-        codeArea.selectRange(pos, pos);
-        break;
-      }
-      paragraphStartOffset += paragraph.length() + 1 /*\n*/;
-    }
   }
 
   private boolean rightCharIs(char c) {

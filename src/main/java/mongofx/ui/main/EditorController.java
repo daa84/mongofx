@@ -18,12 +18,7 @@
 //
 package mongofx.ui.main;
 
-import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.wellbehaved.event.EventHandlerHelper;
-import org.fxmisc.wellbehaved.event.EventPattern;
-
 import com.google.inject.Inject;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -32,11 +27,15 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import mongofx.codearea.CodeAreaBuilder;
+import mongofx.codearea.JsCodeArea;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.wellbehaved.event.EventHandlerHelper;
+import org.fxmisc.wellbehaved.event.EventPattern;
 
 public class EditorController {
 
   @FXML
-  public CodeArea codeArea;
+  public JsCodeArea codeArea;
   @FXML
   public TextField searchField;
   @FXML

@@ -5,9 +5,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.control.cell.TreeItemPropertyValueFactory?>
 <?import javafx.scene.layout.*?>
+<?import mongofx.codearea.JsCodeArea?>
 <?import mongofx.ui.control.NumberTextField?>
 <?import mongofx.ui.result.tree.ResultValueCellFactory?>
-<?import org.fxmisc.richtext.CodeArea?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
 			fx:controller="mongofx.ui.main.QueryTabController">
 	<center>
@@ -31,7 +31,7 @@
 					</HBox>
 				</top>
 				<center>
-					<CodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased" />
+					<JsCodeArea fx:id="codeArea" onKeyReleased="#codeAreaOnKeyReleased" />
 				</center>
 			</BorderPane>
 			<BorderPane>
