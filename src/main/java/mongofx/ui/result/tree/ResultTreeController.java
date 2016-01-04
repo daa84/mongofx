@@ -84,7 +84,7 @@ public class ResultTreeController {
     insertDocument.setOnAction(this::insertDocument);
     MenuItem editDocument = new MenuItem("Edit document...");
     editDocument.setOnAction(this::editSelected);
-    MenuItem copyPath = new MenuItem("Copy Path");
+    MenuItem copyPath = new MenuItem("Copy Name");
     copyPath.setOnAction(this::copyPath);
     MenuItem copyValue = new MenuItem("Copy Value");
     copyValue.setAccelerator(copyValueKeyCombination);
