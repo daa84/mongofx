@@ -250,7 +250,7 @@ public class CodeAreaBuilder {
   }
 
   private ListView<Suggest> createAutocompleteListView(Popup popup) {
-    ListView<Suggest> listView = new ListView<>();
+    ListView<Suggest> listView = new SuggestListView();
 
     Builder<KeyEvent> popupKeyEvents =
         EventHandlerHelper.on(keyPressed(KeyCode.ESCAPE)).act(e -> popup.hide())//

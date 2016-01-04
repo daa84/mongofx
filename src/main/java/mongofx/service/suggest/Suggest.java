@@ -21,59 +21,77 @@ package mongofx.service.suggest;
 import mongofx.service.suggest.TypeAutocompleteService.FieldDescription;
 
 public class Suggest {
-	private final String name;
-	private final SuggestAction action;
+  private final String name;
+  private final FieldDescription fieldDescription;
+  private final SuggestAction action;
 
-	public static final SuggestAction SIMPLE_INSERT_ACTION = (c, s) -> c.insert(s.getName());
+  public static final SuggestAction SIMPLE_INSERT_ACTION = (c, s) -> c.insert(s.getName());
 
-	public static class BackReplaceInsertAction implements SuggestAction {
-		protected int back;
-		protected String text;
+  public boolean isFunction() {
+    return fieldDescription != null && fieldDescription.isFunction();
+  }
 
-		public BackReplaceInsertAction(int back, String text) {
-			super();
-			this.back = back;
-			this.text = text;
-		}
+  public static class BackReplaceInsertAction implements SuggestAction {
+    protected int back;
+    protected String text;
 
-		public BackReplaceInsertAction(int back) {
-			super();
-			this.back = back;
-			this.text = null;
-		}
+    public BackReplaceInsertAction(int back, String text) {
+      super();
+      this.back = back;
+      this.text = text;
+    }
 
-		@Override
-		public void insert(SuggestContext c, Suggest s) {
-			if (text != null) {
-				c.replace(back, text);
-			} else {
-				c.replace(back, s.getName());
-			}
-		}
-		
-	}
+    @Override
+    public void insert(SuggestContext c, Suggest s) {
+      if (text != null) {
+        c.replace(back, text);
+      } else {
+        c.replace(back, s.getName());
+      }
+    }
+  }
 
-	public Suggest(String name, SuggestAction action) {
-		super();
-		this.name = name;
-		this.action = action;
-	}
+  public Suggest(String name, SuggestAction action) {
+    super();
+    this.name = name;
+    this.action = action;
+    this.fieldDescription = null;
+  }
 
-	public Suggest(FieldDescription e) {
-		name = e.getName();
-		action = SIMPLE_INSERT_ACTION;
-	}
+  public Suggest(FieldDescription fieldDescription, SuggestAction action) {
+    this.name = fieldDescription.getName();
+    this.fieldDescription = fieldDescription;
+    this.action = action;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public Suggest(FieldDescription e) {
+    this(e, SIMPLE_INSERT_ACTION);
+  }
 
-	@Override
-	public String toString() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void apply(SuggestContext suggestContext) {
-		action.insert(suggestContext, this);
-	}
+  public String getParametersHintOptional() {
+    if (fieldDescription == null) {
+      return "";
+    }
+    return fieldDescription.getParametersHintOptional();
+  }
+
+  public String getParametersHintRequired() {
+    if (fieldDescription == null) {
+      return "";
+    }
+    return fieldDescription.getParametersHintRequired();
+  }
+
+  @Override
+  public String toString() {
+    return name;
+  }
+
+  public void apply(SuggestContext suggestContext) {
+    action.insert(suggestContext, this);
+  }
 }

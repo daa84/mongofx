@@ -20,15 +20,16 @@ package mongofx.service.suggest;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.inject.Singleton;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import mongofx.js.api.DB;
 import mongofx.js.api.JsIgnore;
 import mongofx.js.api.RS;
-import mongofx.service.suggest.Suggest.BackReplaceInsertAction;
 
 @Singleton
 public class TypeAutocompleteService {
@@ -111,7 +112,7 @@ public class TypeAutocompleteService {
   private List<Suggest> find(NavigableMap<String, FieldDescription> root, String path) {
     NavigableMap<String, FieldDescription> tailMap = root.tailMap(path, true);
     return tailMap.entrySet().stream().filter(e -> e.getKey().startsWith(path)) //
-        .map(e -> new Suggest(e.getValue().name, new FunctionSuggestAction(path.length(), e.getValue().methods)))
+        .map(e -> new Suggest(e.getValue(), new FunctionSuggestAction(path.length(), e.getValue().methods)))
         .collect(Collectors.toList());
   }
 
@@ -142,9 +143,75 @@ public class TypeAutocompleteService {
     private final String name;
     private List<Method> methods;
 
+    private String parametersHintRequired;
+    private String parametersHintOptional;
+
     public FieldDescription(String name, Class<?> returnType) {
       this.name = name;
       this.fieldType = returnType;
+    }
+
+    private void buildParametersHint() {
+      if (parametersHintRequired != null) {
+        return;
+      }
+
+      if (methods == null || methods.isEmpty()) {
+        parametersHintOptional = "";
+        parametersHintRequired = "";
+      }
+
+      int minArgs = Integer.MAX_VALUE;
+      List<String> args = new LinkedList<>();
+      for (Method method : methods) {
+        minArgs = Math.min(minArgs, method.getParameterCount());
+        Parameter[] parameters = method.getParameters();
+        for(int i = args.size(); i < method.getParameterCount(); i++) {
+          Parameter parameter = parameters[i];
+          args.add(convertTypeToName(parameter));
+        }
+      }
+
+      parametersHintRequired = args.subList(0, minArgs).stream().collect(Collectors.joining(", "));
+      if (args.size() > minArgs) {
+        if (minArgs != 0) {
+          parametersHintOptional = args.stream().skip(minArgs).collect(Collectors.joining(", ", ", ", ""));
+        } else {
+          parametersHintOptional = args.stream().skip(minArgs).collect(Collectors.joining(", "));
+        }
+      } else {
+        parametersHintOptional = "";
+      }
+    }
+
+    private String convertTypeToName(Parameter parameter) {
+      Class<?> type = parameter.getType();
+      if (String.class.isAssignableFrom(type)) {
+        return "str";
+      }
+      if (Map.class.isAssignableFrom(type)) {
+        return "obj";
+      }
+      if (List.class.isAssignableFrom(type)) {
+        return "arr";
+      }
+      if (Boolean.class.isAssignableFrom(type)) {
+        return "bool";
+      }
+      if (Number.class.isAssignableFrom(type)) {
+        return "num";
+      }
+      return type.getSimpleName();
+    }
+
+    public String getParametersHintRequired() {
+      buildParametersHint();
+      return parametersHintRequired;
+    }
+
+    public String getParametersHintOptional() {
+      buildParametersHint();
+      return parametersHintOptional;
     }
 
     private void join(Method method) {
@@ -158,10 +225,6 @@ public class TypeAutocompleteService {
       methods.add(method);
     }
 
-    public Class<?> getFieldType() {
-      return fieldType;
-    }
-
     public String getName() {
       return name;
     }
@@ -169,6 +232,10 @@ public class TypeAutocompleteService {
     @Override
     public String toString() {
       return name;
+    }
+
+    public boolean isFunction() {
+      return methods != null && !methods.isEmpty();
     }
   }
 }

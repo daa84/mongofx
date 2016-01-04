@@ -30,7 +30,6 @@
 }
 
 .log-title-label {
-  -fx-font-style: italic;
   -fx-font-weight: bold;
 }
 
@@ -54,4 +53,12 @@
 
 .db-collection-tooltip {
   -fx-font-size: 12;
+}
+
+.suggest-optional-args {
+  -fx-font-style: italic;
+}
+
+.suggest-args {
+  -fx-text-fill: gray;
 }
