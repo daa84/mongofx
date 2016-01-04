@@ -25,7 +25,7 @@ public class ScriptService {
     ScriptContext scriptContext = new SimpleScriptContext();
     Bindings bindings = scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
     bindings.put("db", new DB(db));
-    bindings.put("rs", new RS(db));
+    bindings.put("rs", new RS(db.getSiblingDB("admin")));
     bindings.put("ObjectId", toObjectId);
 
     StringWriter writer = new StringWriter();
