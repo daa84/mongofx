@@ -36,9 +36,12 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 
 import mongofx.service.MongoDatabase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class DB extends HashMap<String, Object> {
+  private static final Logger log = LoggerFactory.getLogger(DB.class);
 
   private final MongoDatabase mongoDatabase;
 
@@ -48,8 +51,18 @@ public class DB extends HashMap<String, Object> {
     mongoDatabase.getCachedCollections().stream().forEach(n -> put(n, new Collection(mongoDatabase, n)));
   }
 
+  @Override
+  public Object get(Object key) {
+    Object collection = super.get(key);
+    if (collection == null && key instanceof String) {
+      log.warn("Collection {} does not exists", key);
+      return new Collection(mongoDatabase, (String) key);
+    }
+    return collection;
+  }
+
   public Collection getCollection(String name) {
-    return (Collection)get(name);
+    return (Collection) get(name);
   }
 
   public ObjectListPresentation runCommand(Bindings cmd) {

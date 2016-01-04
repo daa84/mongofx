@@ -219,4 +219,9 @@ public class Collection {
     }
     return mongoDatabase.runCommand(command);
   }
+
+  @JsField("Removes the specified collection from the database")
+  public void drop() {
+    getCollection().drop();
+  }
 }
