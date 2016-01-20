@@ -185,12 +185,14 @@ public class DBTreeController {
     }
 
     DbTreeValue value = selectedItem.getValue();
-    TextInputDialog dialog = new TextInputDialog(value.getDisplayValue() + "_copy");
+    String sourceCollectionName = value.getDisplayValue();
+    TextInputDialog dialog = new TextInputDialog(sourceCollectionName + "_copy");
     dialog.setContentText("New collection name:");
     dialog.setHeaderText("Copy collection");
     dialog.showAndWait().ifPresent(targetCollection -> {
-      new CopyCollectionHelper(value.getMongoDatabase(), value.getDisplayValue(), targetCollection).copy();
+      new CopyCollectionHelper(value.getMongoDatabase(), sourceCollectionName, targetCollection).copy();
       ((DynamicTreeItem)selectedItem.getParent()).reload();
+      popupService.showInfo(String.format("Collection %s copied to %s", sourceCollectionName, targetCollection));
     });
   }
 
@@ -265,6 +267,7 @@ public class DBTreeController {
     alert.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
       value.getMongoDatabase().dropCollection(collectionName);
       reloadSelectedTreeItem();
+      popupService.showInfo(String.format("Collection '%s' dropped", collectionName));
     });
   }
 
@@ -277,6 +280,7 @@ public class DBTreeController {
     alert.setContentText("Are you sure?");
     alert.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
       value.getMongoDatabase().removeAllDocuments(collectionName);
+      popupService.showInfo(String.format("All documents from collection '%s' removed", collectionName));
     });
   }
 
@@ -290,6 +294,7 @@ public class DBTreeController {
     alert.showAndWait().filter(r -> r == ButtonType.OK).ifPresent(r -> {
       value.getMongoDatabase().drop();
       reloadSelectedTreeItem();
+      popupService.showInfo(String.format("Database '%s' dropped", dbName));
     });
   }
 
