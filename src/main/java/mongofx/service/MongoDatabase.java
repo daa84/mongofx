@@ -80,9 +80,9 @@ public class MongoDatabase {
     BasicDBObject command = new BasicDBObject("collStats", collectionName);
     Document stats = mongoDb.runCommand(command);
     return new CollectionDetails(collectionName,
-            stats.getInteger("count"),
-            stats.getInteger("storageSize"),
-            stats.getInteger("totalIndexSize"),
+            ((Number)stats.get("count")).intValue(),
+            ((Number)stats.get("storageSize")).intValue(),
+            ((Number)stats.get("totalIndexSize")).intValue(),
             stats.containsKey("wiredTiger"));
   }
 
