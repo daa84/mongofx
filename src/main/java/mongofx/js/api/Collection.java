@@ -18,21 +18,6 @@
 //
 package mongofx.js.api;
 
-import static mongofx.js.api.JsApiUtils.buildOptions;
-import static mongofx.js.api.JsApiUtils.dbObjectFromMap;
-import static mongofx.js.api.JsApiUtils.putObject;
-import static mongofx.js.api.JsApiUtils.putSimpleField;
-import static mongofx.js.api.JsApiUtils.singletonIter;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.script.Bindings;
-import javax.script.SimpleBindings;
-
-import org.bson.Document;
-import org.bson.conversions.Bson;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.MongoNamespace;
@@ -40,8 +25,16 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.RenameCollectionOptions;
 import com.mongodb.client.model.UpdateOptions;
-
 import mongofx.service.MongoDatabase;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import javax.script.Bindings;
+import javax.script.SimpleBindings;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static mongofx.js.api.JsApiUtils.*;
 
 public class Collection {
   private final String name;
@@ -53,7 +46,11 @@ public class Collection {
   }
 
   public FindResultIterable find(Bindings query) {
-    return new FindResultIterable(mongoDatabase, name, JsApiUtils.dbObjectFromMap(query));
+    return new FindResultIterable(mongoDatabase, name, dbObjectFromMap(query), null);
+  }
+
+  public FindResultIterable find(Bindings query, Bindings projection) {
+    return new FindResultIterable(mongoDatabase, name, dbObjectFromMap(query), dbObjectFromMap(projection));
   }
 
   public FindResultIterable find() {

@@ -49,21 +49,24 @@ public class FindResultIterable implements ObjectListPresentation, Iterable<Bind
 
   private final MongoDatabase mongoDatabase;
   private final BasicDBObject findQuery;
+  private final BasicDBObject projection;
   private final String collectionName;
   private final FindOptions findOptions = new FindOptions();
   private Integer skip = null;
   private Integer limit = null;
 
-  public FindResultIterable(MongoDatabase mongoDatabase, String collectionName, BasicDBObject findQuery) {
+  public FindResultIterable(MongoDatabase mongoDatabase, String collectionName, BasicDBObject findQuery, BasicDBObject projection) {
     this.mongoDatabase = mongoDatabase;
     this.collectionName = collectionName;
     this.findQuery = findQuery;
+    this.projection = projection;
   }
 
   public FindResultIterable(MongoDatabase mongoDatabase, String collectionName) {
     this.mongoDatabase = mongoDatabase;
     this.collectionName = collectionName;
     findQuery = new BasicDBObject(); // find all
+    projection = null;
   }
 
   @Override
@@ -93,6 +96,9 @@ public class FindResultIterable implements ObjectListPresentation, Iterable<Bind
 
     findOptions.skip(skip);
     findOptions.limit(limit);
+    if (projection != null) {
+      findOptions.projection(projection);
+    }
     return new FindIterable(new MongoNamespace(mongoDatabase.getName(), collectionName), collection.getCodecRegistry(), //
         collection.getReadPreference(), getExecutor(), findQuery, findOptions).iterator();
   }
