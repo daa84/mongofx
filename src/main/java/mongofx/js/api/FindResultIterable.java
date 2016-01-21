@@ -44,6 +44,8 @@ import com.mongodb.operation.OperationExecutor;
 import mongofx.driver.FindIterable;
 import mongofx.service.MongoDatabase;
 
+import static mongofx.js.api.JsApiUtils.dbObjectFromMap;
+
 public class FindResultIterable implements ObjectListPresentation, Iterable<Bindings> {
   private static final Logger log = LoggerFactory.getLogger(FindResultIterable.class);
 
@@ -54,6 +56,7 @@ public class FindResultIterable implements ObjectListPresentation, Iterable<Bind
   private final FindOptions findOptions = new FindOptions();
   private Integer skip = null;
   private Integer limit = null;
+  private Bindings sort = null;
 
   public FindResultIterable(MongoDatabase mongoDatabase, String collectionName, BasicDBObject findQuery, BasicDBObject projection) {
     this.mongoDatabase = mongoDatabase;
@@ -89,6 +92,11 @@ public class FindResultIterable implements ObjectListPresentation, Iterable<Bind
     return this;
   }
 
+  public FindResultIterable sort(Bindings sort) {
+    this.sort = sort;
+    return this;
+  }
+
   @JsIgnore
   @Override
   public MongoCursor<Document> iterator(int skip, int limit) {
@@ -98,6 +106,9 @@ public class FindResultIterable implements ObjectListPresentation, Iterable<Bind
     findOptions.limit(limit);
     if (projection != null) {
       findOptions.projection(projection);
+    }
+    if (sort != null) {
+      findOptions.sort(dbObjectFromMap(sort));
     }
     return new FindIterable(new MongoNamespace(mongoDatabase.getName(), collectionName), collection.getCodecRegistry(), //
         collection.getReadPreference(), getExecutor(), findQuery, findOptions).iterator();
