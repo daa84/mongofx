@@ -86,12 +86,11 @@
                 </Button>
             </ToolBar>
         </top>
-        <left>
-            <TreeView fx:id="treeView" showRoot="false">
-            </TreeView>
-        </left>
         <center>
-            <TabPane fx:id="queryTabs"/>
+            <SplitPane dividerPositions="0.25">
+                <TreeView fx:id="treeView" showRoot="false" SplitPane.resizableWithParent="false"/>
+                <TabPane fx:id="queryTabs"/>
+            </SplitPane>
         </center>
         <bottom>
             <fx:script>
