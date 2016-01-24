@@ -23,6 +23,7 @@ public class SuggestListView extends ListView<Suggest> {
 
     public SuggestListCell() {
       super();
+      getStyleClass().add("suggest-args");
       first.getStyleClass().add("suggest-args");
       last.getStyleClass().add("suggest-args");
       requiredArgs.getStyleClass().addAll("suggest-args", "suggest-required-args");

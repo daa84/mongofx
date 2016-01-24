@@ -55,10 +55,7 @@
   -fx-font-size: 12;
 }
 
+
 .suggest-optional-args {
   -fx-font-style: italic;
-}
-
-.suggest-args {
-  -fx-text-fill: gray;
 }
